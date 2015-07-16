@@ -4,6 +4,7 @@ package nzen;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,19 +14,18 @@ import javax.swing.WindowConstants;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Date;
-import java.util.Locale;
 
 /**
- *
  * @author Nzen
  */
 public class SplainOld extends javax.swing.JFrame {
 
-    String outFile;
-    String[] recentTags;
+    final static int delayms = 60000; // milliseconds
+    private String outFile;
+    private String[] recentTags;
     final int maxTags = 3; // more than that and I may lose it.
-    int latestTag; // you want a stack?
-    Date latestCheckin;
+    private int latestTag; // you want a stack?
+    private Date latestCheckin;
 
     public SplainOld() {
         GregorianCalendar willBeName = new GregorianCalendar();
@@ -37,22 +37,19 @@ public class SplainOld extends javax.swing.JFrame {
         // IMPROVE make a close listener, and flushTags() in response
         latestCheckin = new Date();
 
-        ActionListener taskPerformer = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                Date temp = new Date();
-                long diff = (temp.getTime() - latestCheckin.getTime()) / 1000;
-                // IMPROVE if ( diff > 36000 )
-                jlShowsRoughTime.setText( Long.toString(diff) );
-                if ( latestTag > 0 ) {
-                    flushTags();
-                }
+        // IMPROVE what if I had to restart? check if that file is there
+        // else that diff will be wrong
+
+        ActionListener taskPerformer = (ActionEvent evt) -> {
+            Date temp = new Date();
+            updateTimeDiffLabel( temp );
+            if ( latestTag > 0 ) {
+                flushTags();
             }
         };
         recentTags = new String[ maxTags ];
         latestTag = 0;
-        int delay = 30000; // 30 seconds
-        javax.swing.Timer cron = new javax.swing.Timer( delay, taskPerformer );
+        javax.swing.Timer cron = new javax.swing.Timer( delayms, taskPerformer );
         cron.start();
     }
 
@@ -72,7 +69,7 @@ public class SplainOld extends javax.swing.JFrame {
         jlShowsRoughTime = new JLabel();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("What are you doing now?");
+        setTitle("What are you doing?");
         setResizable(false);
 
         jtfForTag.setFont(new Font("Times New Roman", 0, 18)); // NOI18N
@@ -95,7 +92,6 @@ public class SplainOld extends javax.swing.JFrame {
 
         btnOpensFile.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
         btnOpensFile.setText("Open");
-        btnOpensFile.setEnabled(false);
         btnOpensFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 pushedOpen(evt);
@@ -115,14 +111,13 @@ public class SplainOld extends javax.swing.JFrame {
                         .addComponent(btnOpensFile)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnSave))
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jtfForTag, GroupLayout.PREFERRED_SIZE, 267, GroupLayout.PREFERRED_SIZE)
-                            .addGap(0, 0, Short.MAX_VALUE))
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jlShowsRoughTime, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
-                            .addGap(18, 18, 18)
-                            .addComponent(jlSaysPrevious, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jtfForTag, GroupLayout.PREFERRED_SIZE, 267, GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jlShowsRoughTime, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jlSaysPrevious, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -145,26 +140,33 @@ public class SplainOld extends javax.swing.JFrame {
 
     private void pushedSave(ActionEvent evt) {//GEN-FIRST:event_pushedSave
         // IMPROVE, leave a date difference in the tag
-        latestCheckin = new Date();
-        if ( latestTag >= (maxTags -1) ) {
+        Date newT = new Date();
+        updateTimeDiffLabel( newT );
+        latestCheckin = newT;
+        if ( latestTag >= maxTags ) {
             flushTags();
         } // IMPROVE the date output format
-        recentTags[ latestTag ] = latestCheckin.toString() +"\t"
-                + jtfForTag.getText() +"\r\n";
-        // fits 12 capital Ws, 30+ commas
-        int strMax = ( jtfForTag.getText().length() < 20 ) ? jtfForTag.getText().length() : 20;
-        jlSaysPrevious.setText("since "+ jtfForTag.getText().substring(0, strMax));
+        String newestDid = jtfForTag.getText(); // NOTE below indicies are hand counted
+        recentTags[ latestTag ] = latestCheckin.toString().substring(11, 19) +"\t"
+                + jlShowsRoughTime.getText() +"\t"+ newestDid +"\r\n";
+        updateLatestTaskLabel( newestDid );
         latestTag++;
-        jtfForTag.setText("");
+        jtfForTag.setText(""); // blank the text entry
+        jlShowsRoughTime.setText( "0 min" );
     }//GEN-LAST:event_pushedSave
 
     private void pushedOpen(ActionEvent evt) {//GEN-FIRST:event_pushedOpen
-        /*
-        if (Desktop.isDesktopSupported()) {
-        Desktop.getDesktop().edit(file);
+        if (java.awt.Desktop.isDesktopSupported()) {
+            try {
+                File myFile = new File( outFile );
+                java.awt.Desktop.getDesktop().edit( myFile );
+            } catch ( java.io.IOException ioe ) {
+                System.out.println( "couldn't open, sorry\n"+ ioe.toString() );
+            }
         } else {
-            dieInaFire();
-        -------------
+            System.out.println( "couldn't open, sorry" );
+        }
+        /*
         ProcessBuilder pb = new ProcessBuilder("Notepad.exe", "myfile.txt");
         pb.start();
         ----------
@@ -183,10 +185,22 @@ public class SplainOld extends javax.swing.JFrame {
         pushedSave( evt );
     }//GEN-LAST:event_pushedEnter
 
+    private void updateTimeDiffLabel( Date newestT ) {
+        long diff = (newestT.getTime() - latestCheckin.getTime()) / delayms;
+        // IMPROVE if ( diff > 36000 )
+        jlShowsRoughTime.setText( Long.toString(diff) +" min" );
+    }
+
+    private void updateLatestTaskLabel( String whatDid ) {
+        // fits 12 capital Ws, 30+ commas
+        int strMax = ( whatDid.length() < 20 ) ? whatDid.length() : 20;
+        jlSaysPrevious.setText("since "+ whatDid.substring(0, strMax));
+    }
+
     /** Saves the tags to file and zeros the buffer index */
-    void flushTags() {
+    private void flushTags() {
         String outStr = "";
-        for ( int ind = 0; ind <= latestTag; ind++ ) {
+        for ( int ind = 0; ind < latestTag; ind++ ) {
             outStr += recentTags[ ind ];
         }
 
@@ -211,34 +225,9 @@ public class SplainOld extends javax.swing.JFrame {
     }
 
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SplainOld.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SplainOld.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SplainOld.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SplainOld.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new SplainOld().setVisible(true);
-            }
+        /* woo, lambda form instead of Runnable anon class */
+        java.awt.EventQueue.invokeLater(() -> {
+            new SplainOld().setVisible(true);
         });
     }
 
