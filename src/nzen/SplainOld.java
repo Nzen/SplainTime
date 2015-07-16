@@ -13,44 +13,28 @@ import javax.swing.WindowConstants;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Date;
-import java.util.Locale;
 
 /**
- *
  * @author Nzen
  */
 public class SplainOld extends javax.swing.JFrame {
 
-    String outFile;
-    String[] recentTags;
-    final int maxTags = 3; // more than that and I may lose it.
-    int latestTag; // you want a stack?
-    Date latestCheckin;
+    private TagStore tagHandler;
+    private Date latestCheckin;
 
     public SplainOld() {
-        GregorianCalendar willBeName = new GregorianCalendar();
-        outFile = Integer.toString(willBeName.get( Calendar.YEAR ))
-                +" "+ Integer.toString(willBeName.get( Calendar.MONTH ))
-                +" "+ Integer.toString(willBeName.get( Calendar.DAY_OF_MONTH ))
-                + " splained.txt";
+        tagHandler = new TagStore();
         initComponents();
         // IMPROVE make a close listener, and flushTags() in response
         latestCheckin = new Date();
 
-        ActionListener taskPerformer = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                Date temp = new Date();
-                long diff = (temp.getTime() - latestCheckin.getTime()) / 1000;
-                // IMPROVE if ( diff > 36000 )
-                jlShowsRoughTime.setText( Long.toString(diff) );
-                if ( latestTag > 0 ) {
-                    flushTags();
-                }
-            }
+        ActionListener taskPerformer = (ActionEvent evt) -> {
+            Date temp = new Date();
+            long diff = (temp.getTime() - latestCheckin.getTime()) / 1000;
+            // IMPROVE if ( diff > 36000 )
+            jlShowsRoughTime.setText( Long.toString(diff) );
+            tagHandler.quickSave();
         };
-        recentTags = new String[ maxTags ];
-        latestTag = 0;
         int delay = 30000; // 30 seconds
         javax.swing.Timer cron = new javax.swing.Timer( delay, taskPerformer );
         cron.start();
@@ -146,21 +130,18 @@ public class SplainOld extends javax.swing.JFrame {
     private void pushedSave(ActionEvent evt) {//GEN-FIRST:event_pushedSave
         // IMPROVE, leave a date difference in the tag
         latestCheckin = new Date();
-        if ( latestTag >= (maxTags -1) ) {
-            flushTags();
-        } // IMPROVE the date output format
-        recentTags[ latestTag ] = latestCheckin.toString() +"\t"
-                + jtfForTag.getText() +"\r\n";
+        // IMPROVE the date output format
+        tagHandler.add(latestCheckin,  latestCheckin.toString() +"\t"
+                + jtfForTag.getText() +"\r\n", TagStore.amSubTask); // FIX to check for sub task
         // fits 12 capital Ws, 30+ commas
         int strMax = ( jtfForTag.getText().length() < 20 ) ? jtfForTag.getText().length() : 20;
         jlSaysPrevious.setText("since "+ jtfForTag.getText().substring(0, strMax));
-        latestTag++;
         jtfForTag.setText("");
     }//GEN-LAST:event_pushedSave
 
     private void pushedOpen(ActionEvent evt) {//GEN-FIRST:event_pushedOpen
         /*
-        if (Desktop.isDesktopSupported()) {
+        if (Desktop.isDesktopSupported()) { // MAN I think I have the intermediate version on my work computer
         Desktop.getDesktop().edit(file);
         } else {
             dieInaFire();
@@ -182,33 +163,6 @@ public class SplainOld extends javax.swing.JFrame {
     private void pushedEnter(ActionEvent evt) {//GEN-FIRST:event_pushedEnter
         pushedSave( evt );
     }//GEN-LAST:event_pushedEnter
-
-    /** Saves the tags to file and zeros the buffer index */
-    void flushTags() {
-        String outStr = "";
-        for ( int ind = 0; ind <= latestTag; ind++ ) {
-            outStr += recentTags[ ind ];
-        }
-
-        // improve with import
-        java.nio.file.Path relPath = java.nio.file.Paths.get(outFile);
-        try {
-            if ( java.nio.file.Files.notExists(relPath) ) {
-                java.nio.file.Files.createFile(relPath);
-            }
-            try (java.io.BufferedWriter paper = java.nio.file.Files.newBufferedWriter(
-                    relPath,
-                    java.nio.charset.StandardCharsets.UTF_8,
-                    java.nio.file.StandardOpenOption.APPEND )
-            )   {
-                paper.append( outStr );
-            }
-        } catch ( java.io.IOException ioe ) {
-            System.err.println( "LF.rsf() had some I/O problem."
-                    + " there's like five options\n "+ ioe.toString() );
-        }
-        latestTag = 0;
-    }
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
