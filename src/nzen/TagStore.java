@@ -86,6 +86,10 @@ public class TagStore {
             if ( it.hasNext() ) {
                 // FIX put the difference
                 // long diff = (temp.getTime() - latestCheckin.getTime()) / 1000;
+ // NOTE below indicies are hand counted ;; from SplainOld
+        outStr = temp.tagTime.toString().substring(11, 19) +"\t"
+                + jlShowsRoughTime.getText() +"\t"+ newestDid +"\r\n";
+
                 outStr += temp.tagTime.toString() +"\t"+ temp.didWhat;
                 it.remove();
             } // else, keep the last one
@@ -139,6 +143,10 @@ public class TagStore {
         }
     }
 
+	void wrapUp() {
+		// delete the temp file ? Can't undo that. I made them press several times
+	}
+
     /** Gets current tag */
     String gPreviousTag() {
         if ( tags.size() > 0 )
@@ -149,7 +157,7 @@ public class TagStore {
 
     /** Gets current start time, or null */
     Date gPreviousTime() {
-        if ( tags.size() > 0 )
+        if ( tags.size() > 0 ) // IMPROVE just insert one at the start
             return tags.peek().tagTime;
         else
             return null;
