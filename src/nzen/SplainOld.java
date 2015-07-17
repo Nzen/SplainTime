@@ -1,4 +1,6 @@
 
+// &copy; Nicholas Prado; License: ../../readme.md
+
 package nzen;
 
 import java.awt.Font;
