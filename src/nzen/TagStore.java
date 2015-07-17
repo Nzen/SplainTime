@@ -1,17 +1,19 @@
 /*
- * &copy Nicholas Prado, aka Nzen. But, ISC license.
+    &copy Nicholas Prado; License: ../../readme.md
  */
 
 package nzen;
 
+import java.io.File;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.nio.file.StandardOpenOption;
-/**
- * @author Nzen
+import java.text.SimpleDateFormat;
+
+/** @author Nzen
  */
 public class TagStore {
 
@@ -20,17 +22,22 @@ public class TagStore {
     final static boolean amSubTask = true;
     final static boolean forClient = true;
     LinkedList<WhenTag> tags;
+    private SimpleDateFormat toHourMs;
 
+    /**  */
     public TagStore() {
         /*
         check for temp file
         send up the current time diff, if appropriate
         */
         tags = new LinkedList<>();
+        // FIX check if a temp file exists so I can adopt it rather than next line
+        add( new Date(), "started up", ! TagStore.amSubTask ); // IMPROVE
         GregorianCalendar willBeName = new GregorianCalendar();
         userFile = Integer.toString(willBeName.get( Calendar.YEAR ))
                 +" "+ Integer.toString(willBeName.get( Calendar.MONTH ))
                 +" "+ Integer.toString(willBeName.get( Calendar.DAY_OF_MONTH ));
+        toHourMs = new SimpleDateFormat( "hh:mm.s a" );
         System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
@@ -56,6 +63,7 @@ public class TagStore {
         */
     }
 
+    /**  */
     public String[] problemsWithAdjustPrevious() {
         int numTests = 1; int failedTests = 0;
         String[] problems = new String[ numTests ];
@@ -75,6 +83,7 @@ public class TagStore {
             off = oracle.nextInt( 75 );
         Date wheneverLessRand = new Date();
         /* FIX finish procedural, probably have to use Calendar to adjust it */
+        tags = store; // reset
         return problems;
     }
 
@@ -87,8 +96,7 @@ public class TagStore {
                 // FIX put the difference
                 // long diff = (temp.getTime() - latestCheckin.getTime()) / 1000;
  // NOTE below indicies are hand counted ;; from SplainOld
-        outStr = temp.tagTime.toString().substring(11, 19) +"\t"
-                + jlShowsRoughTime.getText() +"\t"+ newestDid +"\r\n";
+        //outStr = temp.tagTime.toString().substring(11, 19) +"\t" + jlShowsRoughTime.getText() +"\t"+ newestDid +"\r\n";
 
                 outStr += temp.tagTime.toString() +"\t"+ temp.didWhat;
                 it.remove();
@@ -105,6 +113,46 @@ public class TagStore {
         // writeToDisk( forClient, tempFileFormat(tags.peek()) );
     }
 
+    /** Formats the start time and diff for the user */
+    private String userFileFormat( Date start, Date end ) {
+        long diff = (end.getTime() - start.getTime()) / 1000;
+        pr( "ts.uff() diff is " + Long.toString(diff) +" seconds" );
+        String longDiff;
+        int hours = 0, hourSeconds = 3600; // 60m * 60s
+        while ( diff >= hourSeconds ) {
+            diff -= hourSeconds;
+            hours++;
+        }
+        String hrs = ( hours > 0 ) ? Integer.toString( hours )+"h " : "";
+        int  min = 0, minuteSeconds = 60;
+        while ( diff > minuteSeconds ) {
+            diff -= minuteSeconds;
+            min++;
+        }
+        String mins = ( min >= 0 ) ? Integer.toString( min )+"m " : "";
+        return toHourMs.format( start ) +"\t"+ hrs + min+"m ";
+    }
+
+    /** to test the above quickly, by hand */
+    void interactiveUFF() {
+        Date now = new Date();
+        Date later;
+        long nowMs = now.getTime();
+        pr( "ts.iuff() interactive mode begins\n" );
+        String[] tagsToSay = new String[] { "nn uu cc DD","bla bla",
+                "FileForm", "interactiveUFF", "Integer.toString" };
+        java.util.Scanner cli = new java.util.Scanner( System.in );
+        for ( int times = 5; times > 0; times-- ) {
+            pr( "\n\t\tminute difference ?" );
+            int nowPlusMin = cli.nextInt();
+            long laterMs = nowMs + ( nowPlusMin * 60000 );
+            later = new Date( laterMs );
+            pr( userFileFormat(now, later) +"\t"+ tagsToSay[times -1] );
+        }
+        pr( "interactive mode over\n" );
+    }
+
+    /** just toStr of inMem */
     private String tempFileFormat( WhenTag inMem ) {
         String sub = ( inMem.subT ) ? "s" : "m";
         return inMem.tagTime.toString() +"\t"+ inMem.didWhat +"\t"+ sub;
@@ -143,7 +191,22 @@ public class TagStore {
         }
     }
 
-	void wrapUp() {
+    /** open the text file */
+    void showStoredTags() {
+        if (java.awt.Desktop.isDesktopSupported()) {
+            try {
+                File myFile = new File( userFile );
+                java.awt.Desktop.getDesktop().edit( myFile );
+            } catch ( java.io.IOException ioe ) {
+                System.out.println( "couldn't open, sorry\n"+ ioe.toString() );
+            }
+        } else {
+            System.out.println( "couldn't open, sorry" );
+        }
+    }
+
+    /**  */ // UNREADY
+    void wrapUp() {
 		// delete the temp file ? Can't undo that. I made them press several times
 	}
 
@@ -155,15 +218,28 @@ public class TagStore {
             return "Started";
     }
 
-    /** Gets current start time, or null */
+    /** Gets current start time */
     Date gPreviousTime() {
-        if ( tags.size() > 0 ) // IMPROVE just insert one at the start
-            return tags.peek().tagTime;
-        else
-            return null;
+        return tags.peek().tagTime;
     }
 
-    /** Struct for Date : String */
+    /**  */
+    public void runTests() {
+        String[] temp; int emptyIfOkay = 0;
+        temp = problemsWithAdjustPrevious();
+        if ( ! temp[emptyIfOkay].equals("") ) {
+            pr( "--" );
+            for ( String problem : temp )
+                pr( problem );
+        }
+    }
+
+    /** so much typing just for println. No. */
+    void pr( String out ) {
+        System.out.println( out );
+    }
+
+    /** Struct for Date : String : whether a subtask */
     private class WhenTag {
         public Date tagTime;
         public String didWhat;
