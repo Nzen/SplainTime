@@ -5,13 +5,11 @@ I needed a dead simple time tracking app. By 'dead simple' I don't mean some pre
 
 [put a picture here]
 
-Almost feature complete. The only things I still want are flushing the buffer when the window closes, check the file for a previous time, and a {} flag for unrelated distractions.
-
 ### Run
 
-    java SplainTime
+    java -jar SplainTime.jar
 
-Or build an executable jar and double click on that.
+Nope, no arguments.
 
 ### License
 
@@ -21,3 +19,10 @@ SplainTime &copy; Nicholas Prado
 Usage of the works is permitted provided that this instrument is retained with the works, so that any entity that uses the works is notified of this instrument.
 
 DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
+
+### TODO
+
+* use a cache to restore closed sessions
+* interpret time adjust flag
+* interpret subtask flag
+* more tests

@@ -23,34 +23,38 @@ import java.util.Date;
 public class SplainTime extends javax.swing.JFrame {
 
     private TagStore tagHandler;
+    private javax.swing.Timer cron;
 	private int exitFlubsLeft;
-        final int delayms = 60000; // 60 * 1000
+    final int delayms = 60001; // 60 * 1000
 
     /** Starts gui, starts tagStore */
     public SplainTime() {
-        tagHandler = new TagStore();
+		String basicStart = "started up"; // just so it is in one place, rather than two
+        tagHandler = new TagStore( basicStart );
 		exitFlubsLeft = 3;
         initComponents();
+		updateLatestTaskLabel( basicStart );
         ActionListener taskPerformer = new ActionListener() {
-
+            @Override
             public void actionPerformed( ActionEvent evt ) {
                 Date temp = new Date();
                 updateTimeDiffLabel( temp );
+                tagHandler.quickSave();
                 resetExit();
             }
         };
-        javax.swing.Timer cron =
-			new javax.swing.Timer( delayms, taskPerformer );
+        cron = new javax.swing.Timer( delayms, taskPerformer );
         cron.start();
     }
 
     /** 4TESTS version */
     public SplainTime( boolean testMode ) {
-        tagHandler = new TagStore();
-        exitFlubsLeft = 0;
+        tagHandler = new TagStore( "whatever" );
+        exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
+        cron = null;
         runTests();
         tagHandler.runTests();
-        tagHandler.interactiveUFF();
+        tagHandler.interactiveUTF();
     }
 
     /**
@@ -136,7 +140,7 @@ public class SplainTime extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-	/** This one will mean save & close, I will change the label */
+	/** Strengthen exit signal OR end all tasks & delete today's cache file */
     private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
 		if ( exitFlubsLeft < 1 ) {
 			storeTag( "Shutting down" );
@@ -149,42 +153,46 @@ public class SplainTime extends javax.swing.JFrame {
 		}
     }//GEN-LAST:event_pushedFinish
 
-    /**  */
+    /** Open a list of closed tags for the user */
     private void pushedOpen(ActionEvent evt) {//GEN-FIRST:event_pushedOpen
         tagHandler.showStoredTags();
     }//GEN-LAST:event_pushedOpen
 
-    /**  */
+    /** Store (interpret?) this tag, reset gui time & tag summary */
     private void pushedEnter(ActionEvent evt) {//GEN-FIRST:event_pushedEnter
         String newestDid = jtfForTag.getText();
 		// interpret flag, if present
 		storeTag( newestDid );
         updateLatestTaskLabel( newestDid );
+        cron.restart(); // so it doesn't fire midway into newest tag's first minute
         jtfForTag.setText(""); // blank the text entry
         jlShowsRoughTime.setText( "0 min" );
     }//GEN-LAST:event_pushedEnter
 
-    /**  */
+    /** Store the tag with the current time */
 	private void storeTag( String says ) {
         Date newT = new Date();
-        tagHandler.add(newT, says, TagStore.amSubTask);
+        tagHandler.add(newT, says, ! TagStore.amSubTask); // IMPROVE subTask awareness
 	}
 
-    /**  */
-    private void updateTimeDiffLabel( Date newestT ) {
-        long diff = (newestT.getTime() - tagHandler.gPreviousTime().getTime()) / delayms;
+    /** Show minutes elapsed for the current task */
+    private void updateTimeDiffLabel( Date now ) {
+        // ASK should I have ts calculate it this way or fanciest way?
+        long diff = (now.getTime() - tagHandler.gPreviousTime().getTime()) / delayms;
         // IMPROVE if ( diff > 36000 )
         jlShowsRoughTime.setText( Long.toString(diff) +" min" );
     }
 
-    /**  */
+    /** Show portion of the task that fits on the label */
     private void updateLatestTaskLabel( String whatDid ) {
-        // fits 12 capital Ws, 30+ commas
-        int strMax = ( whatDid.length() < 20 ) ? whatDid.length() : 20;
-        jlSaysPrevious.setText("since "+ whatDid.substring(0, strMax));
+        // fits between 12 capital Ws || 30+ commas
+		int charsFit = 20;
+		if ( whatDid.length() >= charsFit )
+			whatDid = whatDid.substring( 0, charsFit );
+        jlSaysPrevious.setText( "since "+ whatDid );
     }
 
-    /** Change exit counter, reset button text */
+    /** Change exit counter, reset Finish button text */
 	private void resetExit() {
 		exitFlubsLeft = 3;
 		if ( ! btnFinish.getText().equals("Finish") )
@@ -193,7 +201,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /**  */
     public void runTests() {
-        // check that ultl gives the right number of minutes
+        // check that ultl gives the right number of minutes ?
     }
 
     /**  */
