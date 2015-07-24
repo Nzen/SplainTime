@@ -1,14 +1,6 @@
-12:28.50 AM	0m 	started up
-12:28.56 AM	1m 	aabababa
-12:30.20 AM	1m 	I think this will be the last time
-12:32.4 AM	0m 	Shutting down
-12:33.21 AM	0m 	started up
-12:33.26 AM	0m 	l
-12:33.30 AM	0m 	kloikloikl
-12:33.39 AM	0m 	llfgsda2334rffcsss
-12:33.44 AM	0m 	Shutting down
-12:34.01 AM	0m 	started up
-12:34.09 AM	0m 	asdf
-12:35.01 AM	0m 	got a pocket full of rainbows. got a heart full of love
-12:35.06 AM	0m 	bye
-12:35.09 AM	0m 	Shutting down
+10:30.05 PM	0m 	started up
+10:30.56 PM	3m 	I'll refrain from undercutting the assumption about the first one, this time
+10:34.51 PM	25m 	-3 listening to soundcloud: game of thrones
+11:00.11 PM	1h 8m 	-12 just reading the papers,please devlog reverse to find the music
+12:08.37 AM	0m 	jesus it's late. I'll need a testing version before adj gets pushed up
+12:08.40 AM	0m 	Shutting down

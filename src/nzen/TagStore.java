@@ -34,7 +34,7 @@ public class TagStore {
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get( Calendar.YEAR ))
-                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) )
+                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 ) // NOTE zero indexed
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
@@ -54,7 +54,8 @@ public class TagStore {
     }
 
     /** Subtract time from previous: client entered the tag late; premature */
-    void adjustPrevious( int minutesOff ) {
+    // ASK will I need this if adjustment is before previous?
+    void adjustPrevious( int minutesOff ) { // otherwise, premature
 		WhenTag was = tags.removeLast();
 		Long wasTime = was.tagTime.getTime();
 		int millisecondsOff = minutesOff * 60000;

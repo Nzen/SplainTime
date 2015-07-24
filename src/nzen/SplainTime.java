@@ -1,5 +1,8 @@
 
 // &copy; Nicholas Prado; License: ../../readme.md
+/* FOR ADJUST BRANCH
+add a hour formatted adjust flag : -8:00 walked in
+*/
 
 package nzen;
 
@@ -15,6 +18,7 @@ import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Random;
 import java.util.Date;
 
 /** @author Nzen
@@ -55,6 +59,7 @@ public class SplainTime extends javax.swing.JFrame {
         runTests();
         tagHandler.runTests();
         tagHandler.interactiveUTF();
+        // consider doing a text entry version instead / in addition to ?
     }
 
     /**
@@ -171,9 +176,57 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Store the tag with the current time */
 	private void storeTag( String says ) {
-        Date newT = new Date();
+        Date newT = adjustedTime( says, new Date() );
         tagHandler.add(newT, says, ! TagStore.amSubTask); // IMPROVE subTask awareness
 	}
+
+    /** now, or subtracted by adjust flag */
+    private Date adjustedTime( String fullTag, Date now ) {
+        if ( ! fullTag.startsWith( "-" ) )
+            return now; // normal case
+        String adjFlag = fullTag.substring( 1, fullTag.indexOf(' ') );
+        if ( adjFlag.contains(":") ) { // ex 8:00
+            return new Date(); // IMPROVE I'll handle this later
+            /* how to AM/PM ?
+            well, definitely in the past. If I'm past 12pm, time is definitely am
+            or adopt an am/pm between previous and now.
+            */
+        } // else is simple adjust
+        int adjMinutes = Integer.parseInt( adjFlag );
+        int adjMillis = adjMinutes * 60000; // 60sec * 1000ms
+        return new Date( now.getTime() - adjMillis );
+    }
+
+    String[] problemsWithAdjustedTime( Random oracle ) {
+        int tests = 2, pInd = 0;
+        String here = "st.pwat() ";
+        String[] problems = new String[ tests ];
+        problems[pInd] = ""; // successful case if it stays this way
+        Date aTime = new Date( System.currentTimeMillis() - oracle.nextInt( 100000 ) );
+        String noFlag = "";
+        if ( ! adjustedTime(noFlag, aTime).equals(aTime) ) {
+            long became = adjustedTime(noFlag, aTime).getTime();
+            problems[ pInd ] = here +"adjusted time despite no flag by "
+                    + Long.toString( aTime.getTime() - became ) +" milliSec";
+            pInd++;
+        }
+        int minutes = oracle.nextInt(60) +1; // to eliminate 0
+        String minusMinutes = "-"+ Integer.toString( minutes );
+        long minusMillis = minutes * 60000; // 60sec * 1000ms
+        Date shouldBe = new Date( aTime.getTime() - minusMillis );
+        String withAdjFlag = minusMinutes +" whatever";
+        if ( ! adjustedTime(withAdjFlag, aTime).equals(shouldBe) ) {
+            long became = adjustedTime(withAdjFlag, aTime).getTime();
+            problems[ pInd ] = here +"wrong adjusted time: off by "
+                    + Long.toString( shouldBe.getTime() - became ) +"ms";
+            pInd++;
+        }
+        // deliberately distinct means of calculating the new time
+        // java.time.Instant iNow = aTime.toInstant(); // goddamn. java8 only
+
+        // IMPROVE clock flag adjust
+        return problems;
+    }
 
     /** Show minutes elapsed for the current task */
     private void updateTimeDiffLabel( Date now ) {
@@ -185,6 +238,10 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Show portion of the task that fits on the label */
     private void updateLatestTaskLabel( String whatDid ) {
+        if (whatDid.startsWith( "-" )) {
+            int startsAfter = whatDid.indexOf( " " );
+            whatDid = whatDid.substring( startsAfter );
+        } // simple to add {} above, but what if tag is " } -8:00 bla " ?
         // fits between 12 capital Ws || 30+ commas
 		int charsFit = 20;
 		if ( whatDid.length() >= charsFit )
@@ -201,8 +258,23 @@ public class SplainTime extends javax.swing.JFrame {
 
     /**  */
     public void runTests() {
-        // check that ultl gives the right number of minutes ?
+        Random oracle = new Random();
+        if (showsResults( problemsWithAdjustedTime(oracle) ))
+            System.out.println( "--" );
+        System.out.println( "- Tests over -" );
     }
+
+    /** Indicate whether theseTests had problems ; hmm if only I could extract this ... */
+	private boolean showsResults( String[] theseTests ) {
+		boolean failed = true;
+		int first = 0;
+        if ( ! theseTests[first].equals("") ) {
+            for ( String problem : theseTests )
+                System.out.println( problem );
+			return failed; 
+        } else
+			return ! failed;
+	}
 
     /**  */
     public static void main(String args[]) {
