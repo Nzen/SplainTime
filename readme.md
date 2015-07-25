@@ -3,13 +3,17 @@
 
 I needed a dead simple time tracking app. By 'dead simple' I don't mean some predictive mapping of my favored clients and a process listener that knows which programs were in focus at any given time. I mean the simplest I can get away with: SplainTime is a text entry box that outputs a timestamp and a time difference in a text file with the date on it. It also has a button to open the text file.
 
-[put a picture here]
+![windows screenshot](https://www.flickr.com/photos/18099895@N06/19979150661)  
+On windows, pic hosted by flickr.
 
 ### Run
 
     java -jar SplainTime.jar
 
 Nope, no arguments.
+
+![output](https://www.flickr.com/photos/18099895@N06/19351574364)  
+Output, pic hosted by flickr
 
 ### License
 
@@ -26,3 +30,6 @@ DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 * interpret time adjust flag
 * interpret subtask flag
 * more tests
+
+![linux screenshot](https://www.flickr.com/photos/18099895@N06/19787232209)  
+On linux, hosted by flickr.
