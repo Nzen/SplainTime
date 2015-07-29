@@ -1,21 +1,25 @@
 
 // &copy; Nicholas Prado; License: ../../readme.md
 
+/*
+standardized flub counter and reduced it
+added example logger use
+*/
+
 package nzen;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Date;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events
@@ -23,15 +27,19 @@ import java.util.Date;
 public class SplainTime extends javax.swing.JFrame {
 
     private TagStore tagHandler;
+    private static final Logger takesNotes = LogManager.getLogger( "nzen.SplainTime" );
     private javax.swing.Timer cron;
 	private int exitFlubsLeft;
+    final int flubStd = 2;
     final int delayms = 60001; // 60 * 1000
 
     /** Starts gui, starts tagStore */
     public SplainTime() {
 		String basicStart = "started up"; // just so it is in one place, rather than two
+        takesNotes.info( basicStart );
+        takesNotes.info( "printf style millisecond delay is {}", Integer.toString( delayms ) );
         tagHandler = new TagStore( basicStart );
-		exitFlubsLeft = 3;
+		exitFlubsLeft = flubStd;
         initComponents();
 		updateLatestTaskLabel( basicStart );
         ActionListener taskPerformer = new ActionListener() {
@@ -142,7 +150,8 @@ public class SplainTime extends javax.swing.JFrame {
 
 	/** Strengthen exit signal OR end all tasks & delete today's cache file */
     private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
-		if ( exitFlubsLeft < 1 ) {
+		takesNotes.entry();
+        if ( exitFlubsLeft < 1 ) {
 			storeTag( "Shutting down" );
 			tagHandler.wrapUp();
             System.exit( 0 );
@@ -151,6 +160,7 @@ public class SplainTime extends javax.swing.JFrame {
 			exitFlubsLeft--;
 			btnFinish.setText(Integer.toString( exitFlubsLeft ));
 		}
+        takesNotes.exit();
     }//GEN-LAST:event_pushedFinish
 
     /** Open a list of closed tags for the user */
@@ -171,12 +181,14 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Store the tag with the current time */
 	private void storeTag( String says ) {
+        takesNotes.entry( says );
         Date newT = new Date();
         tagHandler.add(newT, says, ! TagStore.amSubTask); // IMPROVE subTask awareness
 	}
 
     /** Show minutes elapsed for the current task */
     private void updateTimeDiffLabel( Date now ) {
+        takesNotes.entry( now );
         // ASK should I have ts calculate it this way or fanciest way?
         long diff = (now.getTime() - tagHandler.gPreviousTime().getTime()) / delayms;
         // IMPROVE if ( diff > 36000 )
@@ -185,6 +197,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Show portion of the task that fits on the label */
     private void updateLatestTaskLabel( String whatDid ) {
+        takesNotes.entry( whatDid );
         // fits between 12 capital Ws || 30+ commas
 		int charsFit = 20;
 		if ( whatDid.length() >= charsFit )
@@ -194,7 +207,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Change exit counter, reset Finish button text */
 	private void resetExit() {
-		exitFlubsLeft = 3;
+		exitFlubsLeft = flubStd;
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );
 	}

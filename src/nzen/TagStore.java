@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Random; // for self testing
+// import org.apache.logging.log4j.LogManager;
+// import org.apache.logging.log4j.Logger;
 
 /** @author Nzen
  */
@@ -34,7 +36,7 @@ public class TagStore {
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get( Calendar.YEAR ))
-                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) )
+                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 )
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
