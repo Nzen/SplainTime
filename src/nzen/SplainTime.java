@@ -6,15 +6,12 @@ package nzen;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Date;
 
 /** @author Nzen
@@ -31,7 +28,7 @@ public class SplainTime extends javax.swing.JFrame {
     public SplainTime() {
 		String basicStart = "started up"; // just so it is in one place, rather than two
         tagHandler = new TagStore( basicStart );
-		exitFlubsLeft = 3;
+		exitFlubsLeft = 2;
         initComponents();
 		updateLatestTaskLabel( basicStart );
         ActionListener taskPerformer = new ActionListener() {
@@ -54,7 +51,7 @@ public class SplainTime extends javax.swing.JFrame {
         cron = null;
         runTests();
         tagHandler.runTests();
-        tagHandler.interactiveUTF();
+        // tagHandler.interactiveUTF();
     }
 
     /**
@@ -194,7 +191,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Change exit counter, reset Finish button text */
 	private void resetExit() {
-		exitFlubsLeft = 3;
+		exitFlubsLeft = 2;
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );
 	}
@@ -206,7 +203,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /**  */
     public static void main(String args[]) {
-        boolean testing = false; // true;
+        boolean testing = true;
         if ( testing ) {
             SplainTime nn = new SplainTime( testing );
         } else
