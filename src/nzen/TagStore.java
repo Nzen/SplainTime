@@ -36,7 +36,6 @@ public class TagStore {
     public TagStore( String introText ) {
         tags = new LinkedList<>();
         toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
-		// IMPROVE check, maybe restore from cache
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get(Calendar.YEAR) )
@@ -54,10 +53,10 @@ public class TagStore {
         // IMPROVE delete temp files from previous run
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
-            pr( "ts.if() no temp file" );
+            pr( "ts.if() no temp file" ); // 4TESTS
             add( new Date(), basicStartup, ! TagStore.amSubTask );
         } else {
-            pr( "ts.if() found temp: "+ tempSays );
+            pr( "ts.if() found temp: "+ tempSays ); // 4TESTS
             WhenTag fromPreviousRun = parseTempTag( tempSays );
             if ( fromPreviousRun != null )
                 tags.add( fromPreviousRun );
@@ -112,7 +111,7 @@ public class TagStore {
         String outStr = "";
         WhenTag temp;
         Date later;
-        for ( int ind = 0; ind < tags.size() - 1; ind++ ) {
+        for ( int ind = 0; ind < tags.size() -1; ind++ ) {
             temp = tags.get( ind );
             later = tags.get( ind +1 ).tagTime;
             outStr += toHourMs.format( temp.tagTime ) +"\t"
@@ -130,9 +129,15 @@ public class TagStore {
     void quickSave() {
         if ( tags.size() > 1 ) { // IMPROVE for subtask awareness
             flushExtra();
-            pr("ts.qs "); writeToDisk( tempFile, tempFileFormat(tags.peek()) ); // 4TESTS
-            // writeToDisk( ! forClient, tempFileFormat(tags.peek()) ); // 4REAL
+            // pr("ts.qs "); writeToDisk( tempFile, tempFileFormat(tags.peek()) ); // 4TESTS
+            writeToDisk( ! forClient, tempFileFormat(tags.peek()) ); // 4REAL
+        } else if (aMinuteSince( tags.peek().tagTime.getTime() )) {
+            writeToDisk( ! forClient, tempFileFormat(tags.peek()) );
         }
+    }
+
+    private boolean aMinuteSince( long prevTagStamp ) {
+        return (System.currentTimeMillis() - prevTagStamp) < 85000; // roughly over a minute
     }
 
     /** Formats the start time and diff for the user */
@@ -163,7 +168,7 @@ public class TagStore {
 		return new String[]{""};
 	}
 
-    /** to test the above quickly, by hand */
+    /** to test prettyDiff quickly, by hand */
     void interactiveUTF() {
         Date now = new Date();
         Date later;
@@ -185,7 +190,7 @@ public class TagStore {
     /** just toStr of inMem */
     private String tempFileFormat( WhenTag inMem ) {
         // String sub = ( inMem.subT ) ? "s" : "m"; // IMPROVE this is for later
-        return toHourMs.format( inMem.tagTime ) +"\t"+ inMem.didWhat; // +"\t"+ sub;
+        return Long.toString( inMem.tagTime.getTime() ) +"\t"+ inMem.didWhat; // +"\t"+ sub;
     }
 
     /** turns date\ttag into a whentag, not subtask aware for now */
@@ -193,10 +198,10 @@ public class TagStore {
         String[] date_tag = fromFile.split( "\t" );
         int time = 0, tag = time +1; //, subT = tag +1;
         try {
-            Date then = toHourMs.parse( date_tag[time] );
+            Date then = new Date( Long.parseLong(date_tag[ time ]) );
             return new WhenTag( then, date_tag[tag], !amSubTask );
-        } catch ( java.text.ParseException pe ) {
-            pr( "ts.ptt couldn't parse |"+ date_tag[time] +"| as a date" );
+        } catch ( NumberFormatException nfe ) {
+            pr( "ts.ptt couldn't parse |"+ date_tag[time] +"| as millisec for the date" );
             return null;
         }
     }
@@ -207,18 +212,24 @@ public class TagStore {
         String[] problems = new String[ tests ];
         problems[ 0 ] = "";
         Date wasNow = new Date();
-        String basic = toHourMs.format( wasNow ) +"\t"+ "basic tag";
+        String basic = tempFileFormat(new WhenTag( wasNow, "basic tag", ! amSubTask ));
         WhenTag basicWt = parseTempTag( basic );
         if ( basicWt == null ) {
             problems[ currProb ] = "ts.pwptt basic parse is null";
             return problems;
         }
-        if ( ! wasNow.equals(basicWt.tagTime) ) { // FIX, above saves hours but not date so compare fails
+        Date wasNowPlus1sec = new Date( wasNow.getTime() +1000 );
+        // if parsed is not within 1 second, it failed. exact is rather stringent
+        if ( ! wasNow.equals(basicWt.tagTime) ){
             problems[ currProb ] = "ts.pwptt dates didn't match: \n\ttest "
                     + wasNow.toString() +"\tbecame "+ basicWt.tagTime.toString();
             currProb++;
         }
         return problems;
+    }
+
+    private String gTempSavedTag( boolean testing ) {
+        return tempFile;
     }
 
     /** Gets blank or tag in a temp file */
@@ -243,7 +254,12 @@ public class TagStore {
 
     /* 4TESTS, for visual feedback */
     private void writeToDisk( String whichFile, String outStr ) {
-        System.out.println( "\t"+ whichFile +"\n"+ outStr );
+        if (whichFile.equals( userFile )) {
+            pr( "\t"+ whichFile +"\n"+ outStr );
+        } else {
+            tempFile = outStr;
+            pr( "\t temp\t"+ outStr );
+        }
     }
 
     /** Appends outStr userFile or truncates temp with outStr */
@@ -313,24 +329,38 @@ public class TagStore {
     /** Still rolling my own ad hoc suite, string focused this time */
     public void runTests() {
 		Random oracle = new Random();
-        if(showsResults( problemsWithPrettyDiff(oracle) ))
+        boolean passed = true;
+        if(showsResults( problemsWithPrettyDiff(oracle) )) {
 			pr( "--" );
-        if(showsResults( problemsWithAdjustPrevious(oracle) ))
+            passed = false;
+        }
+        if(showsResults( problemsWithAdjustPrevious(oracle) )) {
 			pr( "--" );
-        if(showsResults( problemsWithParseTempTag() ))
+            passed = false;
+        }
+        if(showsResults( problemsWithParseTempTag() )) {
 			pr( "--" );
-        if(showsResults( problemsWithEnsureTwoDigits() ))
+            passed = false;
+        }
+        if(showsResults( problemsWithEnsureTwoDigits() )) {
 			pr( "--" );
+            passed = false;
+        }
+        if ( passed )
+            pr( "  yay, no test failed" );
     }
 
     /** Print and indicate whether theseTests had problems */
 	private boolean showsResults( String[] theseTests ) {
 		boolean failed = true;
-		int first = 0;
+		int first = 0, prob = 0;
         if ( ! theseTests[first].equals("") ) {
-            pr(" * "+ itoa( theseTests.length )+ " problems *");
-            for ( String problem : theseTests )
-                pr( problem );
+            for ( String problem : theseTests ) {
+                if ( problem != null ) {
+                    pr( problem );
+                    prob++;
+            }   }
+            pr(" * "+ itoa( prob )+ " problems *");
 			return failed; 
         } else
 			return ! failed;

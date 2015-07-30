@@ -6,6 +6,8 @@ package nzen;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -30,7 +32,7 @@ public class SplainTime extends javax.swing.JFrame {
         tagHandler = new TagStore( basicStart );
 		exitFlubsLeft = 2;
         initComponents();
-		updateLatestTaskLabel( basicStart );
+		updateLatestTaskLabel( tagHandler.gPreviousTag() );
         ActionListener taskPerformer = new ActionListener() {
             @Override
             public void actionPerformed( ActionEvent evt ) {
@@ -70,6 +72,11 @@ public class SplainTime extends javax.swing.JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("What now ?");
         setResizable(false);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent evt) {
+                closingFrame(evt);
+            }
+        });
 
         jtfForTag.setFont(new Font("Times New Roman", 0, 18)); // NOI18N
         jtfForTag.addActionListener(new ActionListener() {
@@ -163,8 +170,13 @@ public class SplainTime extends javax.swing.JFrame {
         updateLatestTaskLabel( newestDid );
         cron.restart(); // so it doesn't fire midway into newest tag's first minute
         jtfForTag.setText(""); // blank the text entry
-        jlShowsRoughTime.setText( "0 min" );
+        updateTimeDiffLabel( new Date() );
     }//GEN-LAST:event_pushedEnter
+
+    private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
+        tagHandler.quickSave();
+        // NOTE not wrapUp() so it won't delete the temp file
+    }//GEN-LAST:event_closingFrame
 
     /** Store the tag with the current time */
 	private void storeTag( String says ) {
@@ -203,7 +215,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /**  */
     public static void main(String args[]) {
-        boolean testing = true;
+        boolean testing = false; //true;
         if ( testing ) {
             SplainTime nn = new SplainTime( testing );
         } else
