@@ -2,8 +2,6 @@
     &copy Nicholas Prado; License: ../../readme.md
 
 Next:
-fix problemsWithParseTempTag()
-write to temp file that first time
  */
 
 package nzen;
@@ -34,6 +32,10 @@ public class TagStore {
 
     /** Setup the store's output, guarantee an initial task */
     public TagStore( String introText ) {
+        commonInit( introText );
+    }
+
+    protected void commonInit( String introText ) {
         tags = new LinkedList<>();
         toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
         GregorianCalendar willBeName = new GregorianCalendar();
@@ -69,41 +71,6 @@ public class TagStore {
     void add( Date when, String what, boolean ifSub ) {
         tags.add( new WhenTag( when, what, ifSub ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
-    }
-
-    /** Subtract time from previous: client entered the tag late; premature */
-    void adjustPrevious( int minutesOff ) {
-		WhenTag was = tags.removeLast();
-		Long wasTime = was.tagTime.getTime();
-		int millisecondsOff = minutesOff * 60000;
-		was.tagTime = new Date( wasTime - millisecondsOff );
-		tags.add( was );
-        /*
-        adjust the temp file time
-        */
-    }
-
-    /** does ap() fix previous? */
-    public String[] problemsWithAdjustPrevious( Random oracle ) {
-        int numTests = 1; int failedTests = 0;
-        String[] problems = new String[ numTests ];
-        problems[0] = "";
-        LinkedList<WhenTag> store = tags; // no matter what it is
-        Date whenever = new Date();
-        tags = new LinkedList<>();
-        tags.add(new WhenTag( whenever, "", ! TagStore.amSubTask ));
-        int off = 0;
-        adjustPrevious( off );
-        if ( whenever.getTime() != tags.peek().tagTime.getTime() ) {
-            problems[ failedTests ] = "TS.pwap(0) subtract 0 was different";
-            failedTests++;
-        }
-        while ( off == 0 ) // NOTE already tested zero above
-            off = oracle.nextInt( 75 );
-        Date wheneverLessRand = new Date();
-        /* FIX finish procedural, probably have to use Calendar to adjust it */
-        tags = store; // reset
-        return problems;
     }
 
     /** writes all but the latest to disk; callee checked there's x>1 */ // UNREADY
@@ -218,8 +185,6 @@ public class TagStore {
             problems[ currProb ] = "ts.pwptt basic parse is null";
             return problems;
         }
-        Date wasNowPlus1sec = new Date( wasNow.getTime() +1000 );
-        // if parsed is not within 1 second, it failed. exact is rather stringent
         if ( ! wasNow.equals(basicWt.tagTime) ){
             problems[ currProb ] = "ts.pwptt dates didn't match: \n\ttest "
                     + wasNow.toString() +"\tbecame "+ basicWt.tagTime.toString();
@@ -306,7 +271,6 @@ public class TagStore {
 
     /** delete the temp file ; write the last one */ // UNREADY
     void wrapUp() {
-		// IMPROVE delete temp file
         flushExtra();
         WhenTag ultimate = tags.getLast();
         String outStr = toHourMs.format( ultimate.tagTime ) +"\t"
@@ -314,16 +278,27 @@ public class TagStore {
                 + ultimate.didWhat + "\r\n";
         // writeToDisk( userFile, outStr ); // 4TESTS
 		writeToDisk( forClient, outStr ); // 4REAL
+        deleteTempFile();
 	}
+
+    private void deleteTempFile() {
+        Path relPath = Paths.get( tempFile );
+        try {
+            java.nio.file.Files.deleteIfExists( relPath );
+        } catch ( java.io.IOException ioe ) {
+            System.err.println( "LF.dtf() I/O problem.  While deleting "
+                    + tempFile +" "+ ioe.toString() );
+        }
+    }
 
     /** Gets current tag, there will always be one */
     String gPreviousTag() {
-		return tags.peek().didWhat;
+		return tags.peekLast().didWhat;
     }
 
     /** Gets current tag's start time */
     Date gPreviousTime() {
-        return tags.peek().tagTime;
+        return tags.peekLast().tagTime;
     }
 
     /** Still rolling my own ad hoc suite, string focused this time */
@@ -331,10 +306,6 @@ public class TagStore {
 		Random oracle = new Random();
         boolean passed = true;
         if(showsResults( problemsWithPrettyDiff(oracle) )) {
-			pr( "--" );
-            passed = false;
-        }
-        if(showsResults( problemsWithAdjustPrevious(oracle) )) {
 			pr( "--" );
             passed = false;
         }
