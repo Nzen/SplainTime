@@ -1,5 +1,7 @@
 /*
     &copy Nicholas Prado; License: ../../readme.md
+
+Next:
  */
 
 package nzen;
@@ -8,9 +10,12 @@ import java.io.File;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Random; // for self testing
 
@@ -27,24 +32,39 @@ public class TagStore {
 
     /** Setup the store's output, guarantee an initial task */
     public TagStore( String introText ) {
+        commonInit( introText );
+    }
+
+    protected void commonInit( String introText ) {
         tags = new LinkedList<>();
         toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
-		insertFirst( introText );
-		// IMPROVE check, maybe restore from cache
         GregorianCalendar willBeName = new GregorianCalendar();
 
-        userFile = itoa(willBeName.get( Calendar.YEAR ))
-                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) )
-                +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
+        userFile = itoa(willBeName.get(Calendar.YEAR) )
+                +" "+ ensureTwoDigits( willBeName.get(Calendar.MONTH) +1 )
+                +" "+ ensureTwoDigits( willBeName.get(Calendar.DAY_OF_MONTH) );
         // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
+
+		insertFirst( introText );
     }
 
     /** Ensure a task is ready on startup */
 	private void insertFirst( String basicStartup ) {
-		// IMPROVE check for a restoration file with today's dates
-        add( new Date(), basicStartup, ! TagStore.amSubTask );
+        // IMPROVE delete temp files from previous run
+        String tempSays = gTempSavedTag();
+        if ( tempSays.isEmpty() ) {
+            pr( "ts.if() no temp file" ); // 4TESTS
+            add( new Date(), basicStartup, ! TagStore.amSubTask );
+        } else {
+            pr( "ts.if() found temp: "+ tempSays ); // 4TESTS
+            WhenTag fromPreviousRun = parseTempTag( tempSays );
+            if ( fromPreviousRun != null )
+                tags.add( fromPreviousRun );
+            else
+                add( new Date(), basicStartup, ! TagStore.amSubTask );
+        }
 	}
 
     /** Add a tag, when started, whether ends previous tag */
@@ -53,47 +73,12 @@ public class TagStore {
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
     }
 
-    /** Subtract time from previous: client entered the tag late; premature */
-    void adjustPrevious( int minutesOff ) {
-		WhenTag was = tags.removeLast();
-		Long wasTime = was.tagTime.getTime();
-		int millisecondsOff = minutesOff * 60000;
-		was.tagTime = new Date( wasTime - millisecondsOff );
-		tags.add( was );
-        /*
-        adjust the temp file time
-        */
-    }
-
-    /** does ap() fix previous? */
-    public String[] problemsWithAdjustPrevious( Random oracle ) {
-        int numTests = 1; int failedTests = 0;
-        String[] problems = new String[ numTests ];
-        problems[0] = "";
-        LinkedList<WhenTag> store = tags; // no matter what it is
-        Date whenever = new Date();
-        tags = new LinkedList<>();
-        tags.add(new WhenTag( whenever, "", ! TagStore.amSubTask ));
-        int off = 0;
-        adjustPrevious( off );
-        if ( whenever.getTime() != tags.peek().tagTime.getTime() ) {
-            problems[ failedTests ] = "TS.pwap(0) subtract 0 was different";
-            failedTests++;
-        }
-        while ( off == 0 ) // NOTE already tested zero above
-            off = oracle.nextInt( 75 );
-        Date wheneverLessRand = new Date();
-        /* FIX finish procedural, probably have to use Calendar to adjust it */
-        tags = store; // reset
-        return problems;
-    }
-
     /** writes all but the latest to disk; callee checked there's x>1 */ // UNREADY
     private void flushExtra() {
         String outStr = "";
         WhenTag temp;
         Date later;
-        for ( int ind = 0; ind < tags.size() - 1; ind++ ) {
+        for ( int ind = 0; ind < tags.size() -1; ind++ ) {
             temp = tags.get( ind );
             later = tags.get( ind +1 ).tagTime;
             outStr += toHourMs.format( temp.tagTime ) +"\t"
@@ -109,10 +94,17 @@ public class TagStore {
 
     /** Flush & write current to the cache file */
     void quickSave() {
-        if ( tags.size() > 1 ) // IMPROVE later for subtasks
+        if ( tags.size() > 1 ) { // IMPROVE for subtask awareness
             flushExtra();
-        // writeToDisk( tempFile, tempFileFormat(tags.peek()) ); // ASK should this be conditional?
-        // writeToDisk( ! forClient, tempFileFormat(tags.peek()) ); // 4REAL
+            // pr("ts.qs "); writeToDisk( tempFile, tempFileFormat(tags.peek()) ); // 4TESTS
+            writeToDisk( ! forClient, tempFileFormat(tags.peek()) ); // 4REAL
+        } else if (aMinuteSince( tags.peek().tagTime.getTime() )) {
+            writeToDisk( ! forClient, tempFileFormat(tags.peek()) );
+        }
+    }
+
+    private boolean aMinuteSince( long prevTagStamp ) {
+        return (System.currentTimeMillis() - prevTagStamp) < 85000; // roughly over a minute
     }
 
     /** Formats the start time and diff for the user */
@@ -143,7 +135,7 @@ public class TagStore {
 		return new String[]{""};
 	}
 
-    /** to test the above quickly, by hand */
+    /** to test prettyDiff quickly, by hand */
     void interactiveUTF() {
         Date now = new Date();
         Date later;
@@ -165,12 +157,74 @@ public class TagStore {
     /** just toStr of inMem */
     private String tempFileFormat( WhenTag inMem ) {
         // String sub = ( inMem.subT ) ? "s" : "m"; // IMPROVE this is for later
-        return inMem.tagTime.toString() +"\t"+ inMem.didWhat; // +"\t"+ sub;
+        return Long.toString( inMem.tagTime.getTime() ) +"\t"+ inMem.didWhat; // +"\t"+ sub;
+    }
+
+    /** turns date\ttag into a whentag, not subtask aware for now */
+    private WhenTag parseTempTag( String fromFile ) {
+        String[] date_tag = fromFile.split( "\t" );
+        int time = 0, tag = time +1; //, subT = tag +1;
+        try {
+            Date then = new Date( Long.parseLong(date_tag[ time ]) );
+            return new WhenTag( then, date_tag[tag], !amSubTask );
+        } catch ( NumberFormatException nfe ) {
+            pr( "ts.ptt couldn't parse |"+ date_tag[time] +"| as millisec for the date" );
+            return null;
+        }
+    }
+
+    String[] problemsWithParseTempTag() {
+        int tests = 2;
+        int currProb = 0;
+        String[] problems = new String[ tests ];
+        problems[ 0 ] = "";
+        Date wasNow = new Date();
+        String basic = tempFileFormat(new WhenTag( wasNow, "basic tag", ! amSubTask ));
+        WhenTag basicWt = parseTempTag( basic );
+        if ( basicWt == null ) {
+            problems[ currProb ] = "ts.pwptt basic parse is null";
+            return problems;
+        }
+        if ( ! wasNow.equals(basicWt.tagTime) ){
+            problems[ currProb ] = "ts.pwptt dates didn't match: \n\ttest "
+                    + wasNow.toString() +"\tbecame "+ basicWt.tagTime.toString();
+            currProb++;
+        }
+        return problems;
+    }
+
+    private String gTempSavedTag( boolean testing ) {
+        return tempFile;
+    }
+
+    /** Gets blank or tag in a temp file */
+    private String gTempSavedTag() {
+        String maybePrevious = "";
+        Path relPath = Paths.get( tempFile );
+        try {
+            if ( Files.exists(relPath) ) {
+                try (java.io.BufferedReader fileOpener = Files.newBufferedReader(
+                        relPath, StandardCharsets.UTF_8 )
+                    ) {
+                    maybePrevious = fileOpener.readLine(); // IMPROVE assumes no subtasks
+                    if ( maybePrevious == null )
+                        maybePrevious = "";
+            }   }
+        } catch ( java.io.IOException ioe ) {
+            System.err.println( "LF.rsf() had some I/O problem."
+                    + " there's like five options\n "+ ioe.toString() );
+        }
+        return maybePrevious;
     }
 
     /* 4TESTS, for visual feedback */
     private void writeToDisk( String whichFile, String outStr ) {
-        System.out.println( "\t"+ whichFile +"\n"+ outStr );
+        if (whichFile.equals( userFile )) {
+            pr( "\t"+ whichFile +"\n"+ outStr );
+        } else {
+            tempFile = outStr;
+            pr( "\t temp\t"+ outStr );
+        }
     }
 
     /** Appends outStr userFile or truncates temp with outStr */
@@ -185,14 +239,14 @@ public class TagStore {
             whichFile = tempFile;
             howTreat = StandardOpenOption.TRUNCATE_EXISTING;
         }
-        java.nio.file.Path relPath = java.nio.file.Paths.get(whichFile);
+        Path relPath = Paths.get(whichFile);
         try {
-            if ( java.nio.file.Files.notExists(relPath) ) {
-                java.nio.file.Files.createFile(relPath);
+            if ( Files.notExists(relPath) ) {
+                Files.createFile(relPath);
             }
-            try (java.io.BufferedWriter paper = java.nio.file.Files.newBufferedWriter(
-                    relPath, java.nio.charset.StandardCharsets.UTF_8, howTreat )
-            )   {
+            try (java.io.BufferedWriter paper = Files.newBufferedWriter(
+                    relPath, StandardCharsets.UTF_8, howTreat )
+                ) {
                 paper.append( outStr );
             }
         } catch ( java.io.IOException ioe ) {
@@ -217,7 +271,6 @@ public class TagStore {
 
     /** delete the temp file ; write the last one */ // UNREADY
     void wrapUp() {
-		// IMPROVE delete temp file
         flushExtra();
         WhenTag ultimate = tags.getLast();
         String outStr = toHourMs.format( ultimate.tagTime ) +"\t"
@@ -225,34 +278,60 @@ public class TagStore {
                 + ultimate.didWhat + "\r\n";
         // writeToDisk( userFile, outStr ); // 4TESTS
 		writeToDisk( forClient, outStr ); // 4REAL
+        deleteTempFile();
 	}
+
+    private void deleteTempFile() {
+        Path relPath = Paths.get( tempFile );
+        try {
+            java.nio.file.Files.deleteIfExists( relPath );
+        } catch ( java.io.IOException ioe ) {
+            System.err.println( "LF.dtf() I/O problem.  While deleting "
+                    + tempFile +" "+ ioe.toString() );
+        }
+    }
 
     /** Gets current tag, there will always be one */
     String gPreviousTag() {
-		return tags.peek().didWhat;
+		return tags.peekLast().didWhat;
     }
 
     /** Gets current tag's start time */
     Date gPreviousTime() {
-        return tags.peek().tagTime;
+        return tags.peekLast().tagTime;
     }
 
     /** Still rolling my own ad hoc suite, string focused this time */
     public void runTests() {
 		Random oracle = new Random();
-        if(showsResults( problemsWithPrettyDiff(oracle) ))
+        boolean passed = true;
+        if(showsResults( problemsWithPrettyDiff(oracle) )) {
 			pr( "--" );
-        if(showsResults( problemsWithAdjustPrevious(oracle) ))
+            passed = false;
+        }
+        if(showsResults( problemsWithParseTempTag() )) {
 			pr( "--" );
+            passed = false;
+        }
+        if(showsResults( problemsWithEnsureTwoDigits() )) {
+			pr( "--" );
+            passed = false;
+        }
+        if ( passed )
+            pr( "  yay, no test failed" );
     }
 
     /** Print and indicate whether theseTests had problems */
 	private boolean showsResults( String[] theseTests ) {
 		boolean failed = true;
-		int first = 0;
+		int first = 0, prob = 0;
         if ( ! theseTests[first].equals("") ) {
-            for ( String problem : theseTests )
-                pr( problem );
+            for ( String problem : theseTests ) {
+                if ( problem != null ) {
+                    pr( problem );
+                    prob++;
+            }   }
+            pr(" * "+ itoa( prob )+ " problems *");
 			return failed; 
         } else
 			return ! failed;
@@ -268,11 +347,32 @@ public class TagStore {
 		return Integer.toString( nn );
 	}
 
+    /** Probably replicates a printf feature */
     String ensureTwoDigits( int num ) {
         if ( num < 10 )
             return "0"+ itoa( num );
         else
             return itoa( num );
+    }
+
+    /** Check 1 & 2 digit ints. Oracle would be overkill here */
+    private String[] problemsWithEnsureTwoDigits() {
+        int tests = 2;
+        int currProb = 0;
+        String[] problems = new String[ tests ];
+        problems[ 0 ] = "";
+
+        String oo = ensureTwoDigits( 0 );
+        if ( ! oo.equals("00") ) {
+            problems[ currProb ] = "ts.pwetd instead of 00 got "+ oo;
+            currProb++;
+        }
+        String sixNine = ensureTwoDigits( 69 );
+        if ( ! sixNine.equals("69") ) {
+            problems[ currProb ] = "ts.pwetd instead of 69 got |"+ sixNine +"|";
+            currProb++;
+        }
+        return problems;
     }
 
     /** Struct for Date : String : if_subtask */

@@ -6,15 +6,14 @@ package nzen;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Date;
 
 /** @author Nzen
@@ -24,6 +23,8 @@ public class SplainTime extends javax.swing.JFrame {
 
     private TagStore tagHandler;
     private javax.swing.Timer cron;
+    boolean terseAdj = true;
+    int exitFlubs = 2;
 	private int exitFlubsLeft;
     final int delayms = 60001; // 60 * 1000
 
@@ -31,9 +32,9 @@ public class SplainTime extends javax.swing.JFrame {
     public SplainTime() {
 		String basicStart = "started up"; // just so it is in one place, rather than two
         tagHandler = new TagStore( basicStart );
-		exitFlubsLeft = 3;
+		exitFlubsLeft = exitFlubs;
         initComponents();
-		updateLatestTaskLabel( basicStart );
+		updateLatestTaskLabel( tagHandler.gPreviousTag() );
         ActionListener taskPerformer = new ActionListener() {
             @Override
             public void actionPerformed( ActionEvent evt ) {
@@ -54,7 +55,7 @@ public class SplainTime extends javax.swing.JFrame {
         cron = null;
         runTests();
         tagHandler.runTests();
-        tagHandler.interactiveUTF();
+        // tagHandler.interactiveUTF();
     }
 
     /**
@@ -69,12 +70,19 @@ public class SplainTime extends javax.swing.JFrame {
         jlSaysPrevious = new JLabel();
         btnOpensFile = new JButton();
         jlShowsRoughTime = new JLabel();
+        btnConfig = new JButton();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("What now ?");
         setResizable(false);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent evt) {
+                closingFrame(evt);
+            }
+        });
 
         jtfForTag.setFont(new Font("Times New Roman", 0, 18)); // NOI18N
+        jtfForTag.setToolTipText("Describe this moment");
         jtfForTag.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 pushedEnter(evt);
@@ -83,6 +91,7 @@ public class SplainTime extends javax.swing.JFrame {
 
         btnFinish.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
         btnFinish.setText("Finish");
+        btnFinish.setToolTipText("Press several to close");
         btnFinish.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 pushedFinish(evt);
@@ -94,6 +103,7 @@ public class SplainTime extends javax.swing.JFrame {
 
         btnOpensFile.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
         btnOpensFile.setText("Open");
+        btnOpensFile.setToolTipText("Show saved tags");
         btnOpensFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 pushedOpen(evt);
@@ -103,6 +113,15 @@ public class SplainTime extends javax.swing.JFrame {
         jlShowsRoughTime.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
         jlShowsRoughTime.setText("0 min");
 
+        btnConfig.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
+        btnConfig.setText("Config");
+        btnConfig.setToolTipText("Choose settings");
+        btnConfig.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                openConfig(evt);
+            }
+        });
+
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -111,6 +130,8 @@ public class SplainTime extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnOpensFile)
+                        .addGap(30, 30, 30)
+                        .addComponent(btnConfig)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnFinish))
                     .addGroup(layout.createSequentialGroup()
@@ -133,7 +154,9 @@ public class SplainTime extends javax.swing.JFrame {
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addComponent(btnFinish)
-                    .addComponent(btnOpensFile))
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnOpensFile)
+                        .addComponent(btnConfig)))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -166,8 +189,18 @@ public class SplainTime extends javax.swing.JFrame {
         updateLatestTaskLabel( newestDid );
         cron.restart(); // so it doesn't fire midway into newest tag's first minute
         jtfForTag.setText(""); // blank the text entry
-        jlShowsRoughTime.setText( "0 min" );
+        updateTimeDiffLabel( new Date() );
     }//GEN-LAST:event_pushedEnter
+
+    private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
+        tagHandler.quickSave();
+        // NOTE not wrapUp() so it won't delete the temp file
+    }//GEN-LAST:event_closingFrame
+
+    private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
+        boolean modal = true;
+        ConfigDialog settings = new ConfigDialog( this, modal );
+    }//GEN-LAST:event_openConfig
 
     /** Store the tag with the current time */
 	private void storeTag( String says ) {
@@ -194,10 +227,24 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Change exit counter, reset Finish button text */
 	private void resetExit() {
-		exitFlubsLeft = 3;
+		exitFlubsLeft = exitFlubs;
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );
 	}
+
+    /**  */
+    void applyConfig( boolean terseAdjOutput, int timesToClose ) {
+        sAdjustOutput( terseAdjOutput );
+        sClicksFinish( timesToClose );
+    }
+
+    void sAdjustOutput( boolean terseAdjOutput ) {
+        terseAdj = terseAdjOutput;
+    }
+
+    void sClicksFinish( int newClickCount ) {
+        exitFlubs = newClickCount;
+    }
 
     /**  */
     public void runTests() {
@@ -206,7 +253,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /**  */
     public static void main(String args[]) {
-        boolean testing = false; // true;
+        boolean testing = false; //true;
         if ( testing ) {
             SplainTime nn = new SplainTime( testing );
         } else
@@ -219,6 +266,7 @@ public class SplainTime extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private JButton btnConfig;
     private JButton btnFinish;
     private JButton btnOpensFile;
     private JLabel jlSaysPrevious;
