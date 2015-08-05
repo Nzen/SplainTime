@@ -1,9 +1,9 @@
 
-### SplainTime (extract branch: in progress)
+### SplainTime
 
 I needed a dead simple time tracking app. By 'dead simple' I don't mean some predictive mapping of my favored clients and a process listener that knows which programs were in focus at any given time. I mean the simplest I can get away with: SplainTime is a text entry box that outputs a timestamp and a time difference in a text file with the date on it. It also has a button to open the text file.
 
-![windows screenshot](https://www.flickr.com/photos/18099895@N06/19979150661)  
+![windows screenshot](https://farm1.staticflickr.com/430/19979150661_40037d989c_o.jpg)  
 On windows, pic hosted by flickr.
 
 ### Run
@@ -12,7 +12,7 @@ On windows, pic hosted by flickr.
 
 Nope, no arguments.
 
-![output](https://www.flickr.com/photos/18099895@N06/19351574364)  
+![output](https://farm4.staticflickr.com/3834/19351574364_91f8ce13c0_o.png)  
 Output, pic hosted by flickr
 
 ### License
@@ -31,5 +31,5 @@ DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 * interpret subtask flag
 * more tests
 
-![linux screenshot](https://www.flickr.com/photos/18099895@N06/19787232209)  
+![linux screenshot](https://farm1.staticflickr.com/422/19787232209_fd6d79d140_o_d.png)  
 On linux, hosted by flickr.
