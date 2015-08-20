@@ -1,14 +1,19 @@
-12:28.50 AM	0m 	started up
-12:28.56 AM	1m 	aabababa
-12:30.20 AM	1m 	I think this will be the last time
-12:32.4 AM	0m 	Shutting down
-12:33.21 AM	0m 	started up
-12:33.26 AM	0m 	l
-12:33.30 AM	0m 	kloikloikl
-12:33.39 AM	0m 	llfgsda2334rffcsss
-12:33.44 AM	0m 	Shutting down
-12:34.01 AM	0m 	started up
-12:34.09 AM	0m 	asdf
-12:35.01 AM	0m 	got a pocket full of rainbows. got a heart full of love
-12:35.06 AM	0m 	bye
-12:35.09 AM	0m 	Shutting down
+10:29.47 PM	0m 	started up
+10:30.08 PM	0m 	oh. adjust doesn't have the config
+10:30.32 PM	50m 	just as well, since um it doesn't spawn anything
+11:20.44 PM	0m 	-1 thinking of extracting the calculations so I can make a tui ; adjusted time at Wed Aug 19 23:21:44
+11:27.44 PM	0m 	started up
+11:23.59 PM	13m 	-11:23 I forgot, no temp file on this branch. will need to merge for a jar ; adjusted time at Wed Aug 19 23:28:59 CDT 2015
+11:37.08 PM	5m 	le sigh, reading about synthetic diamonds courtesy of swblack.blogspot
+11:42.19 PM	8m 	brush teeth
+11:50.48 PM	0m 	changed it so adding a tag resets exit
+11:50.55 PM	2m 	worked
+11:52.59 PM	0m 	Shutting down
+
+ {in the next day's file}
+
+12:05.26 AM	0m 	started up
+12:05.43 AM	1m 	config still doesn't work
+12:07.39 AM	2m 	yay, the config wasn't visible. crisis averted
+12:10.19 AM	3m 	-3 fixed master's readme ; adjusted time at Thu Aug 20 00:13:19 CDT 2015
+12:13.27 AM	0m 	Shutting down

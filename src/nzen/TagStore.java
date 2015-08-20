@@ -40,9 +40,9 @@ public class TagStore {
         toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
         GregorianCalendar willBeName = new GregorianCalendar();
 
-        userFile = itoa(willBeName.get(Calendar.YEAR) )
-                +" "+ ensureTwoDigits( willBeName.get(Calendar.MONTH) +1 )
-                +" "+ ensureTwoDigits( willBeName.get(Calendar.DAY_OF_MONTH) );
+        userFile = itoa(willBeName.get( Calendar.YEAR ))
+                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 ) // NOTE zero indexed
+                +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
