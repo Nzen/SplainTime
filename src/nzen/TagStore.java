@@ -235,7 +235,7 @@ public class TagStore {
 
     /** Gets current tag's start time */
     Date gPreviousTime() {
-        return tags.peek().tagTime;
+        return tags.peekLast().tagTime;
     }
 
     /** Still rolling my own ad hoc suite, string focused this time */
