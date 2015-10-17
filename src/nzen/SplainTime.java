@@ -1,6 +1,8 @@
 
 // &copy; Nicholas Prado; License: ../../readme.md
 
+// TODO: time to extract out logic that I mixed with UI again
+
 package nzen;
 
 import java.awt.Font;
@@ -192,11 +194,13 @@ public class SplainTime extends javax.swing.JFrame {
         updateTimeDiffLabel( new Date() );
     }//GEN-LAST:event_pushedEnter
 
+    /** Save, but not final save */
     private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
         tagHandler.quickSave();
         // NOTE not wrapUp() so it won't delete the temp file
     }//GEN-LAST:event_closingFrame
 
+    /** Received new config values */
     private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
         boolean modal = true;
         ConfigDialog settings = new ConfigDialog( this, modal );

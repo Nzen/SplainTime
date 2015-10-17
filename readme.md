@@ -22,7 +22,6 @@ DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 
 ### TODO
 
-* use a cache to restore closed sessions
-* interpret time adjust flag
+* Extract logic from UI so I can make a jcurses version
 * interpret subtask flag
 * more tests
