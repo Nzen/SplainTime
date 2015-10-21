@@ -6,6 +6,7 @@ Check that all this functionality is safely out
 rename the .form
 delete this class
 */
+
 package nzen;
 
 import java.awt.Font;
@@ -203,11 +204,13 @@ public class SplainTime extends javax.swing.JFrame {
         resetExit();
     }//GEN-LAST:event_pushedEnter
 
+    /** Save, but not final save */
     private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
         tagHandler.quickSave();
         // NOTE not wrapUp() so it won't delete the temp file
     }//GEN-LAST:event_closingFrame
 
+    /** Received new config values */
     private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
         boolean modal = true;
         ConfigDialog settings = new ConfigDialog( this, modal );
