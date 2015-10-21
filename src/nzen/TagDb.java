@@ -1,8 +1,13 @@
 /*
-    &copy Nicholas Prado; License: ../../readme.md
+    &copy; Nicholas Prado; License: ../../readme.md
 
-Next:
- */
+  Next:
+Decide whether to extract out the two types of persistence
+Decide whether to extract out the text processing
+	but then what's left besides the LL of tag:times ?
+	It's not like I'm likely to wrap this around a db. a file is just fine
+	Then why am I extracting anything? Isn't this all a little for show?
+*/
 
 package nzen;
 
@@ -21,7 +26,7 @@ import java.util.Random; // for self testing
 
 /** @author Nzen
  */
-public class TagStore {
+public class TagDb {
 
     String userFile;
     String tempFile;
@@ -31,7 +36,7 @@ public class TagStore {
     private SimpleDateFormat toHourMs;
 
     /** Setup the store's output, guarantee an initial task */
-    public TagStore( String introText ) {
+    public TagDb( String introText ) {
         commonInit( introText );
     }
 
@@ -56,21 +61,26 @@ public class TagStore {
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
             pr( "ts.if() no temp file" ); // 4TESTS
-            add( new Date(), basicStartup, ! TagStore.amSubTask );
+            add( new Date(), basicStartup, ! TagDb.amSubTask );
         } else {
             pr( "ts.if() found temp: "+ tempSays ); // 4TESTS
             WhenTag fromPreviousRun = parseTempTag( tempSays );
             if ( fromPreviousRun != null )
                 tags.add( fromPreviousRun );
             else
-                add( new Date(), basicStartup, ! TagStore.amSubTask );
+                add( new Date(), basicStartup, ! TagDb.amSubTask );
         }
 	}
 
-    /** Add a tag, when started, whether ends previous tag */
+    /** Add a tag, when started, whether ends previous tag */ // IMPROVE subTask awareness
     void add( Date when, String what, boolean ifSub ) {
         tags.add( new WhenTag( when, what, ifSub ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
+    }
+
+    // IMPROVE perhaps by processing or handing that to another
+    public String getTextOfPrevious() {
+    	return tags.getLast().didWhat;
     }
 
     /** writes all but the latest to disk; callee checked there's x>1 */ // UNREADY
@@ -105,6 +115,11 @@ public class TagStore {
 
     private boolean aMinuteSince( long prevTagStamp ) {
         return (System.currentTimeMillis() - prevTagStamp) < 85000; // roughly over a minute
+    }
+
+    // IMPROVE
+    public String getDiffStr( Date callee ) {
+    	return prettyDiff( tags.getLast().tagTime, callee );
     }
 
     /** Formats the start time and diff for the user */
@@ -151,6 +166,7 @@ public class TagStore {
             later = new Date( laterMs );
             pr( toHourMs.format( later ) +"\t"+ prettyDiff(now, later) +"\t"+ tagsToSay[times -1] );
         }
+        cli.close();
         pr( "interactive mode over\n" );
     }
 

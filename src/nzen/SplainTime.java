@@ -1,12 +1,11 @@
+/*
+    &copy; Nicholas Prado; License: ../../readme.md
 
-// &copy; Nicholas Prado; License: ../../readme.md
-/* FOR ADJUST BRANCH
-test adjust with clock time, properly. huh, a time-of-day sensitive test.
-pull in master, it has a nice config
-integrate config
-remove tagstore adj previous
+  Next:
+Check that all this functionality is safely out
+rename the .form
+delete this class
 */
-
 package nzen;
 
 import java.awt.Font;
@@ -26,10 +25,11 @@ import java.util.Date;
 
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events
+    @deprecated supplant with MainGui_swing
  */
 public class SplainTime extends javax.swing.JFrame {
 
-    private TagStore tagHandler;
+    private TagDb tagHandler;
     private javax.swing.Timer cron;
     boolean terseAdj = true;
     int exitFlubs = 2;
@@ -39,7 +39,7 @@ public class SplainTime extends javax.swing.JFrame {
     /** Starts gui, starts tagStore */
     public SplainTime() {
 		String basicStart = "started up"; // just so it is in one place, rather than two
-        tagHandler = new TagStore( basicStart );
+        tagHandler = new TagDb( basicStart );
 		exitFlubsLeft = exitFlubs;
         initComponents();
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
@@ -58,7 +58,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** 4TESTS version */
     public SplainTime( boolean testMode ) {
-        tagHandler = new TagStore( "whatever" );
+        tagHandler = new TagDb( "whatever" );
         exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
         cron = null;
         runTests();
@@ -221,7 +221,7 @@ public class SplainTime extends javax.swing.JFrame {
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
             says += " ; adjusted time at "+ now.toString(); // IMPROVE use a date formatter, please
         }
-        tagHandler.add(newT, says, ! TagStore.amSubTask); // IMPROVE subTask awareness
+        tagHandler.add(newT, says, ! TagDb.amSubTask); // IMPROVE subTask awareness
 	}
 
     /** now, or subtracted by adjust flag */

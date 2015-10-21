@@ -6,7 +6,13 @@ I needed a dead simple time tracking app. By 'dead simple' I don't mean some pre
 ![windows screenshot](https://farm1.staticflickr.com/430/19979150661_40037d989c_o.jpg)  
 On windows, pic hosted by flickr.
 
-_Adjust branch_ Use a flag to indicate the start time for this tag needs adjustment.
+_Extract branch_ Refactoring the app so the logic isn't mixed into the gui.
+
+### TODO
+
+* Move to GModel, TagStore, MainGui, etc
+* interpret subtask flag
+* more tests
 
 ### Run
 
@@ -25,11 +31,6 @@ SplainTime &copy; [Nicholas Prado](www.nzen.ws)
 Usage of the works is permitted provided that this instrument is retained with the works, so that any entity that uses the works is notified of this instrument.
 
 DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
-
-### TODO
-
-* interpret subtask flag
-* more tests
 
 ![linux screenshot](https://farm1.staticflickr.com/422/19787232209_fd6d79d140_o_d.png)  
 On linux, hosted by flickr.

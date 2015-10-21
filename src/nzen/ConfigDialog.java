@@ -1,6 +1,11 @@
 /*
- * &copy Nicholas Prado, aka Nzen. But, ISC license.
- */
+    &copy; Nicholas Prado; License: ../../readme.md
+
+  Next:
+Create a model and listeners for this
+Have operations in tagStore apply/use the config model
+*/
+
 package nzen;
 
 import java.awt.Font;
