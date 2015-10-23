@@ -33,3 +33,9 @@ DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 
 ![linux screenshot](https://farm1.staticflickr.com/422/19787232209_fd6d79d140_o_d.png)  
 On linux, hosted by flickr.
+
+### Changelog
+
+Extract: gradle build script
+(Master: waiting for non regressive extract)
+(Logging: waiting for gradle that handles jars)
