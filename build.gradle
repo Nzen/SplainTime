@@ -1,0 +1,22 @@
+apply plugin: 'java'
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src'
+}	}	}
+
+jar {
+	manifest {
+		attributes(
+			'Manifest-Version' : 0.5,
+			'Created-By': 'openjdk-7-jdk - javac 1.7.0_79',
+			'Main-Class' : 'nzen.StFrame' )
+	destinationDir = file( 'dist' )
+}	}
+
+
+
+
+
+

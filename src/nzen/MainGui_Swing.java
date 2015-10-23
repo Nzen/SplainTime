@@ -196,9 +196,9 @@ public class MainGui_Swing extends javax.swing.JFrame
 
     /** Show portion of the task that fits on the label */
     public void tagChanged( String newText ) {
-		int charsFit = Math.min( 20, newText.length() );
-        jlSaysPrevious.setText("since "
-        		+ newText.substring( 0, charsFit ));
+		int charsFit = Math.min( 25, newText.length() );
+        jlSaysPrevious.setText(
+        		newText.substring( 0, charsFit ));
     }
 
     /** Save, but not final save */

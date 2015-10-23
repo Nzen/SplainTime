@@ -373,6 +373,7 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Change exit counter, reset Finish button text */
 	private void resetExit() {
+System.out.println(); // 4GradleTests lesigh
 		exitFlubsLeft = exitFlubs;
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );

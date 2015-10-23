@@ -25,7 +25,7 @@ public class StFrame implements MainViewListener {
 	private int exitFlubsLeft;
     final int delayms = 60001; // 60 * 1000
 
-    /**  */
+    /** launches ourself and the gui */
     public static void main(String args[]) {
         boolean testing = false; //true;
         if ( testing ) {
