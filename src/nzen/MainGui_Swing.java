@@ -184,6 +184,8 @@ public class MainGui_Swing extends javax.swing.JFrame
 
     /** Store (interpret?) this tag, reset gui time & tag summary */
     private void pushedEnter(ActionEvent evt) {//GEN-FIRST:event_pushedEnter
+    	if ( jtfForTag.getText().isEmpty() )
+    		return; // NOTE a blank entry is pretty much an entry error: ignore
     	stRoot.textEntered( jtfForTag.getText(), new Date() );
         cron.restart(); // so it doesn't fire midway into newest tag's first minute
         jtfForTag.setText(""); // blank the text entry

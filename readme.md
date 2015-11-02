@@ -29,7 +29,7 @@ Output, pic hosted by flickr
 
 Though I like the spirit of WTFPL, SplainTime is released as [Fair License](http://fairlicense.org/) So,
 
-SplainTime &copy; [Nicholas Prado](www.nzen.ws)  
+SplainTime &copy; [Nicholas Prado](http://www.nzen.ws)  
 Usage of the works is permitted provided that this instrument is retained with the works, so that any entity that uses the works is notified of this instrument.
 
 DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.

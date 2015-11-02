@@ -26,7 +26,8 @@ import java.util.Random; // for self testing
 
 /** @author Nzen
  */
-public class TagDb {
+public class TagStore {
+	private final String cl = "ts.";
 
     String userFile;
     String tempFile;
@@ -36,7 +37,7 @@ public class TagDb {
     private SimpleDateFormat toHourMs;
 
     /** Setup the store's output, guarantee an initial task */
-    public TagDb( String introText ) {
+    public TagStore( String introText ) {
         commonInit( introText );
     }
 
@@ -46,7 +47,8 @@ public class TagDb {
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get( Calendar.YEAR ))
-                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 ) // NOTE zero indexed
+                +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 )
+                // NOTE cal.month is zero indexed
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
@@ -58,17 +60,18 @@ public class TagDb {
     /** Ensure a task is ready on startup */
 	private void insertFirst( String basicStartup ) {
         // IMPROVE delete temp files from previous run
+		final String here = cl +"if ";
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
             pr( "ts.if() no temp file" ); // 4TESTS
-            add( new Date(), basicStartup, ! TagDb.amSubTask );
+            add( new Date(), basicStartup, ! TagStore.amSubTask );
         } else {
-            pr( "ts.if() found temp: "+ tempSays ); // 4TESTS
+            pr( here +" found temp: "+ tempSays ); // 4TESTS
             WhenTag fromPreviousRun = parseTempTag( tempSays );
             if ( fromPreviousRun != null )
                 tags.add( fromPreviousRun );
             else
-                add( new Date(), basicStartup, ! TagDb.amSubTask );
+                add( new Date(), basicStartup, ! TagStore.amSubTask );
         }
 	}
 
@@ -76,6 +79,13 @@ public class TagDb {
     void add( Date when, String what, boolean ifSub ) {
         tags.add( new WhenTag( when, what, ifSub ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
+    }
+
+    /** Removes a tag, generally when user saves something wrong */
+    void removePrevious() {
+    	if ( tags.size() > 0 ) {
+    		tags.removeLast();
+    	}
     }
 
     // IMPROVE perhaps by processing or handing that to another
@@ -119,7 +129,7 @@ public class TagDb {
 
     // IMPROVE
     public String getDiffStr( Date callee ) {
-    	return prettyDiff( tags.getLast().tagTime, callee );
+    	return prettyDiff( gPreviousTime(), callee );
     }
 
     /** Formats the start time and diff for the user */
@@ -138,7 +148,7 @@ public class TagDb {
             min++;
         }
         String mins = ( min >= 0 ) ? itoa( min )+"m " : "";
-        return hrs + min+"m "; // NOTE remainder tossed
+        return hrs + mins; // NOTE remainder tossed
     }
 
     /** does pd show correct diff? */
@@ -152,10 +162,11 @@ public class TagDb {
 
     /** to test prettyDiff quickly, by hand */
     void interactiveUTF() {
+		final String here = cl +"iu ";
         Date now = new Date();
         Date later;
         long nowMs = now.getTime();
-        pr( "ts.iuff() interactive mode begins\n" );
+        pr( here +" interactive mode begins\n" );
         String[] tagsToSay = new String[] { "nn uu cc DD","bla bla",
                 "FileForm", "interactiveUFF", "Integer.toString" }; // aesthetic touch
         java.util.Scanner cli = new java.util.Scanner( System.in );
@@ -164,10 +175,11 @@ public class TagDb {
             int nowPlusMin = cli.nextInt();
             long laterMs = nowMs + ( nowPlusMin * 60000 );
             later = new Date( laterMs );
-            pr( toHourMs.format( later ) +"\t"+ prettyDiff(now, later) +"\t"+ tagsToSay[times -1] );
+            pr( toHourMs.format( later ) +"\t"
+            		+ prettyDiff(now, later) +"\t"+ tagsToSay[times -1] );
         }
         cli.close();
-        pr( "interactive mode over\n" );
+        pr( here +"interactive mode over\n" );
     }
 
     /** just toStr of inMem */
@@ -178,18 +190,20 @@ public class TagDb {
 
     /** turns date\ttag into a whentag, not subtask aware for now */
     private WhenTag parseTempTag( String fromFile ) {
+		final String here = cl +"ptt ";
         String[] date_tag = fromFile.split( "\t" );
         int time = 0, tag = time +1; //, subT = tag +1;
         try {
             Date then = new Date( Long.parseLong(date_tag[ time ]) );
             return new WhenTag( then, date_tag[tag], !amSubTask );
         } catch ( NumberFormatException nfe ) {
-            pr( "ts.ptt couldn't parse |"+ date_tag[time] +"| as millisec for the date" );
+            pr( here +" couldn't parse |"+ date_tag[time] +"| as millisec for the date" );
             return null;
         }
     }
 
     String[] problemsWithParseTempTag() {
+		final String here = cl +"pwptt ";
         int tests = 2;
         int currProb = 0;
         String[] problems = new String[ tests ];
@@ -198,23 +212,25 @@ public class TagDb {
         String basic = tempFileFormat(new WhenTag( wasNow, "basic tag", ! amSubTask ));
         WhenTag basicWt = parseTempTag( basic );
         if ( basicWt == null ) {
-            problems[ currProb ] = "ts.pwptt basic parse is null";
+            problems[ currProb ] = here +" basic parse is null";
             return problems;
         }
         if ( ! wasNow.equals(basicWt.tagTime) ){
-            problems[ currProb ] = "ts.pwptt dates didn't match: \n\ttest "
+            problems[ currProb ] = here +" dates didn't match: \n\ttest "
                     + wasNow.toString() +"\tbecame "+ basicWt.tagTime.toString();
             currProb++;
         }
         return problems;
     }
 
+    // not sure what this was supposed to test
     private String gTempSavedTag( boolean testing ) {
         return tempFile;
     }
 
     /** Gets blank or tag in a temp file */
     private String gTempSavedTag() {
+		final String here = cl +"gtst ";
         String maybePrevious = "";
         Path relPath = Paths.get( tempFile );
         try {
@@ -227,7 +243,7 @@ public class TagDb {
                         maybePrevious = "";
             }   }
         } catch ( java.io.IOException ioe ) {
-            System.err.println( "LF.rsf() had some I/O problem."
+            System.err.println( here +" had some I/O problem."
                     + " there's like five options\n "+ ioe.toString() );
         }
         return maybePrevious;
@@ -235,17 +251,19 @@ public class TagDb {
 
     /* 4TESTS, for visual feedback */
     private void writeToDisk( String whichFile, String outStr ) {
+		final String here = cl +"wtd ";
         if (whichFile.equals( userFile )) {
-            pr( "\t"+ whichFile +"\n"+ outStr );
+            pr( here +"\t"+ whichFile +"\n"+ outStr );
         } else {
             tempFile = outStr;
-            pr( "\t temp\t"+ outStr );
+            pr( here +"\t temp\t"+ outStr );
         }
     }
 
     /** Appends outStr userFile or truncates temp with outStr */
     private void writeToDisk( boolean isUser, String outStr ) {
         // IMPROVE use imports
+		final String here = cl +" ";
         String whichFile;
         StandardOpenOption howTreat;
         if ( isUser ) {
@@ -266,22 +284,23 @@ public class TagDb {
                 paper.append( outStr );
             }
         } catch ( java.io.IOException ioe ) {
-            System.err.println( "LF.rsf() had some I/O problem."
+            System.err.println( here +" had some I/O problem."
                     + " there's like five options\n "+ ioe.toString() );
         }
     }
 
     /** open the text file */
     void showStoredTags() {
+		final String here = cl +"sst ";
         if (java.awt.Desktop.isDesktopSupported()) {
             try {
                 File myFile = new File( userFile );
                 java.awt.Desktop.getDesktop().edit( myFile );
             } catch ( java.io.IOException ioe ) {
-                System.out.println( "couldn't open, sorry\n"+ ioe.toString() );
+                pr( here +"couldn't open, sorry\n"+ ioe.toString() );
             }
         } else {
-            System.out.println( "couldn't open, sorry" );
+            pr( here +"couldn't open, sorry" );
         }
     }
 
@@ -298,11 +317,12 @@ public class TagDb {
 	}
 
     private void deleteTempFile() {
+		final String here = cl +"dtf ";
         Path relPath = Paths.get( tempFile );
         try {
             java.nio.file.Files.deleteIfExists( relPath );
         } catch ( java.io.IOException ioe ) {
-            System.err.println( "LF.dtf() I/O problem.  While deleting "
+            System.err.println( here +" I/O problem.  While deleting "
                     + tempFile +" "+ ioe.toString() );
         }
     }
@@ -339,6 +359,7 @@ public class TagDb {
 
     /** Print and indicate whether theseTests had problems */
 	private boolean showsResults( String[] theseTests ) {
+		final String here = cl +"sr ";
 		boolean failed = true;
 		int first = 0, prob = 0;
         if ( ! theseTests[first].equals("") ) {
@@ -347,7 +368,7 @@ public class TagDb {
                     pr( problem );
                     prob++;
             }   }
-            pr(" * "+ itoa( prob )+ " problems *");
+            pr( here +" * "+ itoa( prob )+ " problems *" );
 			return failed; 
         } else
 			return ! failed;
@@ -373,6 +394,7 @@ public class TagDb {
 
     /** Check 1 & 2 digit ints. Oracle would be overkill here */
     private String[] problemsWithEnsureTwoDigits() {
+		final String here = cl +"pwetd ";
         int tests = 2;
         int currProb = 0;
         String[] problems = new String[ tests ];
@@ -385,7 +407,7 @@ public class TagDb {
         }
         String sixNine = ensureTwoDigits( 69 );
         if ( ! sixNine.equals("69") ) {
-            problems[ currProb ] = "ts.pwetd instead of 69 got |"+ sixNine +"|";
+            problems[ currProb ] = here +" instead of 69 got |"+ sixNine +"|";
             currProb++;
         }
         return problems;

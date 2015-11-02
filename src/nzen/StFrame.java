@@ -19,7 +19,7 @@ public class StFrame implements MainViewListener {
 
 	private GuiModel viewInfo;
 
-    private TagDb tagHandler;
+    private TagStore tagHandler;
     boolean terseAdj = true;
     int exitFlubs = 2;
 	private int exitFlubsLeft;
@@ -30,7 +30,7 @@ public class StFrame implements MainViewListener {
         boolean testing = false; //true;
         if ( testing ) {
             new MainGui_Swing( testing );
-            new TagDb("just testing").runTests();
+            new TagStore("just testing").runTests();
         } else {
             java.awt.EventQueue.invokeLater(new Runnable() {
 	        public void run() {
@@ -46,15 +46,15 @@ public class StFrame implements MainViewListener {
 
     /** Starts gui, starts tagStore */ // IMPROVE when tagHandler changes
     public StFrame() {
-		String basicStart = "started up"; // just so it is in one place, rather than two
-        tagHandler = new TagDb( basicStart );
+		String basicStart = "started up"; // generic restart text
+        tagHandler = new TagStore( basicStart );
 		exitFlubsLeft = exitFlubs;
 		viewInfo = new GuiModel();
     }
 
     /** 4TESTS version */
     public StFrame( boolean testMode ) {
-        tagHandler = new TagDb( "whatever" );
+        tagHandler = new TagStore( "whatever" );
         exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
         tagHandler.runTests();
         // tagHandler.interactiveUTF();
@@ -73,10 +73,15 @@ public class StFrame implements MainViewListener {
 	// FIX
 	public void textEntered( String userText, Date then ) {
 		System.out.println( "I don;t know how to read text yet" );
-        tagHandler.add(then, userText, ! TagDb.amSubTask);
-        timeChanged(then);
-        viewInfo.setPrevSummary( tagHandler.getTextOfPrevious() );
-        tagHandler.quickSave();
+		// NOTE for when I store my password accidently :\
+		if ( userText.startsWith("jmki") ){
+			tagHandler.removePrevious();
+		} else {
+			tagHandler.add(then, userText, ! TagStore.amSubTask);
+	        timeChanged(then);
+	        viewInfo.setPrevSummary( tagHandler.getTextOfPrevious() );
+	        tagHandler.quickSave();
+		}
 	}
 
 	// FIX
@@ -92,7 +97,7 @@ public class StFrame implements MainViewListener {
 
 	// FIX
 	public void finished() {
-		tagHandler.add(new Date(), "Shutting down", TagDb.amSubTask);
+		tagHandler.add(new Date(), "Shutting down", TagStore.amSubTask);
 		tagHandler.wrapUp();
 		System.exit(0);
 	}
