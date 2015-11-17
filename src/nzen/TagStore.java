@@ -2,16 +2,18 @@
     &copy; Nicholas Prado; License: ../../readme.md
 
   Next:
-Decide whether to extract out the two types of persistence
-Decide whether to extract out the text processing
-	but then what's left besides the LL of tag:times ?
-	It's not like I'm likely to wrap this around a db. a file is just fine
-	Then why am I extracting anything? Isn't this all a little for show?
+Subtask awareness in clearing tags ?
+	depends on TimeTag subtask awareness
 */
 
 package nzen;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -33,40 +35,151 @@ public class TagStore {
     String tempFile;
     final static boolean amSubTask = true;
     final static boolean forClient = true;
+    /** @deprecated in favor of the LL of timeTags */
     LinkedList<WhenTag> tags;
+    LinkedList<TimeTag> activeTags;
     private SimpleDateFormat toHourMs;
 
-    /** Setup the store's output, guarantee an initial task */
+    /** Setup the store's output, guarantee one initial task */
     public TagStore( String introText ) {
-        commonInit( introText );
-    }
-
-    protected void commonInit( String introText ) {
         tags = new LinkedList<>();
+        activeTags = new LinkedList<>();
         toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get( Calendar.YEAR ))
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 )
                 // NOTE cal.month is zero indexed
+                // IMPROVE maybe str.format %2d ?
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
-        // System.out.println( "TD() today is "+ userFile ); // 4TESTS
-        tempFile = userFile + " tmp.txt";
+        // pr( "TD() today is "+ userFile ); // 4TESTS
         userFile += " splained.txt";
+        tempFile = userFile.replace(' ', '_') + "_tmp.ser";
 
 		insertFirst( introText );
     }
 
     /** Ensure a task is ready on startup */
+    private void initTags( String basicStartup ) {
+    	final String here = cl +"if ";
+    	TimeTag fromQuickSave = gQuickSaved();
+    	if ( fromQuickSave == null ) {
+            pr( here +" no saved tags" ); // 4TESTS
+            activeTags.add(new TimeTag( new Date(), basicStartup ));
+    	}
+    }
+
+    /** deserialize LL and provide last if there is more than one; null otherwise */
+    private TimeTag gQuickSaved() {
+    	LinkedList<TimeTag> maybeRestored = retrieveTags();
+    	if ( maybeRestored == null ) {
+    		return null;
+    	} else {
+    		activeTags = maybeRestored;
+    		return activeTags.getLast();
+    	}
+    }
+
+    /** Saves a new tag with its time (which may adjust on interpretation) */
+    public void addTag( Date when, String input ) {
+    	activeTags.add( new TimeTag( when, input ) );
+    }
+
+    /** Provides the processed text of the latest tag */
+    public String gTextOfActiveTag() {
+    	return activeTags.peekLast().getTag();
+    }
+
+    /** Provides string of time elapsed since the latest tag began */
+    public String gElapsedAsText( Date now ) {
+    	return activeTags.peekLast().getDiffAsText( now );
+    }
+
+    /** Removes a tag, generally when user saves something wrong */
+    void removePrevious() {
+		activeTags.removeLast();
+    	if ( activeTags.size() < 1 ) {
+    		// FIX currently unsupported, as I clear them all quickly
+    		addTag( new Date(), "Cleared all active tags" );
+    		// NOTE there must nonetheless be at least one until we quit
+    	}
+    }
+
+    /** an opportunity to save tags may or may not save it */
+    public void considerQuickSaving() {
+    	if ( activeTags.peekLast().overOneMinuteElapsed() ) {
+    		// IMPROVE wait until there are 3 requests or something ?
+    		saveTagsForSplainTime();
+    	}
+    	// else, ignore
+    }
+
+    /** save tags in anticipation of closing, not wrapping up */
+    public void quickSaveBecauseWeAreClosing() {
+    	saveTagsForSplainTime();
+    }
+
+    /** serialize the tag list */
+    private void saveTagsForSplainTime() {
+    	final String here = cl +"stfst ";
+    	boolean append = true;
+    	try {
+            Path relPath = Paths.get( tempFile );
+            if ( Files.notExists(relPath) ) {
+                Files.createFile(relPath);
+            }
+    		ObjectOutputStream byteEmitter = new ObjectOutputStream(
+    				new FileOutputStream( relPath.toFile(), ! append ) );
+    		byteEmitter.writeObject( activeTags );
+    		byteEmitter.close();
+    	} catch( IOException ioe ) {
+    		System.err.println( here
+    				+"couldn't quick save tags because"
+    				+ ioe.toString()  );
+    	}
+    }
+
+    /** deserialize our LL or return null */
+    private LinkedList<TimeTag> retrieveTags() {
+    	final String here = cl +"rt ";
+    	boolean append = true;
+    	try {
+            Path relPath = Paths.get( tempFile );
+            if ( Files.notExists(relPath) ) {
+            	System.out.println( here +"no quicksave to restore from" );
+            	return null;
+            } else {
+            	ObjectInputStream byteReceiver = new ObjectInputStream(
+            			new FileInputStream(relPath.toFile()) );
+            	@SuppressWarnings("unchecked")
+            	// NOTE assumes nothing corrupts the file
+				LinkedList<TimeTag> maybeOurs = (LinkedList<TimeTag>)byteReceiver.readObject();
+            	byteReceiver.close();
+            	return maybeOurs;
+            }
+    	} catch( IOException | ClassNotFoundException ioORcnfE ) {
+    		System.err.println( here
+    				+"couldn't restore quick saved tags because"
+    				+ ioORcnfE.toString() );
+    		return null;
+    	}
+    }
+
+    private void saveTagsForUser() {
+    	// IMPROVE write to file
+    }
+
+    // --- below is deprecated
+
+    /** Ensure a task is ready on startup */
 	private void insertFirst( String basicStartup ) {
-        // IMPROVE delete temp files from previous run
 		final String here = cl +"if ";
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
-            pr( "ts.if() no temp file" ); // 4TESTS
+            pr( here +" no temp file" ); // 4TESTS
             add( new Date(), basicStartup, ! TagStore.amSubTask );
         } else {
-            pr( here +" found temp: "+ tempSays ); // 4TESTS
+            pr( here +"found temp: "+ tempSays ); // 4TESTS
             WhenTag fromPreviousRun = parseTempTag( tempSays );
             if ( fromPreviousRun != null )
                 tags.add( fromPreviousRun );
@@ -79,13 +192,6 @@ public class TagStore {
     void add( Date when, String what, boolean ifSub ) {
         tags.add( new WhenTag( when, what, ifSub ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
-    }
-
-    /** Removes a tag, generally when user saves something wrong */
-    void removePrevious() {
-    	if ( tags.size() > 0 ) {
-    		tags.removeLast();
-    	}
     }
 
     // IMPROVE perhaps by processing or handing that to another
@@ -263,7 +369,7 @@ public class TagStore {
     /** Appends outStr userFile or truncates temp with outStr */
     private void writeToDisk( boolean isUser, String outStr ) {
         // IMPROVE use imports
-		final String here = cl +" ";
+		final String here = cl +"wtd ";
         String whichFile;
         StandardOpenOption howTreat;
         if ( isUser ) {
@@ -283,8 +389,8 @@ public class TagStore {
                 ) {
                 paper.append( outStr );
             }
-        } catch ( java.io.IOException ioe ) {
-            System.err.println( here +" had some I/O problem."
+        } catch ( IOException ioe ) {
+            System.err.println( here +" ad some I/O problem."
                     + " there's like five options\n "+ ioe.toString() );
         }
     }

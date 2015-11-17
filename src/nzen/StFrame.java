@@ -64,23 +64,21 @@ public class StFrame implements MainViewListener {
     	viewInfo.setGmListener(mainGui);
     }
 
-	// FIX
-	public void timeChanged( java.util.Date fireTime ) {
-		System.out.println( "I don;t know how to change time yet" );
-		viewInfo.setTimeDiff( tagHandler.getDiffStr(fireTime) );
+    /** Update gui model about the time elapsed */
+	public void timeChanged( Date fireTime ) {
+		viewInfo.setTimeDiff( tagHandler.gElapsedAsText(fireTime) );
 	}
 
-	// FIX
+	/** remove last or add the tag & remind tagStore to save */
 	public void textEntered( String userText, Date then ) {
-		System.out.println( "I don;t know how to read text yet" );
 		// NOTE for when I store my password accidently :\
 		if ( userText.startsWith("jmki") ){
 			tagHandler.removePrevious();
 		} else {
-			tagHandler.add(then, userText, ! TagStore.amSubTask);
+			tagHandler.addTag( then, userText );
 	        timeChanged(then);
-	        viewInfo.setPrevSummary( tagHandler.getTextOfPrevious() );
-	        tagHandler.quickSave();
+	        viewInfo.setPrevSummary( tagHandler.gTextOfActiveTag() );
+	        tagHandler.considerQuickSaving();;
 		}
 	}
 
@@ -89,15 +87,15 @@ public class StFrame implements MainViewListener {
 		tagHandler.showStoredTags();
 	}
 
-	// FIX
+	/** Demand tags get saved, likely to restore later */
 	public void closing() {
-        tagHandler.quickSave();
+        tagHandler.quickSaveBecauseWeAreClosing();
         // NOTE not wrapUp() so it won't delete the temp file
 	}
 
-	// FIX
+	/** final tag & clean up our space */
 	public void finished() {
-		tagHandler.add(new Date(), "Shutting down", TagStore.amSubTask);
+		tagHandler.addTag( new Date(), "Shutting down" );
 		tagHandler.wrapUp();
 		System.exit(0);
 	}
