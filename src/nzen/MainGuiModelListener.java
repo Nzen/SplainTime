@@ -13,6 +13,6 @@ public interface MainGuiModelListener {
 	/** Finished processing the tag, adopt it */
 	public void tagChanged( String newSummary );
 
-	// not sure, it centralizes it, but I'm not going to process besides default times
-	// closeAttemptsChanged
+	// not sure, it centralizes close attempts, but no processing
+	// public void closeAttemptsChanged( int newAttemptsLeft );
 }

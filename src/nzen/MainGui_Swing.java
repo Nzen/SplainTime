@@ -168,28 +168,28 @@ public class MainGui_Swing extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
 
 	/** Strengthen exit signal OR end all tasks & delete today's cache file */
-    private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
+    void pushedFinish(ActionEvent evt) {
 		if ( exitFlubsLeft < 1 ) { // IMPROVE move to the guiModel
 			stRoot.finished();
 		} else {
 			exitFlubsLeft--;
 			btnFinish.setText(Integer.toString( exitFlubsLeft ));
 		}
-    }//GEN-LAST:event_pushedFinish
+    }
 
     /** Open a list of closed tags for the user */
-    private void pushedOpen(ActionEvent evt) {//GEN-FIRST:event_pushedOpen
+    void pushedOpen(ActionEvent evt) {
         stRoot.requestsOutput();
-    }//GEN-LAST:event_pushedOpen
+    }
 
     /** Store (interpret?) this tag, reset gui time & tag summary */
-    private void pushedEnter(ActionEvent evt) {//GEN-FIRST:event_pushedEnter
+    void pushedEnter(ActionEvent evt) {
     	if ( jtfForTag.getText().isEmpty() )
     		return; // NOTE a blank entry is pretty much an entry error: ignore
     	stRoot.textEntered( jtfForTag.getText(), new Date() );
         cron.restart(); // so it doesn't fire midway into newest tag's first minute
         jtfForTag.setText(""); // blank the text entry
-    }//GEN-LAST:event_pushedEnter
+    }
 
     /** update the time diff portion */
     public void diffChanged( String newDiff ) {
@@ -204,18 +204,18 @@ public class MainGui_Swing extends javax.swing.JFrame
     }
 
     /** Save, but not final save */
-    private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
+    void closingFrame(WindowEvent evt) {
     	stRoot.closing();
-    }//GEN-LAST:event_closingFrame
+    }
 
     /** Received new config values */
-    private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
+    void openConfig(ActionEvent evt) {
         boolean modal = true;
-        new ConfigDialog( new SplainTime(), modal ); // FIX
-    }//GEN-LAST:event_openConfig
+        new ConfigDialog( this, modal ); // FIX
+    }
 
     /** Change exit counter, reset Finish button text */
-	private void resetExit() {
+	void resetExit() {
 		exitFlubsLeft = exitFlubsAllowed;
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );

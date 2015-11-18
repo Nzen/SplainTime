@@ -27,12 +27,12 @@ import javax.swing.WindowConstants;
  */
 public class ConfigDialog extends javax.swing.JDialog {
 
-    private SplainTime parent;
+    private MainGui_Swing parent;
 
     /**
      Creates new form ConfigDialog
      */
-    public ConfigDialog( SplainTime callee, boolean modal ) {
+    public ConfigDialog( MainGui_Swing callee, boolean modal ) {
         super( callee, modal );
         initComponents();
         parent = callee;

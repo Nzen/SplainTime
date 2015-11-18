@@ -8,6 +8,7 @@ Parse the input string to determine whether sub, adj, & remove flags
 package nzen;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
@@ -16,6 +17,7 @@ public class TimeTag implements Serializable {
 	private final String cl = "tt.";
 	private static final long serialVersionUID = 2L;
 	final int aMinuteMilli = 60 * 1000;
+    private SimpleDateFormat toHourMs;
 
 	protected Date tagTime;
 	protected String didWhat;
@@ -32,6 +34,7 @@ public class TimeTag implements Serializable {
         didWhat = dw; // NOTE defaults
         subT = false;
         retainsFlags = explicitAdj;
+        toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
         applyParsedInput( tt, dw );
     }
 
@@ -55,6 +58,12 @@ public class TimeTag implements Serializable {
 
     public long getDiffAsMilliseconds( Date elseWhen ) {
     	return tagTime.getTime() - elseWhen.getTime();
+    }
+
+    public String getFullDescription( Date elseWhen ) {
+    	return toHourMs.format( tagTime ) +"\t"
+                + prettyDiff( tagTime, elseWhen ) +"\t"
+                + didWhat;
     }
 
     public boolean overOneMinuteElapsed() {

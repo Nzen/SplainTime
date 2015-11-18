@@ -74,11 +74,12 @@ public class StFrame implements MainViewListener {
 		// NOTE for when I store my password accidently :\
 		if ( userText.startsWith("jmki") ){
 			tagHandler.removePrevious();
+			// ASK time changed ?
 		} else {
 			tagHandler.addTag( then, userText );
 	        timeChanged(then);
 	        viewInfo.setPrevSummary( tagHandler.gTextOfActiveTag() );
-	        tagHandler.considerQuickSaving();;
+	        tagHandler.considerQuickSaving();
 		}
 	}
 
