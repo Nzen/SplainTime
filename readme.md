@@ -36,6 +36,6 @@ On linux, hosted by flickr.
 
 ### Changelog
 
-Extract: gradle build script  
-(Master: waiting for non regressive extract)  
+Extract: gradle build script
+(Master: waiting for non regressive extract)
 (Logging: waiting for gradle that handles jars)
