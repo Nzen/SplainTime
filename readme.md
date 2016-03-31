@@ -6,13 +6,13 @@ I needed a dead simple time tracking app. By 'dead simple' I don't mean some pre
 ![windows screenshot](https://farm1.staticflickr.com/430/19979150661_40037d989c_o.jpg)  
 On windows, pic hosted by flickr.
 
-_Adjust branch_ Use a flag to indicate the start time for this tag needs adjustment.
-
 ### Run
 
     java -jar SplainTime.jar
 
 Enter a description of what you are doing. If you missed entering on time, you can adjust by starting a description with either a negative number (minutes) or a negative 12-hour time (sans AM/PM). So, "-33 innuendo battle" will log a time 33 minutes in the past. "-8:30 roundly defeated" will log 8:30 and try to adjust the am/pm to be a time earlier than now. I've designed/use splaintime to run different sessions each day.
+
+Also, if you mess up an entry and a minute hasn't elapsed, entering "j8x" will remove the last tag.
 
 ![output](https://farm4.staticflickr.com/3834/19351574364_91f8ce13c0_o.png)  
 Output, pic hosted by flickr

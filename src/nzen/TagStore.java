@@ -7,6 +7,7 @@ Next:
 package nzen;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -82,7 +83,7 @@ public class TagStore {
             temp = tags.get( ind );
             later = tags.get( ind +1 ).tagTime;
             outStr += toHourMs.format( temp.tagTime ) +"\t"
-                + prettyDiff( temp.tagTime, later ) +"\t"
+                + prettyDiff( temp.tagTime, later, temp.subT ) +"\t"
                 + temp.didWhat + "\r\n";
         }
         while( tags.size() > 1 ) {
@@ -108,7 +109,7 @@ public class TagStore {
     }
 
     /** Formats the start time and diff for the user */
-    private String prettyDiff( Date start, Date end ) {
+    private String prettyDiff( Date start, Date end, boolean subT ) {
         long diffSeconds = ( end.getTime() - start.getTime() ) / 1000;
         // pr( "ts.pd() diff is " + Long.toString(diffSeconds) +" seconds" ); // 4TESTS
         int hours = 0, hourSeconds = 3600; // 60m * 60s
@@ -123,7 +124,8 @@ public class TagStore {
             min++;
         }
         String mins = ( min >= 0 ) ? itoa( min )+"m " : "";
-        return hrs + min+"m "; // NOTE remainder tossed
+        return (subT) ? "("+ hrs + mins+") "
+        		: hrs + mins+" "; // NOTE remainder tossed
     }
 
     /** does pd show correct diff? */
@@ -149,8 +151,10 @@ public class TagStore {
             int nowPlusMin = cli.nextInt();
             long laterMs = nowMs + ( nowPlusMin * 60000 );
             later = new Date( laterMs );
-            pr( toHourMs.format( later ) +"\t"+ prettyDiff(now, later) +"\t"+ tagsToSay[times -1] );
+            pr( toHourMs.format( later ) +"\t"+ prettyDiff(
+            		now, later, (times % 3 == 0) ) +"\t"+ tagsToSay[times -1] );
         }
+        cli.close();
         pr( "interactive mode over\n" );
     }
 
@@ -210,7 +214,7 @@ public class TagStore {
                     if ( maybePrevious == null )
                         maybePrevious = "";
             }   }
-        } catch ( java.io.IOException ioe ) {
+        } catch ( IOException ioe ) {
             System.err.println( "LF.rsf() had some I/O problem."
                     + " there's like five options\n "+ ioe.toString() );
         }
@@ -261,11 +265,11 @@ public class TagStore {
             try {
                 File myFile = new File( userFile );
                 java.awt.Desktop.getDesktop().edit( myFile );
-            } catch ( java.io.IOException ioe ) {
-                System.out.println( "couldn't open, sorry\n"+ ioe.toString() );
+            } catch ( IOException | UnsupportedOperationException ioe ) {
+                System.err.println( "couldn't open, sorry\n\t"+ ioe.toString() );
             }
         } else {
-            System.out.println( "couldn't open, sorry" );
+            System.out.println( "can't open, sorry" );
         }
     }
 
@@ -274,7 +278,8 @@ public class TagStore {
         flushExtra();
         WhenTag ultimate = tags.getLast();
         String outStr = toHourMs.format( ultimate.tagTime ) +"\t"
-                + prettyDiff( ultimate.tagTime, new Date() ) +"\t"
+                + prettyDiff( ultimate.tagTime,
+                		new Date(), ultimate.subT ) +"\t"
                 + ultimate.didWhat + "\r\n";
         // writeToDisk( userFile, outStr ); // 4TESTS
 		writeToDisk( forClient, outStr ); // 4REAL
@@ -284,21 +289,31 @@ public class TagStore {
     private void deleteTempFile() {
         Path relPath = Paths.get( tempFile );
         try {
-            java.nio.file.Files.deleteIfExists( relPath );
-        } catch ( java.io.IOException ioe ) {
+            Files.deleteIfExists( relPath );
+        } catch ( IOException ioe ) {
             System.err.println( "LF.dtf() I/O problem.  While deleting "
                     + tempFile +" "+ ioe.toString() );
         }
     }
 
     /** Gets current tag, there will always be one */
-    String gPreviousTag() {
+    public String gPreviousTag() {
 		return tags.peekLast().didWhat;
     }
 
     /** Gets current tag's start time */
-    Date gPreviousTime() {
+    public Date gPreviousTime() {
         return tags.peekLast().tagTime;
+    }
+
+    public boolean canRemoveOne()
+    {
+    	return tags.size() > 1; // since I always want at least one
+    }
+
+    public void removePrevious()
+    {
+    	tags.removeLast();
     }
 
     /** Still rolling my own ad hoc suite, string focused this time */
@@ -347,7 +362,7 @@ public class TagStore {
 		return Integer.toString( nn );
 	}
 
-    /** Probably replicates a printf feature */
+    /** Probably replicates a printf feature. Yes. Yes it does: &02d; */
     String ensureTwoDigits( int num ) {
         if ( num < 10 )
             return "0"+ itoa( num );

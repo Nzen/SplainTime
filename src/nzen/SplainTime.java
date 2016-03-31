@@ -31,6 +31,8 @@ public class SplainTime extends javax.swing.JFrame {
 
     private TagStore tagHandler;
     private javax.swing.Timer cron;
+    private java.text.SimpleDateFormat hourMinText
+    	= new java.text.SimpleDateFormat( "h:mm a" );
     boolean terseAdj = true;
     int exitFlubs = 2;
 	private int exitFlubsLeft;
@@ -43,11 +45,11 @@ public class SplainTime extends javax.swing.JFrame {
 		exitFlubsLeft = exitFlubs;
         initComponents();
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
+		updateTimeDiffLabel( new Date() );
         ActionListener taskPerformer = new ActionListener() {
             @Override
             public void actionPerformed( ActionEvent evt ) {
-                Date temp = new Date();
-                updateTimeDiffLabel( temp );
+                updateTimeDiffLabel( new Date() );
                 tagHandler.quickSave();
                 resetExit();
             }
@@ -82,7 +84,7 @@ public class SplainTime extends javax.swing.JFrame {
         btnConfig = new JButton();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("What now ?");
+        setTitle("SplainTime");
         setResizable(false);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
@@ -193,14 +195,18 @@ public class SplainTime extends javax.swing.JFrame {
     /** Store (interpret?) this tag, reset gui time & tag summary */
     private void pushedEnter(ActionEvent evt) {//GEN-FIRST:event_pushedEnter
         String newestDid = jtfForTag.getText();
-		// interpret flag, if present
-		storeTag( newestDid );
-        updateLatestTaskLabel( newestDid );
-        cron.restart(); // so it doesn't fire midway into newest tag's first minute
-        jtfForTag.setText(""); // blank the text entry
-        updateTimeDiffLabel( new Date() );
-        // jlShowsRoughTime.setText( "0 min" );
-        resetExit();
+        if ( newestDid.isEmpty() )
+        {
+        	return;
+        }
+        else if (newestDid.equals( "j8x" ))
+        {
+        	tryToRemovePreviousTag();
+        }
+        else
+        {
+        	saveNewTag( newestDid );
+        }
     }//GEN-LAST:event_pushedEnter
 
     private void closingFrame(WindowEvent evt) {//GEN-FIRST:event_closingFrame
@@ -214,14 +220,44 @@ public class SplainTime extends javax.swing.JFrame {
         settings.setVisible( true );
     }//GEN-LAST:event_openConfig
 
+    private void tryToRemovePreviousTag()
+    {
+    	if ( tagHandler.canRemoveOne() )
+    	{
+    		tagHandler.removePrevious();
+    		updateLatestTaskLabel( tagHandler.gPreviousTag() );
+    		updateTimeDiffLabel( new Date() );
+            jtfForTag.setText(""); // blank the text entry
+    	}
+    	else
+    	{
+    		jtfForTag.setText("Sorry, already saved");
+    	}
+    }
+
+    private void saveNewTag( String userEntered )
+    {
+		// interpret flag, if present
+		storeTag( userEntered );
+        updateLatestTaskLabel( userEntered );
+        cron.restart(); // so it doesn't fire midway into newest tag's first minute
+        jtfForTag.setText(""); // blank the text entry
+        updateTimeDiffLabel( new Date() );
+        resetExit();
+    }
+
     /** Store the tag with the current time */
 	private void storeTag( String says ) {
         Date now = new Date();
         Date newT = adjustedTime( says, now );
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
-            says += " ; adjusted time at "+ now.toString(); // IMPROVE use a date formatter, please
+        	int separator = says.indexOf(' ');
+            String adjFlag = says.substring( 0, separator );
+        	says = says.substring(separator);
+            says += " ; adjusted by "+ adjFlag +" at "+ hourMinText.format( now );
         }
-        tagHandler.add(newT, says, ! TagStore.amSubTask); // IMPROVE subTask awareness
+        boolean whetherSubtask = says.contains( "{" );
+        tagHandler.add(newT, says, whetherSubtask); // IMPROVE subTask awareness
 	}
 
     /** now, or subtracted by adjust flag */
@@ -229,6 +265,7 @@ public class SplainTime extends javax.swing.JFrame {
         if ( ! fullTag.startsWith( "-" ) )
             return now; // normal case
         String adjFlag = fullTag.substring( 1, fullTag.indexOf(' ') );
+        // NOTE intentionally ignoring substr error, so user can fix the entry
         if ( adjFlag.contains(":") ) { // ex 8:00
             // System.out.println( "st.at( ::: ) starts with "+ fullTag ); // 4TESTS
             return adjustToHhmmFormat( adjFlag, now );
@@ -362,10 +399,12 @@ public class SplainTime extends javax.swing.JFrame {
             whatDid = whatDid.substring( startsAfter );
         } // simple to add {} above, but what if tag is " } -8:00 bla " ?
         // fits between 12 capital Ws || 30+ commas
-		int charsFit = 20;
+		int charsFit = 25;
+		String truncation = "...";
 		if ( whatDid.length() >= charsFit )
-			whatDid = whatDid.substring( 0, charsFit );
-        jlSaysPrevious.setText( "since "+ whatDid );
+			whatDid = whatDid.substring( 0, charsFit - truncation
+					.length() ) + truncation;
+        jlSaysPrevious.setText( whatDid );
     }
 
     /** Change exit counter, reset Finish button text */
