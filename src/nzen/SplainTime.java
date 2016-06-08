@@ -23,6 +23,7 @@ import javax.swing.WindowConstants;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events
@@ -180,7 +181,6 @@ public class SplainTime extends javax.swing.JFrame {
 			storeTag( "Shutting down" );
 			tagHandler.wrapUp();
             System.exit( 0 );
-            // exit(1);
 		} else {
 			exitFlubsLeft--;
 			btnFinish.setText(Integer.toString( exitFlubsLeft ));
@@ -220,6 +220,7 @@ public class SplainTime extends javax.swing.JFrame {
         settings.setVisible( true );
     }//GEN-LAST:event_openConfig
 
+    /** drops in memory tag if it isn't the only one */
     private void tryToRemovePreviousTag()
     {
     	if ( tagHandler.canRemoveOne() )
@@ -253,10 +254,12 @@ public class SplainTime extends javax.swing.JFrame {
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
         	int separator = says.indexOf(' ');
             String adjFlag = says.substring( 0, separator );
-        	says = says.substring(separator);
+        	says = says.substring(separator +1);
             says += " ; adjusted by "+ adjFlag +" at "+ hourMinText.format( now );
         }
         boolean whetherSubtask = says.contains( "{" );
+        if ( whetherSubtask )
+        	says = stripSubtaskFlag( says );
         tagHandler.add(newT, says, whetherSubtask); // IMPROVE subTask awareness
 	}
 
@@ -284,7 +287,7 @@ public class SplainTime extends javax.swing.JFrame {
             +"\tand got "+ now.toString() ); // 4TESTS
         int adjHours = Integer.parseInt( strHours );
         int adjMinutes = Integer.parseInt( strMins );
-        java.util.GregorianCalendar timeKnob = new java.util.GregorianCalendar();
+        GregorianCalendar timeKnob = new GregorianCalendar();
         timeKnob.set( Calendar.HOUR, adjHours );
         timeKnob.set( Calendar.MINUTE, adjMinutes );
         // System.out.println("st.athm() initial calc is "+ timeKnob.getTime().toString()); // 4TESTS
@@ -316,7 +319,7 @@ public class SplainTime extends javax.swing.JFrame {
         int initMin = oracle.nextInt( 58 );
         String initChars = Integer.toString( initHr ) +":"
                 +(( initMin < 10 )?"0":"") + Integer.toString( initMin );
-        java.util.GregorianCalendar timeKnob = new java.util.GregorianCalendar();
+        GregorianCalendar timeKnob = new GregorianCalendar();
         timeKnob.set( Calendar.HOUR, initHr );
         timeKnob.set( Calendar.MINUTE, initMin );
         // System.out.println( here +"initial calc is "
@@ -361,13 +364,13 @@ public class SplainTime extends javax.swing.JFrame {
                     + Long.toString( shouldBe.getTime() - became ) +"ms";
             pInd++;
         }
-        java.util.GregorianCalendar afternoon // IMPROVE use oracle
-                = new java.util.GregorianCalendar( 1999, 10, 12, 16, 20 ); // arbitrary date
+        GregorianCalendar afternoon // IMPROVE use oracle
+                = new GregorianCalendar( 1999, 10, 12, 16, 20 ); // arbitrary date
         Date theAfternoon = afternoon.getTime();
         String woopsEnteredLate = "-8:00 hung over all morning";
         aTime = adjustedTime( woopsEnteredLate, theAfternoon );
-        java.util.GregorianCalendar morning
-                = new java.util.GregorianCalendar( 1999, 10, 12, 8, 00 );
+        GregorianCalendar morning
+                = new GregorianCalendar( 1999, 10, 12, 8, 00 );
         Date whenIShouldHaveEntered = morning.getTime();
         if ( ! aTime.equals(whenIShouldHaveEntered) ) {
             long became = aTime.getTime();
@@ -382,6 +385,19 @@ public class SplainTime extends javax.swing.JFrame {
         it relies on using the current time.
         */
         return problems;
+    }
+
+    /** remove { and one of the spaces around it */
+    private String stripSubtaskFlag( String tagText )
+    {
+    	int stTagInd = tagText.indexOf( '{' );
+    	if ( stTagInd == 0 )
+    		return tagText.substring( stTagInd +2 );
+    	else if ( stTagInd == tagText.length() -1 )
+    		return tagText.substring( 0, tagText.length() -2 );
+    	else
+    		return tagText.substring( 0, stTagInd )
+    				+ tagText.substring( stTagInd +2 );
     }
 
     /** Show minutes elapsed for the current task */

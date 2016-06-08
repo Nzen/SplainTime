@@ -44,7 +44,6 @@ public class TagStore {
         userFile = itoa(willBeName.get( Calendar.YEAR ))
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.MONTH ) +1 ) // NOTE zero indexed
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
-        // System.out.println( "TD() today is "+ userFile ); // 4TESTS
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
 
@@ -117,13 +116,15 @@ public class TagStore {
             diffSeconds -= hourSeconds;
             hours++;
         }
-        String hrs = ( hours > 0 ) ? itoa( hours )+"h " : "";
+        String hrs = ( hours > 0 ) ? itoa( hours )+"h" : "";
         int  min = 0, minuteSeconds = 60;
+        if ( hours > 0 && diffSeconds > minuteSeconds )
+        	hrs += " ";
         while ( diffSeconds >= minuteSeconds ) {
             diffSeconds -= minuteSeconds;
             min++;
         }
-        String mins = ( min >= 0 ) ? itoa( min )+"m " : "";
+        String mins = ( min >= 0 ) ? itoa( min )+"m" : "";
         return (subT) ? "("+ hrs + mins+") "
         		: hrs + mins+" "; // NOTE remainder tossed
     }
