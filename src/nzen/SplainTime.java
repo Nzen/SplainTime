@@ -418,8 +418,11 @@ public class SplainTime extends javax.swing.JFrame {
 		int charsFit = 25;
 		String truncation = "...";
 		if ( whatDid.length() >= charsFit )
+		{
+			jlSaysPrevious.setToolTipText( whatDid );
 			whatDid = whatDid.substring( 0, charsFit - truncation
 					.length() ) + truncation;
+        }
         jlSaysPrevious.setText( whatDid );
     }
 
