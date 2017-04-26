@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src'
+}	}	}
+
+jar {
+	manifest {
+		attributes(
+			'Manifest-Version' : 1.0,
+			'Created-By': 'openjdk-8-jdk - javac 1.8.0_111',
+			'Main-Class' : 'ws.nzen.splaintime.SplainTime' )
+	destinationDir = file( 'dist' )
+}	}
+

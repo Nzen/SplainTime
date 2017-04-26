@@ -35,15 +35,16 @@ public class SplainTime extends javax.swing.JFrame {
     private java.text.SimpleDateFormat hourMinText
     	= new java.text.SimpleDateFormat( "h:mm a" );
     boolean terseAdj = true;
-    int exitFlubs = 2;
 	private int exitFlubsLeft;
-    final int delayms = 60001; // 60 * 1000
+    private final int delayms = 60001; // 60 * 1000
+    private StPreference config;
 
     /** Starts gui, starts tagStore */
     public SplainTime() {
 		String basicStart = "started up"; // just so it is in one place, rather than two
         tagHandler = new TagStore( basicStart );
-		exitFlubsLeft = exitFlubs;
+		config = new StPreference();
+		exitFlubsLeft = config.getFinishFuse();
         initComponents();
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
 		updateTimeDiffLabel( new Date() );
@@ -215,10 +216,19 @@ public class SplainTime extends javax.swing.JFrame {
     }//GEN-LAST:event_closingFrame
 
     private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
-        boolean modal = true;
-        ConfigDialog settings = new ConfigDialog( this, modal );
+        ConfigDialog settings = new ConfigDialog( this, config );
         settings.setVisible( true );
+        config = settings.getConfig();
+        validateConfig();
+        settings.dispose();
     }//GEN-LAST:event_openConfig
+
+
+    private void validateConfig()
+    {
+    	exitFlubsLeft = config.getFinishFuse();
+    }
+
 
     /** drops in memory tag if it isn't the only one */
     private void tryToRemovePreviousTag()
@@ -428,23 +438,26 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Change exit counter, reset Finish button text */
 	private void resetExit() {
-		exitFlubsLeft = exitFlubs;
+		exitFlubsLeft = config.getFinishFuse();
 		if ( ! btnFinish.getText().equals("Finish") )
 			btnFinish.setText( "Finish" );
 	}
 
+	@Deprecated
     /**  */
     void applyConfig( boolean terseAdjOutput, int timesToClose ) {
         sAdjustOutput( terseAdjOutput );
         sClicksFinish( timesToClose );
     }
 
+	@Deprecated
     void sAdjustOutput( boolean terseAdjOutput ) {
         terseAdj = terseAdjOutput;
     }
 
+	@Deprecated
     void sClicksFinish( int newClickCount ) {
-        exitFlubs = newClickCount;
+        config.setFinishFuse( newClickCount );
     }
 
     /**  */
@@ -474,13 +487,13 @@ public class SplainTime extends javax.swing.JFrame {
         boolean testing = true;
         if ( !testing ) {
             SplainTime nn = new SplainTime( testing );
-        } else
-        /* woo, lambda form instead of Runnable anon class */
+        } else {
             java.awt.EventQueue.invokeLater(new Runnable() {
-        public void run() {
-            new SplainTime().setVisible(true);
-            }
-        });
+            	public void run() {
+            		new SplainTime().setVisible(true);
+            	}
+            });
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

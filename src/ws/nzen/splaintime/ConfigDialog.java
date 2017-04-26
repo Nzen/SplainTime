@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -23,15 +24,27 @@ import javax.swing.WindowConstants;
 public class ConfigDialog extends javax.swing.JDialog {
 
     private SplainTime parent;
+    private StPreference whatsWanted;
 
     /**
      Creates new form ConfigDialog
      */
     public ConfigDialog( SplainTime callee, boolean modal ) {
         super( callee, modal );
+        whatsWanted = new StPreference();
         initComponents();
         parent = callee;
     }
+
+
+    public ConfigDialog( JFrame whatever,
+    		StPreference initialVals )
+	{
+		super( whatever, true );
+		whatsWanted = initialVals;
+        initComponents();
+	}
+
 
     /**
      This method is called from within the constructor to initialize the form.
@@ -129,54 +142,18 @@ public class ConfigDialog extends javax.swing.JDialog {
     private void pressedSave(ActionEvent evt) {//GEN-FIRST:event_pressedSave
         boolean wantsTerseAdjOutput = jrbTerseAdjust.isSelected();
         int clicksToClose = (int)jspClicksFinish.getValue();
-        parent.applyConfig( wantsTerseAdjOutput, clicksToClose );
-        this.dispose();
+        whatsWanted.setFinishFuse( clicksToClose );
+        setVisible( false );
     }//GEN-LAST:event_pressedSave
 
     private void pressedCancel(ActionEvent evt) {//GEN-FIRST:event_pressedCancel
         this.dispose();
     }//GEN-LAST:event_pressedCancel
 
-    /**
-     @param args the command line arguments
-     */
-    public static void main( String args[] ) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for ( javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels() ) {
-                if ( "Nimbus".equals( info.getName() ) ) {
-                    javax.swing.UIManager.setLookAndFeel( info.getClassName() );
-                    break;
-                }
-            }
-        } catch ( ClassNotFoundException ex ) {
-            java.util.logging.Logger.getLogger( ConfigDialog.class.getName() ).log( java.util.logging.Level.SEVERE, null, ex );
-        } catch ( InstantiationException ex ) {
-            java.util.logging.Logger.getLogger( ConfigDialog.class.getName() ).log( java.util.logging.Level.SEVERE, null, ex );
-        } catch ( IllegalAccessException ex ) {
-            java.util.logging.Logger.getLogger( ConfigDialog.class.getName() ).log( java.util.logging.Level.SEVERE, null, ex );
-        } catch ( javax.swing.UnsupportedLookAndFeelException ex ) {
-            java.util.logging.Logger.getLogger( ConfigDialog.class.getName() ).log( java.util.logging.Level.SEVERE, null, ex );
-        }
-        //</editor-fold>
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater( new Runnable() {
-            public void run() {
-                ConfigDialog dialog = new ConfigDialog( new SplainTime(), true );
-                dialog.addWindowListener( new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing( java.awt.event.WindowEvent e ) {
-                        System.exit( 0 );
-                    }
-                } );
-                dialog.setVisible( true );
-            }
-        } );
+    public StPreference getConfig()
+    {
+    	return whatsWanted;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
