@@ -7,7 +7,7 @@ integrate config
 remove tagstore adj previous
 */
 
-package nzen;
+package ws.nzen.splaintime;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;

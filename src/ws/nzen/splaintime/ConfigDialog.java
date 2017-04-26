@@ -1,7 +1,7 @@
 /*
  * &copy Nicholas Prado, aka Nzen. But, ISC license.
  */
-package nzen;
+package ws.nzen.splaintime;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;

@@ -4,7 +4,7 @@
 Next:
  */
 
-package nzen;
+package ws.nzen.splaintime;
 
 import java.io.File;
 import java.io.IOException;
