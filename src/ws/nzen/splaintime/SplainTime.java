@@ -75,8 +75,7 @@ public class SplainTime extends javax.swing.JFrame {
     Netbeans generated gui initialization
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents() {//GEN-BEGIN:initComponents
 
         jtfForTag = new JTextField();
         btnFinish = new JButton();
@@ -86,8 +85,7 @@ public class SplainTime extends javax.swing.JFrame {
         btnConfig = new JButton();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("SplainTime");
-        setResizable(false);
+        setTitle("What now ?");
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
                 closingFrame(evt);
@@ -141,15 +139,13 @@ public class SplainTime extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(jtfForTag)
                     .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnOpensFile)
-                        .addGap(30, 30, 30)
+                        .addGap(60, 60, 60)
                         .addComponent(btnConfig)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
                         .addComponent(btnFinish))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jtfForTag, GroupLayout.PREFERRED_SIZE, 267, GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jlShowsRoughTime, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -174,7 +170,7 @@ public class SplainTime extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }//GEN-END:initComponents
 
 	/** Strengthen exit signal OR end all tasks & delete today's cache file */
     private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
