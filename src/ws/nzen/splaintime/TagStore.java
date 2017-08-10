@@ -6,6 +6,7 @@ Next:
 
 package ws.nzen.splaintime;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -30,6 +31,7 @@ public class TagStore {
     final static boolean forClient = true;
     LinkedList<WhenTag> tags;
     private SimpleDateFormat toHourMs;
+    enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
 
     /** Setup the store's output, guarantee an initial task */
     public TagStore( String introText ) {
@@ -260,17 +262,42 @@ public class TagStore {
         }
     }
 
-    /** open the text file */
-    void showStoredTags() {
-        if (java.awt.Desktop.isDesktopSupported()) {
+    /** open the archived tags */
+    OpenResult showStoredTags() {
+        if ( Desktop.isDesktopSupported() ) {
             try {
-                File myFile = new File( userFile );
-                java.awt.Desktop.getDesktop().edit( myFile );
+                File archivedTags = new File( userFile );
+                if ( archivedTags.exists() )
+                {
+	                Desktop os = Desktop.getDesktop();
+	                if ( os.isSupported( Desktop.Action.EDIT ) )
+	                {
+	                	os.edit( archivedTags );
+	                	return OpenResult.WORKED;
+	                }
+	                else if ( os.isSupported( Desktop.Action.OPEN ) )
+	                {
+	                	os.open( archivedTags );
+	                	return OpenResult.WORKED;
+	                }
+	                else
+	                {
+	                    System.out.println( "neither opening nor editing supported; sorry" );
+	                    return OpenResult.NO_OPEN;
+	                }
+                }
+                else
+                {
+                    System.out.println( "haven't written yet" );
+                	return OpenResult.NO_FILE;
+                }
             } catch ( IOException | UnsupportedOperationException ioe ) {
                 System.err.println( "couldn't open, sorry\n\t"+ ioe.toString() );
+            	return OpenResult.IOE;
             }
         } else {
-            System.out.println( "can't open, sorry" );
+            System.out.println( "can't open: Desktop unsupported; sorry" );
+        	return OpenResult.NO_DESKTOP;
         }
     }
 

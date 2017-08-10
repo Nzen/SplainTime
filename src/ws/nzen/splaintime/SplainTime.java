@@ -190,7 +190,28 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Open a list of closed tags for the user */
     private void pushedOpen(ActionEvent evt) {//GEN-FIRST:event_pushedOpen
-        tagHandler.showStoredTags();
+        switch ( tagHandler.showStoredTags() )
+        {
+        	case NO_FILE :
+        	{
+        		if ( jtfForTag.getText().isEmpty() )
+        		{
+        			jtfForTag.setText( "Haven't written file yet" );
+        		}
+        		break;
+        	}
+        	case IOE :
+        	case NO_DESKTOP :
+        	case NO_OPEN :
+        	{
+        		if ( jtfForTag.getText().isEmpty() )
+        		{
+        			jtfForTag.setText( "Editing unsupported, sorry" );
+        		}
+        		break;
+        	}
+        	default : {} // nothing
+        }
     }//GEN-LAST:event_pushedOpen
 
     /** Store (interpret?) this tag, reset gui time & tag summary */
