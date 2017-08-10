@@ -30,7 +30,8 @@ import java.util.GregorianCalendar;
  */
 public class SplainTime extends javax.swing.JFrame {
 
-    private TagStore tagHandler;
+	private static final long serialVersionUID = 1L;
+	private TagStore tagHandler;
     private javax.swing.Timer cron;
     private java.text.SimpleDateFormat hourMinText
     	= new java.text.SimpleDateFormat( "h:mm a" );
@@ -74,7 +75,6 @@ public class SplainTime extends javax.swing.JFrame {
     /**
     Netbeans generated gui initialization
      */
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -200,7 +200,7 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	return;
         }
-        else if (newestDid.equals( "j8x" ))
+        else if (newestDid.equals( config.getUndoFlag() ))
         {
         	tryToRemovePreviousTag();
         }
@@ -235,10 +235,11 @@ public class SplainTime extends javax.swing.JFrame {
     {
     	if ( tagHandler.canRemoveOne() )
     	{
+            jtfForTag.setText( tagHandler.gPreviousTag() );
+            	// replace with current, in case I just want to edit it
     		tagHandler.removePrevious();
     		updateLatestTaskLabel( tagHandler.gPreviousTag() );
     		updateTimeDiffLabel( new Date() );
-            jtfForTag.setText(""); // blank the text entry
     	}
     	else
     	{
