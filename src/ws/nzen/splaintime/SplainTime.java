@@ -293,22 +293,31 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** now, or subtracted by adjust flag */
     private Date adjustedTime( String fullTag, Date now ) {
-        if ( ! fullTag.startsWith( "-" ) )
-            return now; // normal case
+        if ( ! ( fullTag.startsWith( "-" )
+        		|| fullTag.startsWith( "+" ) ) )
+        {
+        	return now; // normal case
+        }
+        boolean pastward = fullTag.charAt( 0 ) == '-';
         String adjFlag = fullTag.substring( 1, fullTag.indexOf(' ') );
         // NOTE intentionally ignoring substr error, so user can fix the entry
         if ( adjFlag.contains(":") ) { // ex 8:00
             // System.out.println( "st.at( ::: ) starts with "+ fullTag ); // 4TESTS
-            return adjustToHhmmFormat( adjFlag, now );
+            return adjustToHhmmFormat( adjFlag, now, pastward );
         }
 		// else is simple adjust. ex -13
         int adjMinutes = Integer.parseInt( adjFlag );
+        if ( pastward )
+        {
+        	adjMinutes *= -1;
+        }
         int adjMillis = adjMinutes * 60000; // 60sec * 1000ms
-        return new Date( now.getTime() - adjMillis );
+        return new Date( now.getTime() + adjMillis );
     }
 
     /** parse time from hh:mm and round down to before 'now' */
-    private Date adjustToHhmmFormat( String adjFlag, Date now ) {
+    private Date adjustToHhmmFormat( String adjFlag,
+    		Date now, boolean pastward ) {
         String strHours = adjFlag.substring( 0, adjFlag.indexOf(':') );
         String strMins = adjFlag.substring( adjFlag.indexOf(':') +1, adjFlag.length() );
         System.out.println( "st.athm() "+adjFlag+" found "+ strHours +" : "+ strMins
@@ -322,7 +331,8 @@ public class SplainTime extends javax.swing.JFrame {
 
         long tempAdjMilli = timeKnob.getTimeInMillis();
         long nowMilli = now.getTime();
-        if ( nowMilli < tempAdjMilli ) { // adjusted doesn't match current AM/PM
+        // FIX actually analyze this math
+        if ( nowMilli < tempAdjMilli && pastward) { // adjusted doesn't match current AM/PM
             System.out.println("st.athm() woo adjusting am/pm"); // 4TESTS
             int apIs = timeKnob.get( Calendar.AM_PM );
             if ( apIs == Calendar.AM )
@@ -353,9 +363,10 @@ public class SplainTime extends javax.swing.JFrame {
         // System.out.println( here +"initial calc is "
                 // + initChars +" is "+ timeKnob.getTime().toString() ); // 4TESTS
         int makeItLess = 66666; // NOTE milliseconds
+        boolean lessIsThePast = true;
         Date aTime = timeKnob.getTime();
-        Date receivedTime = adjustToHhmmFormat(
-                initChars, new Date( aTime.getTime() - makeItLess ));
+        Date receivedTime = adjustToHhmmFormat( initChars,
+        		new Date( aTime.getTime() - makeItLess ), lessIsThePast );
         if ( ! aTime.after(receivedTime) ) {
             problems[ pInd ] = here +"aT "+ aTime.toString() +" }} rT "
                     + receivedTime.toString() +" }} sT "
