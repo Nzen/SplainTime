@@ -472,23 +472,6 @@ public class SplainTime extends javax.swing.JFrame {
 			btnFinish.setText( "Finish" );
 	}
 
-	@Deprecated
-    /**  */
-    void applyConfig( boolean terseAdjOutput, int timesToClose ) {
-        sAdjustOutput( terseAdjOutput );
-        sClicksFinish( timesToClose );
-    }
-
-	@Deprecated
-    void sAdjustOutput( boolean terseAdjOutput ) {
-        terseAdj = terseAdjOutput;
-    }
-
-	@Deprecated
-    void sClicksFinish( int newClickCount ) {
-        config.setFinishFuse( newClickCount );
-    }
-
     /**  */
     public void runTests() {
         Random oracle = new Random();
