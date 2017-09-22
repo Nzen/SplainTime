@@ -66,7 +66,7 @@ public class SplainTime extends javax.swing.JFrame {
         tagHandler = new TagStore( "whatever" );
         exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
         cron = null;
-        runTests();
+        //runTests();
         tagHandler.runTests();
         // tagHandler.interactiveUTF();
         // consider doing a text entry version instead / in addition to ?
@@ -175,7 +175,7 @@ public class SplainTime extends javax.swing.JFrame {
 	/** Strengthen exit signal OR end all tasks & delete today's cache file */
     private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
 		if ( exitFlubsLeft < 1 ) {
-			storeTag( "Shutting down" );
+			storeTag( new ParsesInput( "Shutting down" ).getTag() );
 			tagHandler.wrapUp();
             System.exit( 0 );
 		} else {
@@ -223,7 +223,7 @@ public class SplainTime extends javax.swing.JFrame {
         }
         else
         {
-        	saveNewTag( newestDid );
+        	saveNewTag( new ParsesInput( newestDid ).getTag() );
         }
     }//GEN-LAST:event_pushedEnter
 
@@ -252,7 +252,7 @@ public class SplainTime extends javax.swing.JFrame {
     {
     	if ( tagHandler.canRemoveOne() )
     	{
-            jtfForTag.setText( tagHandler.gPreviousTag() );
+            jtfForTag.setText( tagHandler.gPreviousTag().getUserText() );
             	// replace with current, in case I just want to edit it
     		tagHandler.removePrevious();
     		updateLatestTaskLabel( tagHandler.gPreviousTag() );
@@ -264,7 +264,7 @@ public class SplainTime extends javax.swing.JFrame {
     	}
     }
 
-    private void saveNewTag( String userEntered )
+    private void saveNewTag( Tag userEntered )
     {
 		// interpret flag, if present
 		storeTag( userEntered );
@@ -276,23 +276,27 @@ public class SplainTime extends javax.swing.JFrame {
     }
 
     /** Store the tag with the current time */
-	private void storeTag( String says ) {
+	private void storeTag( Tag input ) {
         Date now = new Date();
-        Date newT = adjustedTime( says, now );
+        Date newT = adjustedTime( input, now );
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
-        	int separator = says.indexOf(' ');
-            String adjFlag = says.substring( 0, separator );
-        	says = says.substring(separator +1);
-            says += " ; adjusted by "+ adjFlag +" at "+ hourMinText.format( now );
+        	int separator = input.getTagText().indexOf(' ');
+            String adjFlag = input.getTagText().substring( 0, separator );
+        	input.hackSetTagText( input.getTagText().substring(separator +1) );
+            input.hackSetTagText( input.getTagText()
+            		+" ; adjusted by "+ adjFlag +" at "+ hourMinText.format( now ) );
         }
-        boolean whetherSubtask = says.contains( "{" );
-        if ( whetherSubtask )
-        	says = stripSubtaskFlag( says );
-        tagHandler.add(newT, says, whetherSubtask); // IMPROVE subTask awareness
+        input.utilDate = newT;
+        if ( input.isSubTag() )
+        {
+        	input = stripSubtaskFlag( input );
+        }
+        tagHandler.add( input );
 	}
 
     /** now, or subtracted by adjust flag */
-    private Date adjustedTime( String fullTag, Date now ) {
+    private Date adjustedTime( Tag input, Date now ) {
+    	String fullTag = input.getUserText();
         if ( ! ( fullTag.startsWith( "-" )
         		|| fullTag.startsWith( "+" ) ) )
         {
@@ -377,7 +381,7 @@ public class SplainTime extends javax.swing.JFrame {
         return problems;
     }
 
-    /** Tests for adjustedTime() */
+    /* Tests for adjustedTime() *
     String[] problemsWithAdjustedTime( Random oracle ) {
 		// no change, minute flag, time flag
         int tests = 2, pInd = 0;
@@ -419,24 +423,29 @@ public class SplainTime extends javax.swing.JFrame {
                     + " - became "+ aTime.toString();
             pInd++;
         }
-        /*
+        /
         Above is a bad test since aT() isn't actually functional.
         it relies on using the current time.
-        */
+        *
         return problems;
-    }
+    }*/
 
     /** remove { and one of the spaces around it */
-    private String stripSubtaskFlag( String tagText )
+    private Tag stripSubtaskFlag( Tag tag )
     {
-    	int stTagInd = tagText.indexOf( '{' );
-    	if ( stTagInd == 0 )
-    		return tagText.substring( stTagInd +2 );
-    	else if ( stTagInd == tagText.length() -1 )
-    		return tagText.substring( 0, tagText.length() -2 );
-    	else
-    		return tagText.substring( 0, stTagInd )
-    				+ tagText.substring( stTagInd +2 );
+    	int stTagInd = tag.getTagText().indexOf( '{' );
+    	int len = tag.getTagText().length();
+    	if ( stTagInd == 0 ) {
+    		tag.hackSetTagText( tag.getTagText().substring( stTagInd +2 ) );
+    	}
+    	else if ( stTagInd == len -1 ) {
+    		tag.hackSetTagText( tag.getTagText().substring(  0, len -2  ) );
+    	}
+    	else {
+    		tag.hackSetTagText( tag.getTagText().substring( 0, stTagInd )
+    				+ tag.getTagText().substring( stTagInd +2 ) );
+    	}
+    	return tag;
     }
 
     /** Show minutes elapsed for the current task */
@@ -448,7 +457,8 @@ public class SplainTime extends javax.swing.JFrame {
     }
 
     /** Show portion of the task that fits on the label */
-    private void updateLatestTaskLabel( String whatDid ) {
+    private void updateLatestTaskLabel( Tag whatDidStruct ) {
+    	String whatDid = whatDidStruct.getUserText();
         if (whatDid.startsWith( "-" )) {
             int startsAfter = whatDid.indexOf( " " );
             whatDid = whatDid.substring( startsAfter );
@@ -472,7 +482,7 @@ public class SplainTime extends javax.swing.JFrame {
 			btnFinish.setText( "Finish" );
 	}
 
-    /**  */
+    /*  *
     public void runTests() {
         Random oracle = new Random();
         if (showsResults( problemsWithAdjustedTime(oracle) ))
@@ -482,7 +492,7 @@ public class SplainTime extends javax.swing.JFrame {
         System.out.println( "- Tests over -" );
     }
 
-    /** Indicate whether theseTests had problems ; hmm if only I could extract this ... */
+    /* Indicate whether theseTests had problems ; hmm if only I could extract this ... *
 	private boolean showsResults( String[] theseTests ) {
 		boolean failed = true;
 		int first = 0;
@@ -492,7 +502,7 @@ public class SplainTime extends javax.swing.JFrame {
 			return failed; 
         } else
 			return ! failed;
-	}
+	}*/
 
     /**  */
     public static void main(String args[]) {

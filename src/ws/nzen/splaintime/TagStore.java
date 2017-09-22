@@ -58,20 +58,26 @@ public class TagStore {
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
             pr( "ts.if() no temp file" ); // 4TESTS
-            add( new Date(), basicStartup, ! TagStore.amSubTask );
+            Tag primingPump = new Tag( basicStartup );
+            primingPump.utilDate = new Date();
+            add( primingPump );
         } else {
             pr( "ts.if() found temp: "+ tempSays ); // 4TESTS
             WhenTag fromPreviousRun = parseTempTag( tempSays );
-            if ( fromPreviousRun != null )
+            if ( fromPreviousRun != null ) {
                 tags.add( fromPreviousRun );
-            else
-                add( new Date(), basicStartup, ! TagStore.amSubTask );
+            }
+            else {
+                Tag primingPump = new Tag( basicStartup );
+                primingPump.utilDate = new Date();
+                add( primingPump );
+            }
         }
 	}
 
     /** Add a tag, when started, whether ends previous tag */
-    void add( Date when, String what, boolean ifSub ) {
-        tags.add( new WhenTag( when, what, ifSub ) );
+    void add( Tag fromGui ) {
+        tags.add( new WhenTag( fromGui ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
     }
 
@@ -164,16 +170,20 @@ public class TagStore {
     /** just toStr of inMem */
     private String tempFileFormat( WhenTag inMem ) {
         // String sub = ( inMem.subT ) ? "s" : "m"; // IMPROVE this is for later
-        return Long.toString( inMem.tagTime.getTime() ) +"\t"+ inMem.didWhat; // +"\t"+ sub;
+        return Long.toString( inMem.tagTime.getTime() ) +"\t"+ inMem.didWhat +"\t"+ inMem.originallySaid;
     }
 
     /** turns date\ttag into a whentag, not subtask aware for now */
     private WhenTag parseTempTag( String fromFile ) {
         String[] date_tag = fromFile.split( "\t" );
-        int time = 0, tag = time +1; //, subT = tag +1;
+        // IMPROVE I've never rejected tabs in the input, something to consider when choosing the next format
+        int time = 0, tag = time +1, original = tag +1;
         try {
             Date then = new Date( Long.parseLong(date_tag[ time ]) );
-            return new WhenTag( then, date_tag[tag], !amSubTask );
+            Tag deserialized = new Tag( date_tag[ original ] );
+            deserialized.hackSetTagText( date_tag[tag] );
+            deserialized.utilDate = then;
+            return new WhenTag( deserialized );
         } catch ( NumberFormatException nfe ) {
             pr( "ts.ptt couldn't parse |"+ date_tag[time] +"| as millisec for the date" );
             return null;
@@ -186,7 +196,9 @@ public class TagStore {
         String[] problems = new String[ tests ];
         problems[ 0 ] = "";
         Date wasNow = new Date();
-        String basic = tempFileFormat(new WhenTag( wasNow, "basic tag", ! amSubTask ));
+        Tag input = new Tag( "basic tag" );
+        input.utilDate = wasNow;
+        String basic = tempFileFormat(new WhenTag( input ));
         WhenTag basicWt = parseTempTag( basic );
         if ( basicWt == null ) {
             problems[ currProb ] = "ts.pwptt basic parse is null";
@@ -325,8 +337,8 @@ public class TagStore {
     }
 
     /** Gets current tag, there will always be one */
-    public String gPreviousTag() {
-		return tags.peekLast().didWhat;
+    public Tag gPreviousTag() {
+		return tags.peekLast().getExternallyViableVersion();
     }
 
     /** Gets current tag's start time */
@@ -422,11 +434,47 @@ public class TagStore {
     private class WhenTag {
         public Date tagTime;
         public String didWhat;
+        public String originallySaid;
         public boolean subT;
-        public WhenTag( Date tt, String dw, boolean notMainTask ) {
-            tagTime = tt;
-            didWhat = dw;
-            subT = notMainTask;
+        /** Provisional, given that WhenTag was the original form, but I kept it solely in here */
+        public WhenTag( Tag fromGui ) {
+        	tagTime = fromGui.utilDate;
+        	didWhat = fromGui.getTagText();
+        	originallySaid = fromGui.getUserText();
+        	subT = fromGui.isSubTag();
+        }
+        public Tag getExternallyViableVersion()
+        {
+        	Tag alt = new Tag( originallySaid );
+        	alt.hackSetTagText( didWhat );
+        	alt.utilDate = tagTime;
+        	return alt;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

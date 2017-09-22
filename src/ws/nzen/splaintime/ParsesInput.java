@@ -11,6 +11,7 @@ public class ParsesInput
 	private StPreference directiveDefaults;
 	private String input;
 	private LocalDateTime when;
+	private Tag result;
 	private List<Flag> directives;
 	private String directivelessText;
 	private boolean awaitingParse = false;
@@ -34,6 +35,10 @@ public class ParsesInput
 		if ( userWords == null )
 		{
 			input = "";
+		}
+		else
+		{
+			input = userWords;
 		}
 		when = LocalDateTime.now();
 		awaitingParse = true;
@@ -61,6 +66,10 @@ public class ParsesInput
 		/*
 		extract directives
 		extract text
+		regex?
+		( ( j8x )? | ( [+-]\d+(:\d+) )? | {? | c4t? | ca7? )
+		um, except the subtask, and time parsing, there isn't much 'parsing',
+		most of these directives aren't made to stack
 		*/
 		return false;//TODO
 	}
@@ -105,7 +114,7 @@ public class ParsesInput
 
 	public Tag getTag()
 	{
-		return null;//TODO
+		return new Tag( input );//TODO
 	}
 
 
@@ -126,7 +135,6 @@ public class ParsesInput
 		this.directiveDefaults = directiveDefaults;
 	}
 
-	
 
 
 }

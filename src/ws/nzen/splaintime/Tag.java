@@ -12,6 +12,10 @@ public class Tag
 	private int minuteAdjustment;
 	private boolean isSubTag;
 	private String tagText;
+	@Deprecated
+	/** Solely for legacy compatibility.
+	 * I'll toss this in a bit, in favor of LocalDateTime */
+	public java.util.Date utilDate;
 
 
 	public Tag( String input )
@@ -30,6 +34,9 @@ public class Tag
 
 	public void adopt( String input )
 	{
+		userText = input;
+		tagText = userText; // FIX only until ParsesInput is handling it
+		isSubTag = userText.contains( "{" );
 		/*
 		parse for minute / time adjustment
 			for subtask flag
@@ -73,6 +80,14 @@ public class Tag
 	public String getTagText()
 	{
 		return tagText;
+	}
+
+	@Deprecated
+	/** evolutionary necessity to start using Tags instead of straight strings.
+	 * In a bit, I'll incorporate the external parsing or move it to ParsesInput */
+	public void hackSetTagText( String externallyMassaged )
+	{
+		tagText = externallyMassaged;
 	}
 
 }
