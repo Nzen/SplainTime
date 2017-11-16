@@ -173,7 +173,7 @@ public class TagStore {
         return Long.toString( inMem.tagTime.getTime() ) +"\t"+ inMem.didWhat +"\t"+ inMem.originallySaid;
     }
 
-    /** turns date\ttag into a whentag, not subtask aware for now */
+    /** turns datetag into a whentag, not subtask aware for now */
     private WhenTag parseTempTag( String fromFile ) {
         String[] date_tag = fromFile.split( "\t" );
         // IMPROVE I've never rejected tabs in the input, something to consider when choosing the next format

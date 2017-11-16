@@ -4,7 +4,9 @@ sourceSets {
 	main {
 		java {
 			srcDir 'src'
-}	}	}
+		}
+	}
+}
 
 jar {
 	manifest {
@@ -13,5 +15,5 @@ jar {
 			'Created-By': 'openjdk-8-jdk - javac 1.8.0_111',
 			'Main-Class' : 'ws.nzen.splaintime.SplainTime' )
 	destinationDir = file( 'dist' )
-}	}
-
+	}
+}

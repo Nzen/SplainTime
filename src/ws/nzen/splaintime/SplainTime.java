@@ -282,9 +282,8 @@ public class SplainTime extends javax.swing.JFrame {
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
         	int separator = input.getTagText().indexOf(' ');
             String adjFlag = input.getTagText().substring( 0, separator );
-        	input.hackSetTagText( input.getTagText().substring(separator +1) );
-            input.hackSetTagText( input.getTagText()
-            		+" ; adjusted by "+ adjFlag +" at "+ hourMinText.format( now ) );
+        	input.hackSetTagText( "[adj: "+ adjFlag +" @"+ hourMinText.format(
+        			now ) +"]  "+ input.getTagText().substring(separator +1) );
         }
         input.utilDate = newT;
         if ( input.isSubTag() )
