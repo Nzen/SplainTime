@@ -81,6 +81,14 @@ public class TagStore {
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
     }
 
+
+    void replaceActiveWith( Tag fromGui )
+    {
+    	tags.pop();
+    	tags.add( new WhenTag( fromGui ) );
+    }
+
+
     /** writes all but the latest to disk; callee checked there's x>1 */ // UNREADY
     private void flushExtra() {
         String outStr = "";
@@ -402,7 +410,7 @@ public class TagStore {
 		return Integer.toString( nn );
 	}
 
-    /** Probably replicates a printf feature. Yes. Yes it does: &02d; */
+    /** Probably replicates a printf feature. Yes. Yes it does: %02d; */
     String ensureTwoDigits( int num ) {
         if ( num < 10 )
             return "0"+ itoa( num );

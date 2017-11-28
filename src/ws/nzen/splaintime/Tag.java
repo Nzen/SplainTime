@@ -9,6 +9,7 @@ public class Tag
 {
 	private String userText;
 	private LocalDateTime when;
+	private LocalDateTime userWhen = null;
 	private int minuteAdjustment;
 	private boolean isSubTag;
 	private String tagText;
@@ -79,6 +80,14 @@ public class Tag
 
 	public String getTagText()
 	{
+		/*if ( userWhen != null )
+		{
+			System.out.println( 
+			"[adj: "+ adjFlag +" @"+ hourMinText.format(
+        			now ) +"]  "+ input.getTagText().substring(separator +1) );
+        			// oh, they'll need to share (or instantiate, but it'll be share) a date formatter
+			 );
+		}*/
 		return tagText;
 	}
 
@@ -88,6 +97,16 @@ public class Tag
 	public void hackSetTagText( String externallyMassaged )
 	{
 		tagText = externallyMassaged;
+	}
+
+
+	public LocalDateTime getUserWhen()
+	{
+		return userWhen;
+	}
+	public void setUserWhen( LocalDateTime userWhen )
+	{
+		this.userWhen = userWhen;
 	}
 
 }

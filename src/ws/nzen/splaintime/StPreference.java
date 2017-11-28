@@ -10,7 +10,10 @@ public class StPreference
 {
 	private String undoFlag = "j8x";
 	private int finishFuse = 2;
-	// update sec
+	private String subtaskStartFlag = "{";
+	/** Means of changing the active text. No time interpretation */
+	private String relabelFlag = "f4l";
+	//private boolean showSeconds = false;
 	// adjustment verbosity
 	// try to cleanup leftover files
 
@@ -21,6 +24,7 @@ public class StPreference
 		{
 			return;
 		}
+		// throw unsupported operation ;; json? xml? Config/yaml?
 	}
 
 
@@ -41,5 +45,26 @@ public class StPreference
 	{
 		this.finishFuse = finishFuse;
 	}
+
+
+	public String getRelabelFlag()
+	{
+		return relabelFlag;
+	}
+	public void setRelabelFlag( String relabelFlag )
+	{
+		this.relabelFlag = relabelFlag;
+	}
+
+
+	public String getSubtaskStartFlag()
+	{
+		return subtaskStartFlag;
+	}
+	public void setSubtaskStartFlag( String subtaskStartFlag )
+	{
+		this.subtaskStartFlag = subtaskStartFlag;
+	}
+	
 	
 }

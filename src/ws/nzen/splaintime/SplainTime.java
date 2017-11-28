@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.time.ZoneId;
+
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -221,6 +223,11 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	tryToRemovePreviousTag();
         }
+        else if ( newestDid.startsWith( config.getRelabelFlag() ) )
+        {
+        	relabelActiveTag( newestDid.substring(
+        			config.getRelabelFlag().length() ).trim() );
+        }
         else
         {
         	saveNewTag( new ParsesInput( newestDid ).getTag() );
@@ -284,7 +291,11 @@ public class SplainTime extends javax.swing.JFrame {
             String adjFlag = input.getTagText().substring( 0, separator );
         	input.hackSetTagText( "[adj: "+ adjFlag +" @"+ hourMinText.format(
         			now ) +"]  "+ input.getTagText().substring(separator +1) );
+        	input.setUserWhen( newT.toInstant().atZone(
+        			ZoneId.systemDefault() ).toLocalDateTime() );
         }
+    	input.setWhen( now.toInstant().atZone(
+    			ZoneId.systemDefault() ).toLocalDateTime() );
         input.utilDate = newT;
         if ( input.isSubTag() )
         {
@@ -293,7 +304,25 @@ public class SplainTime extends javax.swing.JFrame {
         tagHandler.add( input );
 	}
 
-    /** now, or subtracted by adjust flag */
+
+	/** Changes active text, <em>not</em> reinterpreting time (use undo). */
+	private void relabelActiveTag( String replacementText )
+	{
+		/*
+		change labellabel
+		send with previous adj text to tag
+		*/
+		Tag nameSlate = tagHandler.gPreviousTag();
+		nameSlate.hackSetTagText( replacementText );
+		// FIX this is 'changing history' territory, but updateLTLabel uses user text
+		nameSlate.setUserText( replacementText );
+		tagHandler.replaceActiveWith( nameSlate );
+		updateLatestTaskLabel( nameSlate );
+		jtfForTag.setText( "" );
+	}
+
+
+	/** now, or subtracted by adjust flag */
     private Date adjustedTime( Tag input, Date now ) {
     	String fullTag = input.getUserText();
         if ( ! ( fullTag.startsWith( "-" )

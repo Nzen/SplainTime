@@ -1,13 +1,19 @@
 package ws.nzen.splaintime;
 
+import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ParsesInput
 {
-    /*private java.text.SimpleDateFormat hourMinText
-    		= new java.text.SimpleDateFormat( "h:mm a" );*/
+    private java.text.SimpleDateFormat hourMinText
+    		= new java.text.SimpleDateFormat( "h:mm" ); // 12 hour, will guess meridian, eventually
 	private StPreference directiveDefaults;
 	private String input;
 	private LocalDateTime when;
@@ -59,19 +65,89 @@ public class ParsesInput
 	{
 		final boolean worked = true;
 		ensureSubComponentsReady();
-		if ( input.isEmpty() )
+		if ( input == null || input.isEmpty() )
 		{
 			return ! worked;
 		}
-		/*
-		extract directives
-		extract text
-		regex?
-		( ( j8x )? | ( [+-]\d+(:\d+) )? | {? | c4t? | ca7? )
-		um, except the subtask, and time parsing, there isn't much 'parsing',
-		most of these directives aren't made to stack
-		*/
-		return false;//TODO
+		String[] tokens = input.split( " " );
+		boolean exhaustedDirectives = false;
+		for ( String nibble : tokens )
+		{
+			if ( nibble.isEmpty() )
+			{
+				continue;
+			}
+			else if ( exhaustedDirectives )
+			{
+				directivelessText += " "+ nibble;
+			}
+			else if ( nibble.equals( directiveDefaults.getUndoFlag() ) )
+			{
+				directives.add( Flag.undo );
+			}
+			else if ( nibble.equals( directiveDefaults.getSubtaskStartFlag() ) )
+			{
+				directives.add( Flag.toggleSubtask );
+			}
+			else if ( nibble.equals( directiveDefaults.getRelabelFlag() ) )
+			{
+				directives.add( Flag.changeActiveText );
+			}
+			else if ( nibble.charAt( 0 ) == '-' || nibble.charAt( 0 ) == '+' )
+			{
+				if ( directives.contains( Flag.changeActiveTime ) )
+				{
+					// NOTE only interpret the first time adjustment
+					directivelessText = nibble;
+					exhaustedDirectives = true;
+					continue;
+				}
+				else if ( nibble.contains( ":" ) )
+				{
+					try
+					{
+						Date userWhen = hourMinText.parse( nibble.substring( 1 ) );
+						// FIx handle + and - ; which is to say meridian
+						directives.add( Flag.changeActiveTime );
+						when = userWhen.toInstant().atZone(
+			        			ZoneId.systemDefault() ).toLocalDateTime();
+						continue;
+					}
+					catch ( ParseException e )
+					{
+						// nothing, it wasn't certain to be an adjustment; it's normal text
+					}
+					directivelessText = nibble;
+					exhaustedDirectives = true;
+					continue;
+				}
+				else
+				{
+					try
+					{
+						int minAdjust = Integer.parseInt( nibble );
+						when = when.plus( minAdjust, ChronoUnit.MINUTES );
+						directives.add( Flag.changeActiveTime );
+						// is it the "active" time? as in the tag becoming or pre-parsing active? that sounds like a higher level concern
+						continue;
+					}
+					catch ( NumberFormatException nfe )
+					{
+						// nothing, it wasn't certain to be an adjustment
+					}
+					directivelessText = nibble;
+					exhaustedDirectives = true;
+					continue;
+				}
+			}
+			else
+			{
+				directivelessText = nibble;
+				exhaustedDirectives = true;
+			}
+		}
+		awaitingParse = false;
+		return worked;
 	}
 
 
@@ -92,6 +168,35 @@ public class ParsesInput
 	}
 
 
+	/** Parsed tag of input. Caller should check for directives that aren't Tag attributes */
+	public Tag getResult()
+	{
+		if ( awaitingParse )
+		{
+			if ( input == null || input.isEmpty() || ! parse() )
+			{
+				return null; // le sigh
+			}
+		}
+		Tag fromInput = new Tag( directivelessText );
+		if ( directives.contains( Flag.changeActiveTime ) )
+		{
+			fromInput.setWhen( LocalDateTime.now() );
+			fromInput.setUserWhen( when );
+		}
+		else
+		{
+			fromInput.setWhen( when );
+		}
+		if ( directives.contains( Flag.toggleSubtask ) )
+		{
+			fromInput.setSubTag( true ); // Improve
+		}
+		fromInput.setUserText( input );
+		return fromInput;
+	}
+
+
 	public List<Flag> getDirectives()
 	{
 		if ( awaitingParse )
@@ -102,6 +207,7 @@ public class ParsesInput
 	}
 
 
+	/** text stripped of flags and directives */
 	public String getJustText()
 	{
 		if ( awaitingParse )
@@ -118,6 +224,7 @@ public class ParsesInput
 	}
 
 
+	/** entire original text */
 	public String getOriginalText()
 	{
 		return input;
@@ -127,6 +234,7 @@ public class ParsesInput
 	public void setWhen( LocalDateTime originally )
 	{
 		when = originally;
+		// recalc time based on flag?
 	}
 
 
