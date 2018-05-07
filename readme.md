@@ -9,10 +9,16 @@ On windows, pic hosted by flickr.
 ### Run
 
     java -jar SplainTime.jar
+    or
+    *double click an executable jar*
 
-Enter a description of what you are doing. If you missed entering on time, you can adjust by starting a description with either a negative number (minutes) or a negative 12-hour time (sans AM/PM). So, "-33 innuendo battle" will log a time 33 minutes in the past. "-8:30 roundly defeated" will log 8:30 and try to adjust the am/pm to be a time earlier than now. I've designed/use splaintime to run different sessions each day.
+Enter a description of what you are doing. If you missed entering on time, you can adjust by starting a description with either a negative number (minutes) or a negative 12-hour time (sans AM/PM). So, "-33 innuendo battle" will log a time 33 minutes in the past. "-8:30 roundly defeated" will log 8:30 and try to adjust the am/pm to be a time earlier than now. Because of that, it can not, currently, honor a future clock time. However, it will honor positive minutes in the future.
+
+I've designed/use splaintime to run different sessions each day, by naming the resulting file with today's date. To wrap the day, press the _finish_ button until it counts down to zero.
 
 Also, if you mess up an entry and a minute hasn't elapsed, entering "j8x" will remove the last tag.
+
+SplainTime checks for default values in a file called _Splaintime.properties_
 
 ![output](https://farm4.staticflickr.com/3834/19351574364_91f8ce13c0_o.png)  
 Output, pic hosted by flickr
@@ -33,9 +39,3 @@ DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 
 ![linux screenshot](https://farm1.staticflickr.com/422/19787232209_fd6d79d140_o_d.png)  
 On linux, hosted by flickr.
-
-### Changelog
-
-Extract: gradle build script
-(Master: waiting for non regressive extract)
-(Logging: waiting for gradle that handles jars)

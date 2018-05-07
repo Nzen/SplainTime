@@ -33,6 +33,7 @@ import java.util.GregorianCalendar;
 public class SplainTime extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 1L;
+	private static final String configFile = "Splaintime.properties";
 	private TagStore tagHandler;
     private javax.swing.Timer cron;
     private java.text.SimpleDateFormat hourMinText
@@ -44,9 +45,9 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** Starts gui, starts tagStore */
     public SplainTime() {
-		String basicStart = "started up"; // just so it is in one place, rather than two
-        tagHandler = new TagStore( basicStart );
 		config = new StPreference();
+		config.parseConfig( configFile );
+        tagHandler = new TagStore( config.getInitialTagText() );
 		exitFlubsLeft = config.getFinishFuse();
         initComponents();
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
@@ -134,6 +135,7 @@ public class SplainTime extends javax.swing.JFrame {
                 openConfig(evt);
             }
         });
+        btnConfig.setEnabled( false );
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -223,11 +225,12 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	tryToRemovePreviousTag();
         }
+        /* relabelActiveTag() is broken
         else if ( newestDid.startsWith( config.getRelabelFlag() ) )
         {
         	relabelActiveTag( newestDid.substring(
         			config.getRelabelFlag().length() ).trim() );
-        }
+        } */
         else
         {
         	saveNewTag( new ParsesInput( newestDid ).getTag() );
@@ -305,6 +308,7 @@ public class SplainTime extends javax.swing.JFrame {
 	}
 
 
+	@Deprecated
 	/** Changes active text, <em>not</em> reinterpreting time (use undo). */
 	private void relabelActiveTag( String replacementText )
 	{
