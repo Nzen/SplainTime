@@ -22,6 +22,9 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
+
+import ws.nzen.splaintime.model.Tag;
+
 import java.util.Calendar;
 import java.util.Random;
 import java.util.Date;
@@ -180,7 +183,7 @@ public class SplainTime extends javax.swing.JFrame {
     private void pushedFinish(ActionEvent evt) {//GEN-FIRST:event_pushedFinish
 		if ( exitFlubsLeft < 1 ) {
 			storeTag( new ParsesInput( "Shutting down" ).getTag() );
-			tagHandler.wrapUp();
+			tagHandler.wrapUp( config );
             System.exit( 0 );
 		} else {
 			exitFlubsLeft--;

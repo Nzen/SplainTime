@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ws.nzen.splaintime.model.Flag;
+import ws.nzen.splaintime.model.Tag;
+
 public class ParsesInput
 {
     private java.text.SimpleDateFormat hourMinText

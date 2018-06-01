@@ -19,11 +19,15 @@ public class StPreference
 	private String initialTagText = "started up";
 	private String subtaskStartFlag = "{";
 	private String sumDelimiter = "^^";
+	private boolean doesntNeedSum = true;
+	private int categoryDaysToExpiration = 29;
+	private String pathToCategoryFile = "st_categories.tsv";
 	/** Means of changing the active text. No time interpretation */
 	@Deprecated
 	private String relabelFlag = "f4l";
 	private static final String FC_UNDO = "undo_phrase", FC_FUSE = "press_finish",
-			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter";
+			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter",
+			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days";
 	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false;
 	// adjustment verbosity
@@ -69,6 +73,18 @@ public class StPreference
 		if ( configVersion > 1F && configVersion < wayFutureVersion )
 		{
 			sumDelimiter = fileConfig.getProperty( FC_SUM, sumDelimiter );
+			temp = fileConfig.getProperty( FC_WANT_SUM );
+			doesntNeedSum = temp != null && ! temp.toLowerCase().equals( "yes" )
+					 && ! temp.toLowerCase().equals( "true" );
+ 			temp = fileConfig.getProperty( FC_CATEGORY_DAYS, "29" );
+			try
+			{
+				categoryDaysToExpiration = Integer.parseInt( temp );
+			}
+			catch ( NumberFormatException nfe )
+			{
+				System.err.println( cl +"pc config category days should be an integer" );
+			}
 		}
 		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag
 				+" ;; initail "+ initialTagText +" ;; sum "+ sumDelimiter );
@@ -160,6 +176,34 @@ public class StPreference
 	{
 		this.sumDelimiter = sumDelimiter;
 	}
+
+
+	public boolean isDoesntNeedSum()
+	{
+		return doesntNeedSum;
+	}
+	public void setDoesntNeedSum( boolean doesntNeedSum )
+	{
+		this.doesntNeedSum = doesntNeedSum;
+	}
+
+
+
+	public int getCategoryDaysToExpiration()
+	{
+		return categoryDaysToExpiration;
+	}
+	public void setCategoryDaysToExpiration( int categoryDaysToExpiration )
+	{
+		this.categoryDaysToExpiration = categoryDaysToExpiration;
+	}
+
+
+	public String getPathToCategoryFile()
+	{
+		return pathToCategoryFile;
+	}
+
 	
 	
 }
