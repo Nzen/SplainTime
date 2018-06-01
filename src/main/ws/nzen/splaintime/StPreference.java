@@ -18,10 +18,13 @@ public class StPreference
 	private int finishFuse = 2;
 	private String initialTagText = "started up";
 	private String subtaskStartFlag = "{";
+	private String sumDelimiter = "^^";
 	/** Means of changing the active text. No time interpretation */
+	@Deprecated
 	private String relabelFlag = "f4l";
 	private static final String FC_UNDO = "undo_phrase", FC_FUSE = "press_finish",
-			FC_INITIAL = "initial_tag", FC_VERSION = "version";
+			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter";
+	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false;
 	// adjustment verbosity
 	// try to cleanup leftover files
@@ -49,7 +52,7 @@ public class StPreference
 			System.err.println( cl +"pc config version should be a number" );
 			configVersion = 0;
 		}
-		if ( configVersion > 0F )
+		if ( configVersion > 0F && configVersion < wayFutureVersion )
 		{
 			undoFlag = fileConfig.getProperty( FC_UNDO, undoFlag );
 			initialTagText = fileConfig.getProperty( FC_INITIAL, initialTagText );
@@ -63,7 +66,12 @@ public class StPreference
 				System.err.println( cl +"pc config fuse presses should be an integer" );
 			}
 		}
-		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag +" ;; initail "+ initialTagText );
+		if ( configVersion > 1F && configVersion < wayFutureVersion )
+		{
+			sumDelimiter = fileConfig.getProperty( FC_SUM, sumDelimiter );
+		}
+		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag
+				+" ;; initail "+ initialTagText +" ;; sum "+ sumDelimiter );
 	}
 
 
@@ -141,6 +149,16 @@ public class StPreference
 	public void setInitialTagText( String initialTagText )
 	{
 		this.initialTagText = initialTagText;
+	}
+
+
+	public String getSumDelimiter()
+	{
+		return sumDelimiter;
+	}
+	public void setSumDelimiter( String sumDelimiter )
+	{
+		this.sumDelimiter = sumDelimiter;
 	}
 	
 	
