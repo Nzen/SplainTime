@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
+import java.util.List;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Random; // for self testing
+
+import ws.nzen.splaintime.model.Tag;
 
 /** @author Nzen
  */
@@ -58,6 +61,7 @@ public class TagStore {
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
             pr( "ts.if() no temp file" ); // 4TESTS
+            writeToDisk( forClient, " SplainTime output format v 2.0\r\n" );
             Tag primingPump = new Tag( basicStartup );
             primingPump.utilDate = new Date();
             add( primingPump );
@@ -322,7 +326,7 @@ public class TagStore {
     }
 
     /** delete the temp file ; write the last one */ // UNREADY
-    void wrapUp() {
+    void wrapUp( StPreference config ) {
         flushExtra();
         WhenTag ultimate = tags.getLast();
         String outStr = toHourMs.format( ultimate.tagTime ) +"\t"
@@ -332,6 +336,31 @@ public class TagStore {
         // writeToDisk( userFile, outStr ); // 4TESTS
 		writeToDisk( forClient, outStr ); // 4REAL
         deleteTempFile();
+        prettifyFile( config );
+	}
+
+	private void prettifyFile( StPreference config )
+	{
+		if ( config.isDoesntNeedSum() )
+		{
+			return;
+		}
+		try
+		{
+			Path whereToday = Paths.get( userFile );
+			Path whereCategories = Paths.get( config.getPathToCategoryFile() );
+			List<String> userLines = Files.readAllLines( whereToday );
+			List<String> categories = Files.readAllLines( whereCategories );
+			Accountant tabulator = new Accountant( config );
+			userLines = tabulator.withSums( userLines, categories );
+			categories = tabulator.getCategories();
+			Files.write( whereToday, userLines, StandardOpenOption.TRUNCATE_EXISTING );
+			Files.write( whereCategories, categories, StandardOpenOption.TRUNCATE_EXISTING );
+		}
+		catch ( IOException ie )
+		{
+			System.err.println( "unable to prettify user file because "+ ie );
+		}
 	}
 
     private void deleteTempFile() {

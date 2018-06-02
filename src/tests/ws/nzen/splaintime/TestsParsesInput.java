@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import ws.nzen.splaintime.model.Flag;
+
 /** 
  */
 public class TestsParsesInput
