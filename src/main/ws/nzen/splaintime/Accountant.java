@@ -65,7 +65,7 @@ public class Accountant
 				{
 					String currCategory = currLine.substring( indOfMark, tempInd );
 					categoryUses.put( currCategory, LocalDate.now() );
-					// try again, just in case
+					// try for more, just in case
 					indOfMark = tempInd + lenOfDelim;
 					tempInd = currLine.indexOf( settings.getSumDelimiter(), indOfMark );
 				}
@@ -92,6 +92,7 @@ public class Accountant
 						tagMins += prevCatDur;
 					}
 					categoryMins.put( currCategory, tagMins );
+					categoryUses.put( currCategory, LocalDate.now() );
 				}
 			}
 		}
@@ -127,6 +128,7 @@ public class Accountant
 	}
 
 
+	/** parse the time out of the tag line */
 	private int durationOf( String tagLine )
 	{
 		int totalMinutes = 0;
