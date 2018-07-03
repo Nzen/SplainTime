@@ -507,6 +507,10 @@ public class SplainTime extends javax.swing.JFrame {
 			whatDid = whatDid.substring( 0, charsFit - truncation
 					.length() ) + truncation;
         }
+		else
+		{
+			jlSaysPrevious.setToolTipText( "" ); // NOTE so it's not keeping old tooltips
+		}
         jlSaysPrevious.setText( whatDid );
     }
 
