@@ -79,8 +79,8 @@ public class StPreference
 			doesntNeedSum = temp != null && ! temp.toLowerCase().equals( "yes" )
 					 && ! temp.toLowerCase().equals( "true" );
 			temp = fileConfig.getProperty( FC_12_HOUR );
-			hourFormatIs12Not24 = temp != null && ( temp.toLowerCase().equals( "yes" )
-					 && temp.toLowerCase().equals( "true" ) );
+			hourFormatIs12Not24 = temp == null || ( temp != null && ( temp.toLowerCase()
+					.equals( "yes" ) || temp.toLowerCase().equals( "true" ) ) );
  			temp = fileConfig.getProperty( FC_CATEGORY_DAYS, "29" );
 			try
 			{
