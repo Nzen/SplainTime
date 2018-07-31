@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 
 import javax.swing.GroupLayout;
@@ -39,19 +40,21 @@ public class SplainTime extends javax.swing.JFrame {
 	private static final String configFile = "Splaintime.properties";
 	private TagStore tagHandler;
     private javax.swing.Timer cron;
-    private java.text.SimpleDateFormat hourMinText
-    	= new java.text.SimpleDateFormat( "h:mm a" );
+    private SimpleDateFormat hourFormat;
     boolean terseAdj = true;
 	private int exitFlubsLeft;
-    private final int delayms = 60001; // 60 * 1000
+    private final int delayms = 60_001; // 60 * 1000
     private StPreference config;
 
     /** Starts gui, starts tagStore */
     public SplainTime() {
 		config = new StPreference();
 		config.parseConfig( configFile );
-        tagHandler = new TagStore( config.getInitialTagText() );
+        tagHandler = new TagStore( config.getInitialTagText(), config );
 		exitFlubsLeft = config.getFinishFuse();
+		hourFormat = ( config.isHourFormatIs12Not24() )
+				? new SimpleDateFormat( "h:mm a" )
+				: new SimpleDateFormat( "k:mm" );
         initComponents();
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
 		updateTimeDiffLabel( new Date() );
@@ -69,8 +72,9 @@ public class SplainTime extends javax.swing.JFrame {
 
     /** 4TESTS version */
     public SplainTime( boolean testMode ) {
-        tagHandler = new TagStore( "whatever" );
+        tagHandler = new TagStore( "whatever", new StPreference() );
         exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
+        hourFormat = new SimpleDateFormat( "h:mm a" );
         cron = null;
         //runTests();
         tagHandler.runTests();
@@ -245,12 +249,9 @@ public class SplainTime extends javax.swing.JFrame {
         // NOTE not wrapUp() so it won't delete the temp file
     }//GEN-LAST:event_closingFrame
 
+    @Deprecated
     private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
-        ConfigDialog settings = new ConfigDialog( this, config );
-        settings.setVisible( true );
-        config = settings.getConfig();
-        validateConfig();
-        settings.dispose();
+        System.out.println( "st.oc no longer implemented" );
     }//GEN-LAST:event_openConfig
 
 
@@ -295,7 +296,7 @@ public class SplainTime extends javax.swing.JFrame {
         if ( ! now.equals(newT) ) { // IMPROVE && config.adjOut == bla
         	int separator = input.getTagText().indexOf(' ');
             String adjFlag = input.getTagText().substring( 0, separator );
-        	input.hackSetTagText( "[adj: "+ adjFlag +" @"+ hourMinText.format(
+        	input.hackSetTagText( "[adj: "+ adjFlag +" @"+ hourFormat.format(
         			now ) +"]  "+ input.getTagText().substring(separator +1) );
         	input.setUserWhen( newT.toInstant().atZone(
         			ZoneId.systemDefault() ).toLocalDateTime() );

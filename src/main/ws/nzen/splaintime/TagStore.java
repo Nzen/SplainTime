@@ -37,13 +37,15 @@ public class TagStore {
     enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
 
     /** Setup the store's output, guarantee an initial task */
-    public TagStore( String introText ) {
-        commonInit( introText );
+    public TagStore( String introText, StPreference config ) {
+        commonInit( introText, config );
     }
 
-    protected void commonInit( String introText ) {
+    protected void commonInit( String introText, StPreference config ) {
         tags = new LinkedList<>();
-        toHourMs = new SimpleDateFormat( "hh:mm.ss a" );
+		String hourFormat = ( config.isHourFormatIs12Not24() )
+				? "hh:mm.ss a" : "kk:mm.ss   ";
+        toHourMs = new SimpleDateFormat( hourFormat );
         GregorianCalendar willBeName = new GregorianCalendar();
 
         userFile = itoa(willBeName.get( Calendar.YEAR ))

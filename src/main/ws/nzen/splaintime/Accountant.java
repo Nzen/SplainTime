@@ -17,7 +17,8 @@ import ws.nzen.splaintime.model.Category;
 public class Accountant
 {
 	// \d{2}:\d{2}\.\d{2} [AP]M\s\(?(\dh )?(\dm )? ;;; 10:49.37 PM	1h 25m 
-	private static final String tagLineRegex = "\\d{2}:\\d{2}\\.\\d{2} [AP]M	\\(?(\\d+h )??(\\d+m)";
+	private static final String tagLineRegex12 = "\\d{2}:\\d{2}\\.\\d{2} [AP]M	\\(?(\\d+h )??(\\d+m)";
+	private static final String tagLineRegex24 = "\\d{2}:\\d{2}\\.\\d{2}   	\\(?(\\d+h )??(\\d+m)";
 	private StPreference settings = null;
 	private Map<String, LocalDate> categoryUses = new HashMap<>();
 	private Pattern fsmSpec = null;
@@ -134,7 +135,8 @@ public class Accountant
 		int totalMinutes = 0;
 		if ( fsmSpec == null )
 		{
-			fsmSpec = Pattern.compile( tagLineRegex );
+			fsmSpec = Pattern.compile( ( settings.isHourFormatIs12Not24() )
+					? tagLineRegex12 : tagLineRegex24 );
 		}
 		// gr here is an abbreviation for (regex) group
 		final int grHour = 1, grMin = grHour +1;

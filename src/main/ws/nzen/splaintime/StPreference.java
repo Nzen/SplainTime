@@ -22,12 +22,14 @@ public class StPreference
 	private boolean doesntNeedSum = true;
 	private int categoryDaysToExpiration = 29;
 	private String pathToCategoryFile = "st_categories.tsv";
+	private boolean hourFormatIs12Not24 = true;
 	/** Means of changing the active text. No time interpretation */
 	@Deprecated
 	private String relabelFlag = "f4l";
 	private static final String FC_UNDO = "undo_phrase", FC_FUSE = "press_finish",
 			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter",
-			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days";
+			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days",
+			FC_12_HOUR = "12_hour_format";
 	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false;
 	// adjustment verbosity
@@ -76,6 +78,9 @@ public class StPreference
 			temp = fileConfig.getProperty( FC_WANT_SUM );
 			doesntNeedSum = temp != null && ! temp.toLowerCase().equals( "yes" )
 					 && ! temp.toLowerCase().equals( "true" );
+			temp = fileConfig.getProperty( FC_12_HOUR );
+			hourFormatIs12Not24 = temp != null && ( temp.toLowerCase().equals( "yes" )
+					 && temp.toLowerCase().equals( "true" ) );
  			temp = fileConfig.getProperty( FC_CATEGORY_DAYS, "29" );
 			try
 			{
@@ -187,6 +192,15 @@ public class StPreference
 		this.doesntNeedSum = doesntNeedSum;
 	}
 
+
+	public boolean isHourFormatIs12Not24()
+	{
+		return hourFormatIs12Not24;
+	}
+	public void setHourFormatIs12Not24( boolean hourFormatIs12Not24 )
+	{
+		this.hourFormatIs12Not24 = hourFormatIs12Not24;
+	}
 
 
 	public int getCategoryDaysToExpiration()
