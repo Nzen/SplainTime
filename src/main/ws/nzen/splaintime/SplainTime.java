@@ -232,6 +232,10 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	tryToRemovePreviousTag();
         }
+        else if ( newestDid.startsWith( config.getCheckCategoryFlag() ) )
+        {
+        	checkIfTagIsCategory( newestDid );
+        }
         /* relabelActiveTag() is broken
         else if ( newestDid.startsWith( config.getRelabelFlag() ) )
         {
@@ -277,6 +281,19 @@ public class SplainTime extends javax.swing.JFrame {
     		jtfForTag.setText("Sorry, already saved");
     	}
     }
+
+	private void checkIfTagIsCategory( String text )
+	{
+		if ( config.getCheckCategoryFlag().length() +1 >= text.length() )
+		{
+			jtfForTag.setText( text +" {check which category?}" );
+		}
+		else
+		{
+			jtfForTag.setText( tagHandler.whetherCategory( text.substring(
+	     			config.getCheckCategoryFlag().length() +1 ), config ) );
+		}
+	}
 
     private void saveNewTag( Tag userEntered )
     {

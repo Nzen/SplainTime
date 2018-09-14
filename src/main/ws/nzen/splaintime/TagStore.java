@@ -138,10 +138,8 @@ public class TagStore {
             diffSeconds -= hourSeconds;
             hours++;
         }
-        String hrs = ( hours > 0 ) ? itoa( hours )+"h" : "";
+        String hrs = ( hours > 0 ) ? itoa( hours )+"h " : "";
         int  min = 0, minuteSeconds = 60;
-        if ( hours > 0 && diffSeconds > minuteSeconds )
-        	hrs += " ";
         while ( diffSeconds >= minuteSeconds ) {
             diffSeconds -= minuteSeconds;
             min++;
@@ -327,6 +325,45 @@ public class TagStore {
         }
     }
 
+	String whetherCategory( String someInput, StPreference config )
+	{
+		final String yes = " yes", no = " no";
+		if ( someInput == null || someInput.isEmpty() )
+		{
+			return someInput + no;
+		}
+		else if ( config.isDoesntNeedSum() )
+		{
+			return someInput + no +", categories off";
+		}
+		try
+		{
+			Path whereToday = Paths.get( userFile );
+			Path whereCategories = Paths.get( config.getPathToCategoryFile() );
+			List<String> userLines = Files.readAllLines( whereToday );
+			List<String> categories = Files.readAllLines( whereCategories );
+			Accountant tabulator = new Accountant( config );
+			// IMPROVE avoid calculating the sums just to parse the files
+			userLines = tabulator.withSums( userLines, categories );
+			categories = tabulator.getCategories();
+			final int catInd = 0;
+			for ( String catPlusDate : categories )
+			{
+				String[] catSplit = catPlusDate.split( "\t" );
+				if ( catSplit[ catInd ].equals( someInput ) )
+				{
+					return someInput + yes;
+				}
+			}
+			return config.getSumDelimiter() + someInput + config.getSumDelimiter() + no;
+		}
+		catch ( IOException ie )
+		{
+			System.err.println( "unable to prettify user file because "+ ie );
+			return someInput + no +", one of files dne";
+		}
+	}
+
     /** delete the temp file ; write the last one */ // UNREADY
     void wrapUp( StPreference config ) {
         flushExtra();
@@ -361,7 +398,7 @@ public class TagStore {
 		}
 		catch ( IOException ie )
 		{
-			System.err.println( "unable to prettify user file because "+ ie );
+			System.err.println( "ts.pf unable to prettify user file because "+ ie );
 		}
 	}
 

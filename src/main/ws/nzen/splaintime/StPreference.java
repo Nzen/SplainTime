@@ -21,6 +21,7 @@ public class StPreference
 	private String sumDelimiter = "^^";
 	private boolean doesntNeedSum = true;
 	private int categoryDaysToExpiration = 29;
+	private String checkCategoryFlag = "??cat";
 	private String pathToCategoryFile = "st_categories.tsv";
 	private boolean hourFormatIs12Not24 = true;
 	/** Means of changing the active text. No time interpretation */
@@ -29,7 +30,7 @@ public class StPreference
 	private static final String FC_UNDO = "undo_phrase", FC_FUSE = "press_finish",
 			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter",
 			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days",
-			FC_12_HOUR = "12_hour_format";
+			FC_12_HOUR = "12_hour_format", FC_CHECK_CATEGORY = "vet_category";
 	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false;
 	// adjustment verbosity
@@ -210,6 +211,17 @@ public class StPreference
 	public void setCategoryDaysToExpiration( int categoryDaysToExpiration )
 	{
 		this.categoryDaysToExpiration = categoryDaysToExpiration;
+	}
+
+
+
+	public String getCheckCategoryFlag()
+	{
+		return checkCategoryFlag;
+	}
+	public void setCheckCategoryFlag( String checkCategoryFlag )
+	{
+		this.checkCategoryFlag = checkCategoryFlag;
 	}
 
 
