@@ -49,6 +49,8 @@ public class Accountant
 		// deserialize the previous categories
 		for ( String curr : contentsOfCategoryFile )
 		{
+			if ( curr.isEmpty() )
+				continue;
 			temp.become( curr );
 			categoryUses.put( temp.getCategory(), temp.getLastUsed() );
 		}
