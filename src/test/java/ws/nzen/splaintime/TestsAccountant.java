@@ -1,13 +1,13 @@
 /** see ../../../../../../../LICENSE for release rights */
 package ws.nzen.splaintime;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** 
  */
@@ -28,7 +28,7 @@ public class TestsAccountant
 		List<String> tagsPlusSums = counter.withSums(
 				todaysTags, existingCategories );
 		List<String> categoriesAfterward = counter.getCategories();
-		assertEquals( "should have one category", 1, categoriesAfterward.size() );
+		assertEquals( 1, categoriesAfterward.size(), "should have one category" );
 	}
 
 }
