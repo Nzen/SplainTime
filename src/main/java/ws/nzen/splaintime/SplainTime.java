@@ -236,6 +236,10 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	checkIfTagIsCategory( newestDid );
         }
+        else if ( newestDid.startsWith( config.getNextTimeFlag() ) )
+        {
+        	saveForRestart( newestDid );
+        }
         /* relabelActiveTag() is broken
         else if ( newestDid.startsWith( config.getRelabelFlag() ) )
         {
@@ -295,7 +299,16 @@ public class SplainTime extends javax.swing.JFrame {
 		}
 	}
 
-    private void saveNewTag( Tag userEntered )
+
+	private void saveForRestart( String userEntered )
+	{
+		tagHandler.setRestartTag( userEntered
+    			.substring( config.getNextTimeFlag().length() ) );
+		jtfForTag.setText( "" );
+	}
+
+
+	private void saveNewTag( Tag userEntered )
     {
 		// interpret flag, if present
 		storeTag( userEntered );

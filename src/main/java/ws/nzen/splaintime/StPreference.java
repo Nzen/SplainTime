@@ -22,6 +22,7 @@ public class StPreference
 	private boolean doesntNeedSum = true;
 	private int categoryDaysToExpiration = 29;
 	private String checkCategoryFlag = "??cat";
+	private String nextTimeFlag = "!!nt";
 	private String pathToCategoryFile = "st_categories.tsv";
 	private boolean hourFormatIs12Not24 = true;
 	/** Means of changing the active text. No time interpretation */
@@ -222,6 +223,16 @@ public class StPreference
 	public void setCheckCategoryFlag( String checkCategoryFlag )
 	{
 		this.checkCategoryFlag = checkCategoryFlag;
+	}
+
+
+	public String getNextTimeFlag()
+	{
+		return nextTimeFlag;
+	}
+	public void setNextTimeFlag( String nextTimeFlag )
+	{
+		this.nextTimeFlag = nextTimeFlag;
 	}
 
 

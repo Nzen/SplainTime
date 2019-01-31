@@ -34,7 +34,10 @@ public class TagStore {
     final static boolean forClient = true;
     LinkedList<WhenTag> tags;
     private SimpleDateFormat toHourMs;
-    enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
+    private long msSinceRestartTag = 0L;
+    private String restartTag = "";
+
+	enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
 
     /** Setup the store's output, guarantee an initial task */
     public TagStore( String introText, StPreference config ) {
@@ -85,6 +88,11 @@ public class TagStore {
     void add( Tag fromGui ) {
         tags.add( new WhenTag( fromGui ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
+        if ( ! restartTag.isEmpty() )
+        {
+        	restartTag = "";
+        	msSinceRestartTag = 0L;
+        }
     }
 
 
@@ -116,12 +124,22 @@ public class TagStore {
 
     /** Flush & write current to the cache file */
     void quickSave() {
-        if ( tags.size() > 1 ) { // IMPROVE for subtask awareness
+    	boolean holdingMultipleTags = tags.size() > 1;
+        if ( holdingMultipleTags ) {
             flushExtra();
+        }
+        if ( holdingMultipleTags
+        		|| ( ! restartTag.isEmpty() && aMinuteSince( msSinceRestartTag ) )
+        		|| aMinuteSince( tags.peek().tagTime.getTime() ) ) {
             // pr("ts.qs "); writeToDisk( tempFile, tempFileFormat(tags.peek()) ); // 4TESTS
-            writeToDisk( ! forClient, tempFileFormat(tags.peek()) ); // 4REAL
-        } else if (aMinuteSince( tags.peek().tagTime.getTime() )) {
-            writeToDisk( ! forClient, tempFileFormat(tags.peek()) );
+            if ( ! restartTag.isEmpty() )
+            {
+            	writeToDisk( ! forClient, tempFileFormat() );
+            }
+            else
+            {
+            	writeToDisk( ! forClient, tempFileFormat(tags.peek()) );
+            }
         }
     }
 
@@ -179,6 +197,11 @@ public class TagStore {
         pr( "interactive mode over\n" );
     }
 
+    /** restartTag and time -1 to signal that it's 'write when seen' */
+    private String tempFileFormat() {
+        return "-1\t"+ restartTag +"\t"+ restartTag;
+    }
+
     /** just toStr of inMem */
     private String tempFileFormat( WhenTag inMem ) {
         // String sub = ( inMem.subT ) ? "s" : "m"; // IMPROVE this is for later
@@ -190,7 +213,12 @@ public class TagStore {
         String[] date_tag = fromFile.split( "\t" );
         int time = 0, tag = time +1, original = tag +1;
         try {
-            Date then = new Date( Long.parseLong(date_tag[ time ]) );
+        	long savedMilliseconds = Long.parseLong(date_tag[ time ]);
+        	if ( savedMilliseconds < 0 )
+        	{
+        		savedMilliseconds = System.currentTimeMillis();
+        	}
+            Date then = new Date( savedMilliseconds );
             Tag deserialized = new Tag( date_tag[ original ] );
             deserialized.hackSetTagText( date_tag[tag] );
             deserialized.utilDate = then;
@@ -430,6 +458,15 @@ public class TagStore {
     {
     	tags.removeLast();
     }
+
+    public void setRestartTag( String restartTag )
+	{
+		if ( restartTag != null && ! restartTag.isEmpty() )
+		{
+			this.restartTag = restartTag;
+			msSinceRestartTag = System.currentTimeMillis();
+		}
+	}
 
     /** Still rolling my own ad hoc suite, string focused this time */
     public void runTests() {
