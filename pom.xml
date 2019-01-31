@@ -5,94 +5,152 @@
 		xsi:schemaLocation="http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>
 		4.0.0
-	</modelVersion>
+		</modelVersion>
 	<groupId>
 		ws.nzen.tracking
-	</groupId>
+		</groupId>
 	<artifactId>
 		splaintime
-	</artifactId>
+		</artifactId>
 	<version>
 		3.0
-	</version>
+		</version>
 	<inceptionYear>
 		2015
-	</inceptionYear>
+		</inceptionYear>
 	<licenses>
 		<license>
 			<name>
 				Fair v1.0
-			</name>
+				</name>
 			<url>
 				http://fairlicense.org/
-			</url>
-		</license>
-	</licenses>
+				</url>
+			</license>
+		</licenses>
 	<developers>
 		<developer>
 			<id>
 				nzen
-			</id>
+				</id>
 			<name>
 				Nicholas Prado
-			</name>
+				</name>
 			<email>
 				nmprado@nzen.ws
-			</email>
+				</email>
 			<roles>
 				<role>
 					Implementor
-				</role>
-			</roles>
+					</role>
+				</roles>
 			<timezone>
 				UTC-06:00
-			</timezone>
-		</developer>
-	</developers>
-		<dependencies>
-			<dependency>
-				<groupId>
-					org.junit.jupiter
-					</groupId>
-				<artifactId>
-					junit-jupiter-engine
-					</artifactId>
-				<version>
-					5.3.2
-					</version>
-				<scope>
-					test
-					</scope>
-				</dependency>
-			<dependency>
-				<groupId>
-					org.junit.jupiter
-					</groupId>
-				<artifactId>
-					junit-jupiter-api
-					</artifactId>
-				<version>
-					5.3.2
-					</version>
-				<scope>
-					test
-					</scope>
-				</dependency>
-			<!--
-			<dependency>
-				<groupId>
-					</groupId>
-				<artifactId>
-					</artifactId>
-				<version>
-					</version>
-				</dependency>
-				-->
+				</timezone>
+			</developer>
+		</developers>
+	<dependencies>
+		<dependency>
+			<groupId>
+				org.junit.jupiter
+				</groupId>
+			<artifactId>
+				junit-jupiter-engine
+				</artifactId>
+			<version>
+				5.3.2
+				</version>
+			<scope>
+				test
+				</scope>
+			</dependency>
+		<dependency>
+			<groupId>
+				org.junit.jupiter
+				</groupId>
+			<artifactId>
+				junit-jupiter-api
+				</artifactId>
+			<version>
+				5.3.2
+				</version>
+			<scope>
+				test
+				</scope>
+			</dependency>
+		<!--
+		<dependency>
+			<groupId>
+				</groupId>
+			<artifactId>
+				</artifactId>
+			<version>
+				</version>
+			</dependency>
+			-->
 	</dependencies>
 	<build>
 	    <plugins>
-	    	<!-- make source jar -->
+			<plugin>
+			    <!-- path to java 9+ jdk -->
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-toolchains-plugin
+					</artifactId>
+				<version>
+					1.1
+					</version>
+				<configuration>
+					<toolchains>
+						<jdk>
+							<version>
+								[1.8,)
+    							<!-- or 9, depending on numbering convention -->
+								</version>
+							</jdk>
+						</toolchains>
+					</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>
+								toolchain
+								</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			<plugin>
+	    		<!-- compile with java v9+ -->
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-compiler-plugin
+					</artifactId>
+				<version>
+					3.8.0
+					</version>
+				<configuration>
+					<source>
+						1.8
+						</source>
+					<target>
+						1.8
+						</target>
+					<!-- java 9+ specific tag
+					<release>
+						11
+						</release> -->
+					<encoding>
+						UTF-8
+						</encoding>
+					</configuration>
+				</plugin>
 		    <plugin>
+	    		<!-- make source jar -->
 				<groupId>
 					org.apache.maven.plugins
 				</groupId>
@@ -115,8 +173,8 @@
 					</execution>
 				</executions>
 			</plugin>
-	    	<!-- skip tests without remembering -DskipTests -->
 			<plugin>
+		    	<!-- skip tests without remembering -DskipTests -->
 				<groupId>
 					org.apache.maven.plugins
 				</groupId>
@@ -155,14 +213,14 @@
 							<mainClass>
 								ws.nzen.splaintime.SplainTime
 								</mainClass>
-							<Automatic-Module-Name>
-								ws.nzen.tracking.splaintime
-								</Automatic-Module-Name>
 							</manifest>
 						<manifestEntries>
 							<mode>
 								development
 								</mode>
+							<Automatic-Module-Name>
+								ws.nzen.tracking.splaintime
+								</Automatic-Module-Name>
 							</manifestEntries>
 						</archive>
 					</configuration>
