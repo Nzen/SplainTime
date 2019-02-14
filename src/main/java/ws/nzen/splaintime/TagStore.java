@@ -361,16 +361,12 @@ public class TagStore {
         }
     }
 
-	String whetherCategory( String someInput, StPreference config )
+	boolean whetherCategory( String someInput, StPreference config )
 	{
-		final String yes = " yes", no = " no";
-		if ( someInput == null || someInput.isEmpty() )
+		if ( someInput == null || someInput.isEmpty()
+				|| config.isDoesntNeedSum() )
 		{
-			return someInput + no;
-		}
-		else if ( config.isDoesntNeedSum() )
-		{
-			return someInput + no +", categories off";
+			return false;
 		}
 		try
 		{
@@ -388,15 +384,15 @@ public class TagStore {
 				String[] catSplit = catPlusDate.split( "\t" );
 				if ( catSplit[ catInd ].equals( someInput ) )
 				{
-					return someInput + yes;
+					return true;
 				}
 			}
-			return config.getSumDelimiter() + someInput + config.getSumDelimiter() + no;
+			return false;
 		}
 		catch ( IOException ie )
 		{
 			System.err.println( "unable to prettify user file because "+ ie );
-			return someInput + no +", one of files dne";
+			return false;
 		}
 	}
 

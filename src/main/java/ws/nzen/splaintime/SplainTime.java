@@ -294,14 +294,26 @@ public class SplainTime extends javax.swing.JFrame {
 
     private void checkIfTagIsCategory( String text )
 	{
+		final String yes = " y", no = " n";
 		if ( config.getCheckCategoryFlag().length() +1 >= text.length() )
 		{
 			jtfForTag.setText( text +" {check which category?}" );
+			return;
+		}
+		String someInput = text.substring(
+     			config.getCheckCategoryFlag().length() +1 );
+		if ( config.isDoesntNeedSum() )
+		{
+			jtfForTag.setText( no +": categories off" );
+		}
+		else if (  tagHandler.whetherCategory( someInput, config ) )
+		{
+			jtfForTag.setText( someInput + yes );
 		}
 		else
 		{
-			jtfForTag.setText( tagHandler.whetherCategory( text.substring(
-	     			config.getCheckCategoryFlag().length() +1 ), config ) );
+			jtfForTag.setText( config.getSumDelimiter() + someInput
+					+ config.getSumDelimiter() + no );
 		}
 	}
 
