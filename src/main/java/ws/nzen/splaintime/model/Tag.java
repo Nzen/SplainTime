@@ -48,6 +48,13 @@ public class Tag
 	}
 
 
+	@Override
+	public String toString()
+	{
+		return "t-"+ tagText +" @"+ when;
+	}
+
+
 	public String getUserText()
 	{
 		return userText;

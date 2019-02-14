@@ -23,6 +23,7 @@ public class StPreference
 	private int categoryDaysToExpiration = 29;
 	private String checkCategoryFlag = "??cat";
 	private String nextTimeFlag = "!!nt";
+	private String timeSinceFlag = "??ts";
 	private String pathToCategoryFile = "st_categories.tsv";
 	private boolean hourFormatIs12Not24 = true;
 	/** Means of changing the active text. No time interpretation */
@@ -233,6 +234,17 @@ public class StPreference
 	public void setNextTimeFlag( String nextTimeFlag )
 	{
 		this.nextTimeFlag = nextTimeFlag;
+	}
+
+
+
+	public String getTimeSinceFlag()
+	{
+		return timeSinceFlag;
+	}
+	public void setTimeSinceFlag( String timeSinceFlag )
+	{
+		this.timeSinceFlag = timeSinceFlag;
 	}
 
 

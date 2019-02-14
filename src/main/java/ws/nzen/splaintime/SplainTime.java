@@ -15,7 +15,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Random;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -25,11 +31,6 @@ import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
 import ws.nzen.splaintime.model.Tag;
-
-import java.util.Calendar;
-import java.util.Random;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events
@@ -240,6 +241,10 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	saveForRestart( newestDid );
         }
+        else if ( newestDid.startsWith( config.getTimeSinceFlag() +" " ) )
+        {
+        	replyTimeSince( newestDid );
+        }
         /* relabelActiveTag() is broken
         else if ( newestDid.startsWith( config.getRelabelFlag() ) )
         {
@@ -286,7 +291,8 @@ public class SplainTime extends javax.swing.JFrame {
     	}
     }
 
-	private void checkIfTagIsCategory( String text )
+
+    private void checkIfTagIsCategory( String text )
 	{
 		if ( config.getCheckCategoryFlag().length() +1 >= text.length() )
 		{
@@ -308,6 +314,36 @@ public class SplainTime extends javax.swing.JFrame {
 	}
 
 
+	private void replyTimeSince( String userEntered )
+	{
+		// assert userEntered contains command and isn't blank
+		String textToFind = userEntered.substring(
+				userEntered.indexOf( " " ) +1, userEntered.length() );
+		Duration timeSince = tagHandler.timeSince(
+				textToFind, LocalDateTime.now(), config );
+		if ( timeSince.getSeconds() == 0L )
+		{
+			jtfForTag.setText( "No record of "+ textToFind );
+		}
+		else
+		{
+			long minutes = timeSince.toMinutes();
+			long minPerHour = 60;
+			if ( minutes > minPerHour )
+			{
+				long hours = minutes / minPerHour;
+				minutes = minutes % minPerHour;
+				jtfForTag.setText( Long.toString( hours ) +"h "
+						+ Long.toString( minutes ) +"m" );
+			}
+			else
+			{
+				jtfForTag.setText( Long.toString( minutes ) +"m" );
+			}
+		}
+	}
+
+
 	private void saveNewTag( Tag userEntered )
     {
 		// interpret flag, if present
@@ -319,7 +355,8 @@ public class SplainTime extends javax.swing.JFrame {
         resetExit();
     }
 
-    /** Store the tag with the current time */
+
+	/** Store the tag with the current time */
 	private void storeTag( Tag input ) {
         Date now = new Date();
         Date newT = adjustedTime( input, now );

@@ -9,17 +9,19 @@ package ws.nzen.splaintime;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.Random; // for self testing
 
 import ws.nzen.splaintime.model.Tag;
@@ -32,10 +34,11 @@ public class TagStore {
     String tempFile;
     final static boolean amSubTask = true;
     final static boolean forClient = true;
-    LinkedList<WhenTag> tags;
+    private LinkedList<WhenTag> tags;
     private SimpleDateFormat toHourMs;
     private long msSinceRestartTag = 0L;
     private String restartTag = "";
+    private List<Tag> recorded = new LinkedList<>();
 
 	enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
 
@@ -75,6 +78,11 @@ public class TagStore {
             WhenTag fromPreviousRun = parseTempTag( tempSays );
             if ( fromPreviousRun != null ) {
                 tags.add( fromPreviousRun );
+                Tag alsoAs = new Tag( fromPreviousRun.didWhat,
+                		fromPreviousRun.tagTime.toInstant()
+    					.atZone( java.time.ZoneId.systemDefault() )
+    					.toLocalDateTime() );
+                recorded.add( alsoAs );
             }
             else {
                 Tag primingPump = new Tag( basicStartup );
@@ -93,6 +101,7 @@ public class TagStore {
         	restartTag = "";
         	msSinceRestartTag = 0L;
         }
+        recorded.add( fromGui );
     }
 
 
@@ -388,6 +397,34 @@ public class TagStore {
 		{
 			System.err.println( "unable to prettify user file because "+ ie );
 			return someInput + no +", one of files dne";
+		}
+	}
+
+	/** Uses in-memory only, not the file stored tags; returns
+	 * a Duration of 0 seconds if the tag is not found. */
+	Duration timeSince( String someInput,
+			LocalDateTime reference, StPreference config )
+	{
+		if ( someInput == null || someInput.isEmpty() )
+		{
+			return Duration.ofSeconds( 0L );
+		}
+		Tag latestRelevant = null;
+		for ( int ind = recorded.size() -1; ind >= 0; ind-- )
+		{
+			Tag candidate = recorded.get( ind );
+			if ( candidate.getUserText().contains( someInput ) )
+			{
+				latestRelevant = candidate;
+			}
+		}
+		if ( latestRelevant == null )
+		{
+			return Duration.ofSeconds( 0L );
+		}
+		else
+		{
+			return Duration.between( latestRelevant.getWhen(), reference );
 		}
 	}
 
