@@ -28,7 +28,7 @@ import ws.nzen.splaintime.model.Tag;
 
 /** @author Nzen
  */
-public class TagStore {
+public class TagStore implements Store {
 
     String userFile;
     String tempFile;

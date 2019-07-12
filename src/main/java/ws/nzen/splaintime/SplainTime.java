@@ -39,7 +39,7 @@ public class SplainTime extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private static final String configFile = "Splaintime.properties";
-	private TagStore tagHandler;
+	private Store tagHandler;
     private javax.swing.Timer cron;
     private SimpleDateFormat hourFormat;
     boolean terseAdj = true;
@@ -69,18 +69,6 @@ public class SplainTime extends javax.swing.JFrame {
         };
         cron = new javax.swing.Timer( delayms, taskPerformer );
         cron.start();
-    }
-
-    /** 4TESTS version */
-    public SplainTime( boolean testMode ) {
-        tagHandler = new TagStore( "whatever", new StPreference() );
-        exitFlubsLeft = 0; // NOTE irrelevant for testing, probably :p
-        hourFormat = new SimpleDateFormat( "h:mm a" );
-        cron = null;
-        //runTests();
-        tagHandler.runTests();
-        // tagHandler.interactiveUTF();
-        // consider doing a text entry version instead / in addition to ?
     }
 
     /**
@@ -622,20 +610,6 @@ public class SplainTime extends javax.swing.JFrame {
         } else
 			return ! failed;
 	}*/
-
-    /**  */
-    public static void main(String args[]) {
-        boolean testing = true;
-        if ( !testing ) {
-            SplainTime nn = new SplainTime( testing );
-        } else {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-            	public void run() {
-            		new SplainTime().setVisible(true);
-            	}
-            });
-        }
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private JButton btnConfig;
