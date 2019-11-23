@@ -47,7 +47,21 @@ public class SplainTime extends javax.swing.JFrame {
     private final int delayms = 60_001; // 60 * 1000
     private StPreference config;
 
-    /** Starts gui, starts tagStore */
+
+
+	public static void main( String args[] )
+	{
+		java.awt.EventQueue.invokeLater( new Runnable()
+		{
+			public void run()
+			{
+				new SplainTime().setVisible( true );
+			}
+		} );
+	}
+
+
+	/** Starts gui, starts tagStore */
     public SplainTime() {
 		config = new StPreference();
 		config.parseConfig( configFile );
