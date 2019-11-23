@@ -1,0 +1,60 @@
+
+# issue 191123 
+
+## body
+
+assignee : Nicholas (Nzen)
+
+title : Handle noon
+
+status : to do
+
+priority : Highest
+
+-- desc
+Splaintime doesn't handle adjusting times at noon nor midnight.
+
+Steps:
+	- (Precondition) Time is 12:05 pm
+	- Enter "-12:01" as the adjustment, with some text
+
+Expected : Duration label shows "4 min"
+
+Saw : Duration label shows "-1447 min"
+
+Underlying cause:
+	| SplainTime.adjustToHhmmFormat() tries to find a time within the last
+	| twelve hours to be that time. Twelve doesn't always fit the way
+	| this is implemented.
+-- desc
+
+labels:
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
