@@ -40,7 +40,6 @@ public class TagStore implements Store {
     private String restartTag = "";
     private List<Tag> recorded = new LinkedList<>();
 
-	enum OpenResult { WORKED, NO_FILE, NO_DESKTOP, NO_OPEN, IOE };
 
     /** Setup the store's output, guarantee an initial task */
     public TagStore( String introText, StPreference config ) {
@@ -93,7 +92,7 @@ public class TagStore implements Store {
 	}
 
     /** Add a tag, when started, whether ends previous tag */
-    void add( Tag fromGui ) {
+    public void add( Tag fromGui ) {
         tags.add( new WhenTag( fromGui ) );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
         if ( ! restartTag.isEmpty() )
@@ -105,7 +104,7 @@ public class TagStore implements Store {
     }
 
 
-    void replaceActiveWith( Tag fromGui )
+    public void replaceActiveWith( Tag fromGui )
     {
     	tags.pop();
     	tags.add( new WhenTag( fromGui ) );
@@ -132,7 +131,7 @@ public class TagStore implements Store {
     }
 
     /** Flush & write current to the cache file */
-    void quickSave() {
+    public void quickSave() {
     	boolean holdingMultipleTags = tags.size() > 1;
         if ( holdingMultipleTags ) {
             flushExtra();
@@ -323,7 +322,7 @@ public class TagStore implements Store {
     }
 
     /** open the archived tags */
-    OpenResult showStoredTags() {
+    public OpenResult showStoredTags() {
         if ( Desktop.isDesktopSupported() ) {
             try {
                 File archivedTags = new File( userFile );
@@ -361,7 +360,7 @@ public class TagStore implements Store {
         }
     }
 
-	boolean whetherCategory( String someInput, StPreference config )
+    public boolean whetherCategory( String someInput, StPreference config )
 	{
 		if ( someInput == null || someInput.isEmpty()
 				|| config.isDoesntNeedSum() )
@@ -398,7 +397,7 @@ public class TagStore implements Store {
 
 	/** Uses in-memory only, not the file stored tags; returns
 	 * a Duration of 0 seconds if the tag is not found. */
-	Duration timeSince( String someInput,
+    public Duration timeSince( String someInput,
 			LocalDateTime reference, StPreference config )
 	{
 		if ( someInput == null || someInput.isEmpty() )
@@ -425,7 +424,7 @@ public class TagStore implements Store {
 	}
 
     /** delete the temp file ; write the last one */ // UNREADY
-    void wrapUp( StPreference config ) {
+    public void wrapUp( StPreference config ) {
         flushExtra();
         WhenTag ultimate = tags.getLast();
         String outStr = toHourMs.format( ultimate.tagTime ) +"\t"
