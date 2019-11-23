@@ -35,6 +35,8 @@ public class Tag
 
 	public void adopt( String input )
 	{
+		if ( input == null )
+			input = "";
 		userText = input;
 		tagText = userText; // FIX only until ParsesInput is handling it
 		isSubTag = userText.contains( "{" );
