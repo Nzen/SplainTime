@@ -1,5 +1,5 @@
 /** see ../../../../../../../LICENSE for release rights */
-package ws.nzen.splaintime.model;
+package ws.nzen.tracking.splaintime.model;
 
 import java.time.LocalDateTime;
 

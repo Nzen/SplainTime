@@ -7,3 +7,4 @@ module ws.nzen.schedule.splaintime
 
 	requires java.desktop;
 }
+

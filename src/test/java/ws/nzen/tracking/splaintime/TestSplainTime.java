@@ -1,5 +1,5 @@
 /* see ../../../../../LICENSE for release details */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,6 +10,8 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+
+import ws.nzen.tracking.splaintime.SplainTime;
 
 /**  */
 class TestSplainTime

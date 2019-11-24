@@ -1,5 +1,5 @@
 /** see ../../../../../../../LICENSE for release rights */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,7 +8,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-import ws.nzen.splaintime.model.Flag;
+import ws.nzen.tracking.splaintime.ParsesInput;
+import ws.nzen.tracking.splaintime.StPreference;
+import ws.nzen.tracking.splaintime.model.Flag;
 
 /** 
  */
@@ -16,7 +18,7 @@ public class TestsParsesInput
 {
 
 	/**
-	 * Test method for {@link ws.nzen.splaintime.ParsesInput#parse(java.lang.String)}.
+	 * Test method for {@link ws.nzen.tracking.splaintime.ParsesInput#parse(java.lang.String)}.
 	 */
 	@Test
 	public void testParseString()
@@ -51,7 +53,7 @@ public class TestsParsesInput
 	}
 
 	/**
-	 * Test method for {@link ws.nzen.splaintime.ParsesInput#parse()}.
+	 * Test method for {@link ws.nzen.tracking.splaintime.ParsesInput#parse()}.
 	 */
 	@Test
 	public void testParse()
@@ -60,7 +62,7 @@ public class TestsParsesInput
 	}
 
 	/**
-	 * Test method for {@link ws.nzen.splaintime.ParsesInput#getResult()}.
+	 * Test method for {@link ws.nzen.tracking.splaintime.ParsesInput#getResult()}.
 	 */
 	@Test
 	public void testGetResult()

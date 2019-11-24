@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

@@ -177,7 +177,7 @@
 								true
 								</addClasspath>
 							<mainClass>
-								ws.nzen.splaintime.SplainTime
+								ws.nzen.tracking.splaintime.SplainTime
 								</mainClass>
 							</manifest>
 						<manifestEntries>

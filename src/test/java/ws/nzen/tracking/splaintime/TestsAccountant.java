@@ -1,5 +1,5 @@
 /** see ../../../../../../../LICENSE for release rights */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import ws.nzen.tracking.splaintime.Accountant;
+import ws.nzen.tracking.splaintime.StPreference;
 
 /** 
  */

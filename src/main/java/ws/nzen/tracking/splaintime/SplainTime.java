@@ -7,7 +7,7 @@ integrate config
 remove tagstore adj previous
 */
 
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -29,7 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.WindowConstants;
 
-import ws.nzen.splaintime.model.Tag;
+import ws.nzen.tracking.splaintime.model.Tag;
 
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events

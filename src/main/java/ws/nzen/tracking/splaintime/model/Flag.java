@@ -1,4 +1,4 @@
-package ws.nzen.splaintime.model;
+package ws.nzen.tracking.splaintime.model;
 
 public enum Flag
 {

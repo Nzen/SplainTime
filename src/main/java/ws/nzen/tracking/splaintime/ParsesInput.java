@@ -1,4 +1,4 @@
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ws.nzen.splaintime.model.Flag;
-import ws.nzen.splaintime.model.Tag;
+import ws.nzen.tracking.splaintime.model.Flag;
+import ws.nzen.tracking.splaintime.model.Tag;
 
 public class ParsesInput
 {

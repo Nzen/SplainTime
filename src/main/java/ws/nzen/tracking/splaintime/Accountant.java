@@ -1,5 +1,5 @@
 /** see ../../../../../../../LICENSE for release rights */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ws.nzen.splaintime.model.Category;
+import ws.nzen.tracking.splaintime.model.Category;
 
 /** Provides reports about existing tags
  */

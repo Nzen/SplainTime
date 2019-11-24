@@ -1,5 +1,5 @@
 /* see ../../../../../LICENSE for release details */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 /**  */
 public enum OpenResult

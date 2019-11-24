@@ -4,7 +4,7 @@
 Next:
  */
 
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -24,7 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random; // for self testing
 
-import ws.nzen.splaintime.model.Tag;
+import ws.nzen.tracking.splaintime.model.Tag;
 
 /** @author Nzen
  */

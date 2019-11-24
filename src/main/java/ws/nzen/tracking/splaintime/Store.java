@@ -1,11 +1,11 @@
 /* see ../../../../../LICENSE for release details */
-package ws.nzen.splaintime;
+package ws.nzen.tracking.splaintime;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import ws.nzen.splaintime.model.Tag;
+import ws.nzen.tracking.splaintime.model.Tag;
 
 /**  */
 public interface Store
