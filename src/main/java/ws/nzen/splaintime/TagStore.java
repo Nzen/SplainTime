@@ -111,7 +111,7 @@ public class TagStore implements Store {
     }
 
 
-    /** writes all but the latest to disk; callee checked there's x>1 */ // UNREADY
+    /** writes all but the latest to disk; callee checked there's x&gt;1 */ // UNREADY
     private void flushExtra() {
         String outStr = "";
         WhenTag temp;
@@ -130,7 +130,7 @@ public class TagStore implements Store {
 		writeToDisk( forClient, outStr ); // 4REAL
     }
 
-    /** Flush & write current to the cache file */
+    /** Flush &amp; write current to the cache file */
     public void quickSave() {
     	boolean holdingMultipleTags = tags.size() > 1;
         if ( holdingMultipleTags ) {
