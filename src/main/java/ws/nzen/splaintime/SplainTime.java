@@ -16,12 +16,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Random;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -55,7 +54,8 @@ public class SplainTime extends javax.swing.JFrame {
 		{
 			public void run()
 			{
-				new SplainTime().setVisible( true );
+				SplainTime gui = new SplainTime();
+				gui.setVisible( true );
 			}
 		} );
 	}
@@ -255,7 +255,9 @@ public class SplainTime extends javax.swing.JFrame {
         } */
         else
         {
-        	saveNewTag( new ParsesInput( newestDid ).getTag() );
+        	ParsesInput tagGen = new ParsesInput( newestDid );
+        	// tagGen.parse(); // if, else kick back
+        	saveNewTag( tagGen.getTag() );
         }
     }//GEN-LAST:event_pushedEnter
 
@@ -436,116 +438,239 @@ public class SplainTime extends javax.swing.JFrame {
         return new Date( now.getTime() + adjMillis );
     }
 
-    /** parse time from hh:mm and round down to before 'now' */
-    private Date adjustToHhmmFormat( String adjFlag,
-    		Date now, boolean pastward ) {
-        String strHours = adjFlag.substring( 0, adjFlag.indexOf(':') );
-        String strMins = adjFlag.substring( adjFlag.indexOf(':') +1, adjFlag.length() );
-        System.out.println( "st.athm() "+adjFlag+" found "+ strHours +" : "+ strMins
-            +"\tand got "+ now.toString() ); // 4TESTS
-        int adjHours = Integer.parseInt( strHours );
-        int adjMinutes = Integer.parseInt( strMins );
-        GregorianCalendar timeKnob = new GregorianCalendar();
-        timeKnob.set( Calendar.HOUR, adjHours );
-        timeKnob.set( Calendar.MINUTE, adjMinutes );
-        // System.out.println("st.athm() initial calc is "+ timeKnob.getTime().toString()); // 4TESTS
 
-        long tempAdjMilli = timeKnob.getTimeInMillis();
-        long nowMilli = now.getTime();
-        // FIX actually analyze this math
-        if ( nowMilli < tempAdjMilli && pastward) { // adjusted doesn't match current AM/PM
-            System.out.println("st.athm() woo adjusting am/pm"); // 4TESTS
-            int apIs = timeKnob.get( Calendar.AM_PM );
-            if ( apIs == Calendar.AM )
-                apIs = Calendar.PM; // so swap it
-            else
-                apIs = Calendar.AM;
-            timeKnob.set( Calendar.AM_PM, apIs );
-        } // or subtract 12h-milli :p
-        // System.out.println("st.athm() post amPM calc is "+ timeKnob.getTime().toString()); // 4TESTS
-        return timeKnob.getTime();
-    }
-
-    /** Tests for adjustToHhmmFormat() */
-    String[] problemsWithAdjustHhMm( Random oracle ) {
-		// no change, minute flag, time flag
-        int tests = 1, pInd = 0;
-        String here = "st.pwahm() ";
-        String[] problems = new String[ tests ];
-        problems[pInd] = ""; // successful case if it stays this way
-
-        int initHr = oracle.nextInt( 11 ); // NOTE zero offset, le sigh
-        int initMin = oracle.nextInt( 58 );
-        String initChars = Integer.toString( initHr ) +":"
-                +(( initMin < 10 )?"0":"") + Integer.toString( initMin );
-        GregorianCalendar timeKnob = new GregorianCalendar();
-        timeKnob.set( Calendar.HOUR, initHr );
-        timeKnob.set( Calendar.MINUTE, initMin );
-        // System.out.println( here +"initial calc is "
-                // + initChars +" is "+ timeKnob.getTime().toString() ); // 4TESTS
-        int makeItLess = 66666; // NOTE milliseconds
-        boolean lessIsThePast = true;
-        Date aTime = timeKnob.getTime();
-        Date receivedTime = adjustToHhmmFormat( initChars,
-        		new Date( aTime.getTime() - makeItLess ), lessIsThePast );
-        if ( ! aTime.after(receivedTime) ) {
-            problems[ pInd ] = here +"aT "+ aTime.toString() +" }} rT "
-                    + receivedTime.toString() +" }} sT "
-                    + new Date( aTime.getTime() - makeItLess ).toString()
-                    +"\tdiff is "+ Long.toString(aTime.getTime() - receivedTime.getTime());
-            pInd++;
-        }
-        return problems;
-    }
-
-    /* Tests for adjustedTime() *
-    String[] problemsWithAdjustedTime( Random oracle ) {
-		// no change, minute flag, time flag
-        int tests = 2, pInd = 0;
-        String here = "st.pwat() ";
-        String[] problems = new String[ tests ];
-        problems[pInd] = ""; // successful case if it stays this way
-        Date aTime = new Date( System.currentTimeMillis() - oracle.nextInt( 100000 ) );
-        String noFlag = "";
-        if ( ! adjustedTime(noFlag, aTime).equals(aTime) ) {
-            long became = adjustedTime(noFlag, aTime).getTime();
-            problems[ pInd ] = here +"adjusted time despite no flag by "
-                    + Long.toString( aTime.getTime() - became ) +" milliSec";
-            pInd++;
-        }
-        int minutes = oracle.nextInt(60) +1; // to eliminate 0
-        String minusMinutes = "-"+ Integer.toString( minutes );
-        long minusMillis = minutes * 60000; // 60sec * 1000ms
-        Date shouldBe = new Date( aTime.getTime() - minusMillis );
-        String withAdjFlag = minusMinutes +" whatever";
-        if ( ! adjustedTime(withAdjFlag, aTime).equals(shouldBe) ) {
-            long became = adjustedTime(withAdjFlag, aTime).getTime();
-            problems[ pInd ] = here +"wrong minute adjusted time: off by "
-                    + Long.toString( shouldBe.getTime() - became ) +"ms";
-            pInd++;
-        }
-        GregorianCalendar afternoon // IMPROVE use oracle
-                = new GregorianCalendar( 1999, 10, 12, 16, 20 ); // arbitrary date
-        Date theAfternoon = afternoon.getTime();
-        String woopsEnteredLate = "-8:00 hung over all morning";
-        aTime = adjustedTime( woopsEnteredLate, theAfternoon );
-        GregorianCalendar morning
-                = new GregorianCalendar( 1999, 10, 12, 8, 00 );
-        Date whenIShouldHaveEntered = morning.getTime();
-        if ( ! aTime.equals(whenIShouldHaveEntered) ) {
-            long became = aTime.getTime();
-            problems[ pInd ] = here +"wrong clock adjusted time: off by "
-                    + Long.toString( whenIShouldHaveEntered.getTime() - became ) +"ms\n"
-                    + "  should be "+ whenIShouldHaveEntered.toString()
-                    + " - became "+ aTime.toString();
-            pInd++;
-        }
-        /
-        Above is a bad test since aT() isn't actually functional.
-        it relies on using the current time.
-        *
-        return problems;
-    }*/
+	/** parse time from hh:mm and round down to before 'now' */
+	public Date adjustToHhmmFormat(
+			String adjFlag, Date now, boolean pastward )
+	{
+		String strHours = adjFlag.substring( 0, adjFlag.indexOf( ':' ) );
+		String strMins = adjFlag.substring( adjFlag.indexOf( ':' ) + 1,
+				adjFlag.length() );
+		System.out.println(
+				"st.athm() " + adjFlag + " found " + strHours + " : " + strMins
+						+ "\tand got " + now.toString() ); // 4TESTS
+		int adjHour = Integer.parseInt( strHours );
+		int adjMinute = Integer.parseInt( strMins );
+		/*
+		interpret as a time
+		if + find one in the future
+		else find one in the past
+		if hour is the same, use the minute
+		*/
+		LocalDateTime nowIs = now.toInstant().atZone(
+				ZoneId.systemDefault() ).toLocalDateTime();
+		int nowHour = nowIs.getHour();
+		boolean nowIsAm = nowHour < 12;
+		int absoluteNowHour;
+		if ( nowHour == 0 )
+		{
+			absoluteNowHour = 12;
+		}
+		else if ( nowHour > 0 && nowHour <= 12 )
+		{
+			absoluteNowHour = nowHour; 
+		}
+		else
+		{
+			absoluteNowHour = nowHour -12;
+		}
+		LocalDate adjDate = nowIs.toLocalDate();
+		LocalTime adjTime = nowIs.toLocalTime();
+		if ( absoluteNowHour == adjHour )
+		{
+			int nowMin = nowIs.getMinute();
+			if ( pastward && adjMinute < nowMin )
+			{
+				/*
+				00:30 said -12:10
+					0 today
+				5:30 said -5:29
+					5 today
+				12:30 said -12:01
+					12 today
+				17:30 said -5:24
+					17 today
+				*/
+				adjTime = LocalTime.of( nowHour, adjMinute );
+			}
+			else if ( pastward && adjMinute >= nowMin )
+			{
+				/*
+				00:30 said -12:37
+					12 yesterday
+				5:30 said -5:55
+					17 yesterday
+				12:30 said -12:37
+					0 today
+				17:30 said -5:55
+					5 today
+				*/
+				if ( nowIsAm )
+				{
+					adjDate = adjDate.minusDays( 1L );
+					if ( adjHour != 12 )
+						adjHour += 12;
+					adjTime = LocalTime.of( adjHour, adjMinute );
+				}
+				else
+				{
+					adjHour -= 12;
+					adjTime = LocalTime.of( adjHour, adjMinute );
+				}
+			}
+			else if ( ! pastward && adjMinute <= nowMin )
+			{
+				/*
+				00:30 said +12:27
+					12 today
+				5:30 said +5:25
+					17 today
+				12:30 said +12:27
+					0 next day
+				17:30 said +5:25
+					5 next day
+				*/
+				if ( nowIsAm )
+				{
+					adjTime = LocalTime.of( nowHour +12, adjMinute );
+				}
+				else
+				{
+					adjDate = adjDate.plusDays( 1L );
+					if ( adjHour == 12 )
+						adjHour = 0;
+					adjTime = LocalTime.of( adjHour, adjMinute );
+				}
+			}
+			else // if ( ! pastward && adjMinutes > nowMin )
+			{
+				/*
+				00:30 said +12:37
+					0 today
+				5:30 said +5:55
+					5 today
+				12:30 said +12:37
+					12 today
+				17:30 said +5:55
+					17 today
+				*/
+				adjTime = LocalTime.of( nowHour, adjMinute );
+			}
+		}
+		else if ( pastward && adjHour < absoluteNowHour )
+		{
+			/*
+			00:30 said -11:10
+				23 yesterday
+			4:30 said -3:29
+				3 today
+			12:30 said -11:01
+				11 today
+			17:30 said -4:24
+				16 today
+			*/
+			if ( nowHour == 0 )
+			{
+				adjDate = adjDate.minusDays( 1L );
+				adjTime = LocalTime.of( adjHour +12, adjMinute );
+			}
+			else if ( nowIsAm || nowHour == 12 )
+			{
+				adjTime = LocalTime.of( adjHour, adjMinute );
+			}
+			else
+			{
+				adjTime = LocalTime.of( adjHour +12, adjMinute );
+			}
+		}
+		else if ( pastward && adjHour > absoluteNowHour )
+		{
+			/*
+			1:30 said -11:10
+				23 yesterday
+			2:30 said -12:10
+				0 today
+			5:30 said -3:55
+				3 today
+			12:30 said -5:37
+				5 today
+			17:30 said -1:55
+				13 today
+			*/
+			if ( nowIsAm && adjHour == 12 )
+			{
+				adjTime = LocalTime.of( 0, adjMinute );
+			}
+			else if ( nowIsAm )
+			{
+				adjDate = adjDate.minusDays( 1L );
+				adjTime = LocalTime.of( adjHour +12, adjMinute );
+			}
+			else
+			{
+				adjTime = LocalTime.of( adjHour, adjMinute );
+			}
+		}
+		else if ( ! pastward && adjHour < absoluteNowHour )
+		{
+			/*
+			00:30 said +8:10
+				8 today
+			6:30 said +5:25
+				17 today
+			12:59 said +11:49
+				23 today
+			17:30 said +4:25
+				4 next day
+			*/
+			if ( nowHour == 0 )
+			{
+				adjTime = LocalTime.of( adjHour, adjMinute );
+			}
+			else if ( nowIsAm || nowHour == 12 )
+			{
+				adjTime = LocalTime.of( adjHour +12, adjMinute );
+			}
+			else
+			{
+				adjDate = adjDate.plusDays( 1L );
+				adjTime = LocalTime.of( adjHour, adjMinute );
+			}
+			
+		}
+		else // if ( ! pastward && adjHours > absoluteNowHour )
+		{
+			/*
+			01:30 said +12:37
+				12 today
+			5:30 said +9:55
+				9 today
+			11:30 said +12:27
+				12 today
+			14:30 said +10:37
+				22 today
+			14:30 said +1:37
+				1 next day
+			21:30 said +12:55
+				0 next day
+			*/
+			if ( nowIsAm )
+			{
+				adjTime = LocalTime.of( adjHour, adjMinute );
+			}
+			else if ( adjHour == 12 )
+			{
+				adjDate = adjDate.plusDays( 1L );
+				adjTime = LocalTime.of( 0, adjMinute );
+			}
+			else
+			{
+				adjTime = LocalTime.of( adjHour +12, adjMinute );
+			}
+		}
+		return Date.from( LocalDateTime.of( adjDate, adjTime )
+				.atZone( ZoneId.systemDefault() ).toInstant() );
+	}
 
     /** remove { and one of the spaces around it */
     private Tag stripSubtaskFlag( Tag tag )

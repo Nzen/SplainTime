@@ -1,5 +1,5 @@
 
-# issue 191123 
+# issue 191123_1201
 
 ## body
 
@@ -7,7 +7,7 @@ assignee : Nicholas (Nzen)
 
 title : Handle noon
 
-status : to do
+status : in review
 
 priority : Highest
 
@@ -30,13 +30,15 @@ Underlying cause:
 
 labels:
 
->## yyMMdd hhMM zzz
+## 191123 22:45 cst
 
->comment author : 
+comment author : Nicholas (Nzen)
 
->-- comment
-
->-- comment
+-- comment
+I've provided some tests for the possibilities I'm aware of.
+I'd like to say it's exhaustive, but it may not be.
+Changing the issue status to _in review_
+-- comment
 
 
 

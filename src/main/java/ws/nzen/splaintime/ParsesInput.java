@@ -1,11 +1,9 @@
 package ws.nzen.splaintime;
 
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -109,7 +107,7 @@ public class ParsesInput
 				{
 					try
 					{
-						Date userWhen = hourMinText.parse( nibble.substring( 1 ) );
+						Date userWhen = hourMinText.parse( nibble.substring( 1 ) ); // consider adding ymd? so it's today, not 700101
 						// FIx handle + and - ; which is to say meridian
 						directives.add( Flag.changeActiveTime );
 						when = userWhen.toInstant().atZone(
