@@ -5,7 +5,7 @@
 
 assignee : Nicholas Prado (Nzen)
 
-title : Time since calculates from the first instance and isn't persisted
+title : Time since isn't persisted
 
 status : to do
 
@@ -14,18 +14,20 @@ priority : high
 -- desc
 The feature to calculate the time elaped since a particular category for today is not reliable. It is not resilient to shutdown. Which is to say, if splaintime restarts during the day, it reports nothing has occured except the tags entered since restarting.
 
-Also, it reports the time since the first instance of the category, rather than the latest.
+~Also, it reports the time since the first instance of the category, rather than the latest.~
 -- desc
 
 >labels:
 
->## yyMMdd hhMM zzz
+## 191126 00:12 cst
 
->comment author : 
+comment author : Nicholas Prado (Nzen)
 
->-- comment
+-- comment
+I've resolved the issue with falling all the way back to the first tag with the requested word.
 
->-- comment
+However, improving resilience means either dumping TagStore's list into the tmp file or using a different persistence mechanism. This issue is, largely, a justification for that. If it weren't this (which is merited), I'd justify it to avoid orphan tmp files.
+-- comment
 
 
 

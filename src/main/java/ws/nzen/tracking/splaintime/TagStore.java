@@ -411,6 +411,7 @@ public class TagStore implements Store {
 			if ( candidate.getUserText().contains( someInput ) )
 			{
 				latestRelevant = candidate;
+				break;
 			}
 		}
 		if ( latestRelevant == null )
