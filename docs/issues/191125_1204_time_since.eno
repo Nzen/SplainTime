@@ -1,0 +1,49 @@
+
+# issue 191125_1204
+
+## body
+
+assignee : Nicholas Prado (Nzen)
+
+title : Time since calculates from the first instance and isn't persisted
+
+status : to do
+
+priority : high
+
+-- desc
+The feature to calculate the time elaped since a particular category for today is not reliable. It is not resilient to shutdown. Which is to say, if splaintime restarts during the day, it reports nothing has occured except the tags entered since restarting.
+
+Also, it reports the time since the first instance of the category, rather than the latest.
+-- desc
+
+>labels:
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

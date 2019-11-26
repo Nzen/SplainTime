@@ -16,15 +16,15 @@ priority :
 
 -- desc
 
-labels:
+>labels:
 
-## yyMMdd hhMM zzz
+>## yyMMdd hhMM zzz
 
-comment author : 
+>comment author : 
 
--- comment
+>-- comment
 
--- comment
+>-- comment
 
 
 

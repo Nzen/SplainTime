@@ -3,7 +3,7 @@
 
 ## body
 
-assignee : Nicholas (Nzen)
+assignee : Nicholas Prado (Nzen)
 
 title : Handle noon
 
@@ -32,7 +32,7 @@ labels:
 
 ## 191123 22:45 cst
 
-comment author : Nicholas (Nzen)
+comment author : Nicholas Prado (Nzen)
 
 -- comment
 I've provided some tests for the possibilities I'm aware of.
