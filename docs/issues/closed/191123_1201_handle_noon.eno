@@ -7,7 +7,7 @@ assignee : Nicholas Prado (Nzen)
 
 title : Handle noon
 
-status : in review
+status : closed
 
 priority : Highest
 
@@ -38,6 +38,15 @@ comment author : Nicholas Prado (Nzen)
 I've provided some tests for the possibilities I'm aware of.
 I'd like to say it's exhaustive, but it may not be.
 Changing the issue status to _in review_
+-- comment
+
+## 191126 00:11 cst
+
+comment author : Nicholas Prado (Nzen)
+
+-- comment
+I'm satisfied that adjusting the time works across noon.
+Changing the issue status to _closed_
 -- comment
 
 
