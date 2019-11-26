@@ -512,7 +512,7 @@
 				</build>
 			</profile>
 		<profile>
-			<!-- profile to compile as java 12 for local repo -->
+			<!-- profile to compile as latest java for local repo -->
 			<id>
 				jL
 				</id>

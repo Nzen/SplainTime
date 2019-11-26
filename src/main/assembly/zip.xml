@@ -35,7 +35,7 @@
 		<file>
 			<!-- Example config file -->
 			<source>
-				${project.basedir}/fair-v1.0.txt
+				${project.basedir}/Splaintime.properties
 				</source>
 			</file>
 		<file>
