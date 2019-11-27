@@ -410,7 +410,12 @@ public class TagStore implements Store {
 			Tag candidate = recorded.get( ind );
 			if ( candidate.getUserText().contains( someInput ) )
 			{
-				latestRelevant = candidate;
+				// NOTE calc from end, if we aren't the active tag
+				if ( ind < recorded.size() -1 )
+					latestRelevant = recorded.get( ind +1 );
+				else
+					
+					latestRelevant = candidate;
 				break;
 			}
 		}
