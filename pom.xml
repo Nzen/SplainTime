@@ -257,6 +257,51 @@
 						</execution>
 					</executions>
 				</plugin>
+			<plugin>
+				<!-- sign the jar itself -->
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-jarsigner-plugin
+					</artifactId>
+				<version>
+					3.0.0
+					</version>
+				<executions>
+					<execution>
+						<id>
+							sign
+							</id>
+						<goals>
+							<goal>
+								sign
+								</goal>
+							</goals>
+						</execution>
+					<execution>
+						<id>
+							verify
+							</id>
+						<goals>
+							<goal>
+								verify
+								</goal>
+							</goals>
+						</execution>
+					</executions>
+				<configuration>
+					<keystore>
+						../191207_self.pks
+						</keystore>
+					<alias>
+						selfsigned
+						</alias>
+					<storepass>
+						{67NpMzkKDlEHdt+zHoSQLGwpT36EB554VsliU/pY6rR1mULM3Xc6Ahg2bycRa6e8}
+						</storepass>
+					</configuration>
+				</plugin>
 			</plugins>
 		</build>
 	<!--
