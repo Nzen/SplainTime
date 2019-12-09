@@ -14,6 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,6 +28,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random; // for self testing
 
+import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import ws.nzen.tracking.splaintime.model.Tag;
 
 /** @author Nzen
@@ -34,11 +50,13 @@ public class TagStore implements Store {
     String tempFile;
     final static boolean amSubTask = true;
     final static boolean forClient = true;
+    private final Logger outChannel = LoggerFactory.getLogger( TagStore.class );
     private LinkedList<WhenTag> tags;
     private SimpleDateFormat toHourMs;
     private long msSinceRestartTag = 0L;
     private String restartTag = "";
     private List<Tag> recorded = new LinkedList<>();
+    private JdbcConnectionPool cPool;
 
 
     /** Setup the store's output, guarantee an initial task */
@@ -58,9 +76,67 @@ public class TagStore implements Store {
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
-
+        prepDb( config );
 		insertFirst( introText );
     }
+
+	protected void prepDb( StPreference config )
+	{
+		// if ( ! System.getProperty( "os.name" ).equals( "Linux" ) ) // possibly for user home folder
+    	cPool = JdbcConnectionPool.create(
+    			"jdbc:h2:file:~/.splaintime",
+    			"sp_admin_user",
+    			"alot1ofcomputerizedneeds" );
+    	// NOTE migrate db, if necessary
+    	String expectedChangeLogFile = "_st_changesets.json";
+    	JdbcConnection liquibasePipe = null;
+    	try
+    	(
+    			Connection pipe = cPool.getConnection();
+    	)
+		{
+    		ResourceAccessor fileProbe = new FileSystemResourceAccessor();
+     		liquibasePipe = new JdbcConnection( pipe );
+			Liquibase migrator = new Liquibase(
+					expectedChangeLogFile,
+					fileProbe,
+					DatabaseFactory.getInstance()
+						.findCorrectDatabaseImplementation( liquibasePipe ) );
+			migrator.update( new Contexts() );
+			// 4TESTS check if it went in
+			Statement executor = liquibasePipe.createStatement();
+			ResultSet rows = executor.executeQuery( "SHOW TABLES;" );
+			if ( rows.next() )
+			{
+				outChannel.info( "tables exist :" );
+				do
+				{
+					
+					outChannel.info( rows.getString( 1 ) );
+				}
+				while ( rows.next() );
+			}
+			rows.close();
+			executor.close();
+		}
+		catch ( SQLException | LiquibaseException se )
+		{
+			outChannel.error( se.toString() );
+			se.printStackTrace();
+		}
+    	finally
+    	{
+    		if ( liquibasePipe != null )
+				try
+				{
+					liquibasePipe.close();
+				}
+				catch ( DatabaseException de )
+				{
+					outChannel.error( de.toString() );
+				}
+    	}
+	}
 
     /** Ensure a task is ready on startup */
 	private void insertFirst( String basicStartup ) {
@@ -440,6 +516,7 @@ public class TagStore implements Store {
         // writeToDisk( userFile, outStr ); // 4TESTS
 		writeToDisk( forClient, outStr ); // 4REAL
         deleteTempFile();
+        cPool.dispose();
         prettifyFile( config );
 	}
 
@@ -542,9 +619,9 @@ public class TagStore implements Store {
 			return ! failed;
 	}
 
-    /** so much typing just for println. No. */
+    /** So much typing just for println. No. */
     void pr( String out ) {
-        System.out.println( out );
+        outChannel.info( out );
     }
 
 	/** More laziness/terseness */

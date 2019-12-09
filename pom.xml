@@ -24,8 +24,44 @@
 		jar
 		</packaging>
 	<dependencies>
-		<!--
 		<dependency>
+			<!-- embedded db -->
+			<groupId>
+				com.h2database
+				</groupId>
+			<artifactId>
+				h2
+				</artifactId>
+			<version>
+				1.4.200
+				</version>
+			</dependency>
+		<dependency>
+			<!-- migrate db at startup -->
+			<groupId>
+				org.liquibase
+				</groupId>
+			<artifactId>
+				liquibase-core
+				</artifactId>
+			<version>
+				3.8.2
+				</version>
+			</dependency>
+		<dependency>
+			<!-- reputedly needed by liquibase with json -->
+			<groupId>
+				org.yaml
+				</groupId>
+			<artifactId>
+				snakeyaml
+				</artifactId>
+			<version>
+				1.12
+				</version>
+			</dependency>
+		<dependency>
+			<!-- common logging -->
 			<groupId>
 				 org.slf4j
 				</groupId>
@@ -33,10 +69,12 @@
 				slf4j-api
 				</artifactId>
 			<version>
-			< ! - - keep in line with o.j-w version - - >
+			<!-- keep in line with org.java-websockets version -->
 				1.7.25
 				</version>
 			</dependency>
+		<!--
+			NOTE removed, given that liquibase uses logback : 1.2.3
 		<dependency>
 			<groupId>
 				org.slf4j
@@ -45,11 +83,13 @@
 				slf4j-simple
 				</artifactId>
 			<version>
+			same as above
 				1.7.25
 				</version>
 			</dependency>
 			-->
 		<dependency>
+			<!-- test framework -->
 			<groupId>
 				org.junit.jupiter
 				</groupId>

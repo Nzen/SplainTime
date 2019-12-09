@@ -1,0 +1,12 @@
+
+{
+  "databaseChangeLog" :
+  [
+    {
+      "include" :
+      {
+        "file": "0_initial_tables.json"
+      }
+    }
+  ]
+}

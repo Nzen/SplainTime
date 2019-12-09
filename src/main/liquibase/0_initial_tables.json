@@ -1,0 +1,494 @@
+
+{
+  "databaseChangeLog" :
+  [
+    {
+      "changeSet" :
+      {
+        "id": "0_initial_tables",
+        "author": "Nicholas Prado (Nzen)",
+        "dbms" : "H2",
+        "changes" :
+        [
+          {
+            "createTable" :
+            {
+              "tableName" : "st_hashing_algorithm",
+              "remarks": "Just for consistency",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "h_algorithm_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "h_algorithm_desc",
+                    "type" : "VARCHAR( 30 )"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_type",
+              "remarks": "Just a dump for descriptions that dont need checking",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "type_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "type_desc",
+                    "type" : "VARCHAR( 60 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "own_type",
+                    "type" : "INT",
+                    "remarks": "fk constraint below"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "type_fk_type_recur",
+              "baseTableName" : "st_type",
+              "baseColumnNames" : "type_id",
+              "referencedTableName" : "st_type",
+              "referencedColumnNames" : "type_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_person",
+              "remarks": "ST only expects one, but thats fine",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "person_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "person_desc",
+                    "type" : "VARCHAR( 35 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "password_hash",
+                    "type" : "VARCHAR( 65 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "password_salt",
+                    "type" : "VARCHAR( 8 )",
+                    "constraints":
+                    {
+                      "unique" : true
+                    },
+                    "remarks": "Uniqueness shouldnt be a problem with my domain"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "h_algorithm_id",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "person_fk_hasher",
+                      "references" : "st_hashing_algorithm( h_algorithm_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "added_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE",
+                    "defaultValueComputed" : "CURRENT_TIMESTAMP"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_recording_device",
+              "remarks": "For representing the pc, phone that recorded tags",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_desc",
+                    "type" : "VARCHAR( 30 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "device_type",
+                    "type" : "type_id",
+                    "defaultValue" : "NULL",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "recdevice_fk_type",
+                      "references" : "st_type( type_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "mac_address",
+                    "type" : "VARCHAR( 17 )"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_tag",
+              "remarks": "The user entered text about what happened during that time",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "tag_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recorded_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE",
+                    "defaultValueComputed" : "CURRENT_TIMESTAMP"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "adjusted_to",
+                    "type" : "TIMESTAMP WITH TIME ZONE"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recorded_on",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "tag_fk_rec_device",
+                      "references" : "st_recording_device( recording_device_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recorded_by",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "tag_fk_person_recorder",
+                      "references" : "st_person( person_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "tag_value",
+                    "type" : "VARCHAR( 90 )"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_category",
+              "remarks": "Characterizaton of tag, mostly for summing",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "category_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "category_desc",
+                    "type" : "VARCHAR( 30 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "entered_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE",
+                    "defaultValueComputed" : "CURRENT_TIMESTAMP"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "expires_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "reused_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "type_id",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "category_fk_type",
+                      "references" : "st_type( type_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "parent_id",
+                    "type" : "INT",
+                    "defaultValue" : "NULL",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "category_fk_category_recur",
+                      "references" : "st_category( category_id )"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_tag_category",
+              "remarks": "Convenience to avoid reparsing tags for the active categories",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "tag_id",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "tagcategory_fk_tag",
+                      "references" : "st_tag( tag_id )",
+                      "nullable" : false
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "category_id",
+                    "type" : "INT",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "tagcategory_fk_category",
+                      "references" : "st_category( category_id )",
+                      "nullable" : false
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addPrimaryKey" :
+            {
+              "tableName" : "st_tag_category",
+              "remarks": "Ensures the pivot table is compound id",
+              "columnNames" : "tag_id, category_id",
+              "constraintName" : "tagcategory_pk",
+              "validate": true
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Arbitrary attributes for the runtime",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "type" : "VARCHAR( 35 )"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "type_id",
+                    "type" : "INT",
+                    "defaultValue" : "NULL",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "configuration_fk_type",
+                      "references" : "st_type( type_id )"
+                    }
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_id",
+                    "type" : "INT",
+                    "defaultValue" : "NULL",
+                    "constraints":
+                    {
+                      "foreignKeyName" : "configuration_fk_recdevice",
+                      "references" : "st_recording_device( recording_device_id )"
+                    },
+                    "remarks": "ex to enable an easier undo string on a phone"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "string_value",
+                    "type" : "VARCHAR( 30 )",
+                    "remarks": "Large, in case ST allows custom datetime format"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "integral_value",
+                    "type" : "INT"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "boolean_value",
+                    "type" : "BOOLEAN"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
