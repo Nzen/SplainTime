@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration
+		xmlns="http://www.jooq.org/xsd/jooq-codegen-3.12.0.xsd">
+	<jdbc>
+		<driver>
+			org.h2.Driver
+			</driver>
+		<url>
+			jdbc:h2:file:~/.splaintime/st_data
+			</url>
+		<user>
+			sp_admin_user
+			</user>
+		<password>
+			alot1ofcomputerizedneeds
+			</password>
+		</jdbc>
+	<generator>
+		<database>
+			<name>
+				org.jooq.meta.h2.H2Database
+				</name>
+			<excludes>
+				<!-- liquibase tables -->
+				DATABASECHANGELOG*
+				</excludes>
+			<inputSchema>
+				PUBLIC
+				</inputSchema>
+			</database>
+		<generate>
+			<javaTimeTypes>
+				true
+				</javaTimeTypes>
+			<generatedAnnotationType>
+				JAVAX_ANNOTATION_GENERATED
+				</generatedAnnotationType>
+			</generate>
+		<target>
+			<packageName>
+				ws.nzen.tracking.splaintime.dao.jooq
+				</packageName>
+			<directory>
+				src/main/java/
+				</directory>
+			</target>
+		</generator>
+	</configuration>
+
