@@ -49,7 +49,7 @@
 				</version>
 			</dependency>
 		<dependency>
-			<!-- reputedly needed by liquibase with json -->
+			<!-- for liquibase to parse json -->
 			<groupId>
 				org.yaml
 				</groupId>
@@ -74,6 +74,7 @@
 				</version>
 			</dependency>
 		<dependency>
+			<!-- sql dsl -->
 			<groupId>
 				org.jooq
 				</groupId>
@@ -321,7 +322,7 @@
 								development
 								</mode>
 							<st-version>
-								4.0
+								${project.version}
 								</st-version>
 							<Automatic-Module-Name>
 								ws.nzen.tracking.splaintime
@@ -393,8 +394,10 @@
 						</execution>
 					</executions>
 				</plugin>
+	<!--
+	disabled outside of home; move to a profile
 			<plugin>
-				<!-- sign the jar itself -->
+				<!- - sign the jar itself - ->
 				<groupId>
 					org.apache.maven.plugins
 					</groupId>
@@ -436,6 +439,35 @@
 					<storepass>
 						{67NpMzkKDlEHdt+zHoSQLGwpT36EB554VsliU/pY6rR1mULM3Xc6Ahg2bycRa6e8}
 						</storepass>
+					</configuration>
+				</plugin>
+		-->
+			<plugin>
+	    		<!-- maven is able to start splaintime -->
+				<groupId>
+					org.codehaus.mojo
+					</groupId>
+				<artifactId>
+					exec-maven-plugin
+					</artifactId>
+				<version>
+					1.6.0
+					</version>
+				<configuration>
+					<executable>
+						java
+						</executable>
+					<mainClass>
+						ws.nzen.tracking.splaintime.SplainTime
+						</mainClass>
+					<arguments>
+						<argument>
+							-classpath
+							</argument>
+						<argument>
+							ws.nzen.tracking.splaintime.SplainTime
+							</argument>
+					</arguments>
 					</configuration>
 				</plugin>
 			</plugins>
