@@ -14,13 +14,13 @@
             "createTable" :
             {
               "tableName" : "st_hashing_algorithm",
-              "remarks": "Just for consistency",
+              "remarks": "How we hashed the person password",
               "columns" :
               [
                 {
                   "column":
                   {
-                    "name" : "h_algorithm_id",
+                    "name" : "hashing_algorithm_id",
                     "type" : "INT",
                     "autoIncrement" : true,
                     "constraints":
@@ -34,8 +34,90 @@
                 {
                   "column":
                   {
-                    "name" : "h_algorithm_desc",
+                    "name" : "hashing_algorithm_desc",
                     "type" : "VARCHAR( 30 )"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_hashing_algorithm",
+              "remarks": "sha 512 using bcrypt is the initial default",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "hashing_algorithm_desc",
+                    "value" : "SHA512CRYPT"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable" :
+            {
+              "tableName" : "st_recording_device_type",
+              "remarks": "Computer; phone",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_type_id",
+                    "type" : "INT",
+                    "autoIncrement" : true,
+                    "constraints":
+                    {
+                      "primaryKey" : true,
+                      "nullable" : false
+                    }
+                  }
+                  
+                },
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_type_desc",
+                    "type" : "VARCHAR( 30 )"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_recording_device_type",
+              "remarks": "pc that I use",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_type_desc",
+                    "value" : "personal computer; tower"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_recording_device_type",
+              "remarks": "phone/tablet app, eventually",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "recording_device_type_desc",
+                    "value" : "android os"
                   }
                 }
               ]
@@ -45,7 +127,7 @@
             "createTable" :
             {
               "tableName" : "st_type",
-              "remarks": "Just a dump for descriptions that dont need checking",
+              "remarks": "Descriptions that dont need type checking",
               "columns" :
               [
                 {
@@ -74,7 +156,7 @@
                   {
                     "name" : "own_type",
                     "type" : "INT",
-                    "remarks": "fk constraint below"
+                    "remarks": "fk; enabling simple heirarchy"
                   }
                 }
               ]
@@ -131,24 +213,16 @@
                   "column":
                   {
                     "name" : "password_salt",
-                    "type" : "VARCHAR( 8 )",
-                    "constraints":
-                    {
-                      "unique" : true
-                    },
-                    "remarks": "Uniqueness shouldnt be a problem with my domain"
+                    "type" : "VARCHAR( 4 )",
+                    "remarks": "Preferably unique"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "h_algorithm_id",
+                    "name" : "hashing_algorithm_id",
                     "type" : "INT",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "person_fk_hasher",
-                      "references" : "st_hashing_algorithm( h_algorithm_id )"
-                    }
+                    "remarks": "fk"
                   }
                 },
                 {
@@ -157,6 +231,36 @@
                     "name" : "added_when",
                     "type" : "TIMESTAMP WITH TIME ZONE",
                     "defaultValueComputed" : "CURRENT_TIMESTAMP"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "person_fk_hash",
+              "baseTableName" : "st_person",
+              "baseColumnNames" : "hashing_algorithm_id",
+              "referencedTableName" : "st_hashing_algorithm",
+              "referencedColumnNames" : "hashing_algorithm_id",
+              "onDelete": "RESTRICT",
+              "onUpdate": "CASCADE",
+              "remarks": "Restrict so we rehash the pw before deprecating algorithm"
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_person",
+              "remarks": "default user without a password",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "person_desc",
+                    "value" : "default user"
                   }
                 }
               ]
@@ -193,24 +297,41 @@
                 {
                   "column":
                   {
-                    "name" : "device_type",
-                    "type" : "type_id",
-                    "defaultValue" : "NULL",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "recdevice_fk_type",
-                      "references" : "st_type( type_id )"
-                    }
+                    "name" : "recording_device_type_id",
+                    "type" : "INT",
+                    "defaultValue" : 1,
+                    "remarks": "fk; assume pc"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "mac_address",
-                    "type" : "VARCHAR( 17 )"
+                    "name" : "home_dir_guid",
+                    "type" : "VARCHAR( 33 )",
+                    "remarks": "offsetdatetime separator 3digit random"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "ipv4_address",
+                    "type" : "VARCHAR( 15 )",
+                    "remarks": "as an assist to initial user identification"
                   }
                 }
               ]
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "recdevice_fk_recdevice_type",
+              "baseTableName" : "st_recording_device",
+              "baseColumnNames" : "recording_device_type_id",
+              "referencedTableName" : "st_recording_device_type",
+              "referencedColumnNames" : "recording_device_type_id",
+              "onDelete": "SET DEFAULT",
+              "onUpdate": "CASCADE"
             }
           },
           {
@@ -239,38 +360,33 @@
                   {
                     "name" : "recorded_when",
                     "type" : "TIMESTAMP WITH TIME ZONE",
-                    "defaultValueComputed" : "CURRENT_TIMESTAMP"
+                    "defaultValueComputed" : "CURRENT_TIMESTAMP",
+                    "remarks": "ASK is this the resolved date or only when entered"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "adjusted_to",
-                    "type" : "TIMESTAMP WITH TIME ZONE"
+                    "name" : "adjusted_when",
+                    "type" : "TIMESTAMP WITH TIME ZONE",
+                    "remarks": "ASK is this null when not adjusted"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "recorded_on",
+                    "name" : "recording_device_id",
                     "type" : "INT",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "tag_fk_rec_device",
-                      "references" : "st_recording_device( recording_device_id )"
-                    }
+                    "remarks": "fk"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "recorded_by",
+                    "name" : "person_id",
                     "type" : "INT",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "tag_fk_person_recorder",
-                      "references" : "st_person( person_id )"
-                    }
+                    "defaultValue" : 1,
+                    "remarks": "fk"
                   }
                 },
                 {
@@ -284,10 +400,34 @@
             }
           },
           {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "tag_fk_recdevice",
+              "baseTableName" : "st_tag",
+              "baseColumnNames" : "recording_device_id",
+              "referencedTableName" : "st_recording_device",
+              "referencedColumnNames" : "recording_device_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "tag_fk_person",
+              "baseTableName" : "st_tag",
+              "baseColumnNames" : "person_id",
+              "referencedTableName" : "st_person",
+              "referencedColumnNames" : "person_id",
+              "onDelete": "SET DEFAULT",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
             "createTable" :
             {
               "tableName" : "st_category",
-              "remarks": "Characterizaton of tag, mostly for summing",
+              "remarks": "Characterizaton of tag, ex break or cooking",
               "columns" :
               [
                 {
@@ -314,22 +454,7 @@
                 {
                   "column":
                   {
-                    "name" : "entered_when",
-                    "type" : "TIMESTAMP WITH TIME ZONE",
-                    "defaultValueComputed" : "CURRENT_TIMESTAMP"
-                  }
-                },
-                {
-                  "column":
-                  {
                     "name" : "expires_when",
-                    "type" : "TIMESTAMP WITH TIME ZONE"
-                  }
-                },
-                {
-                  "column":
-                  {
-                    "name" : "reused_when",
                     "type" : "TIMESTAMP WITH TIME ZONE"
                   }
                 },
@@ -338,11 +463,7 @@
                   {
                     "name" : "type_id",
                     "type" : "INT",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "category_fk_type",
-                      "references" : "st_type( type_id )"
-                    }
+                    "remarks": "fk"
                   }
                 },
                 {
@@ -350,22 +471,41 @@
                   {
                     "name" : "parent_id",
                     "type" : "INT",
-                    "defaultValue" : "NULL",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "category_fk_category_recur",
-                      "references" : "st_category( category_id )"
-                    }
+                    "remarks": "fk"
                   }
                 }
               ]
             }
           },
           {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "category_fk_type",
+              "baseTableName" : "st_category",
+              "baseColumnNames" : "type_id",
+              "referencedTableName" : "st_type",
+              "referencedColumnNames" : "type_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "category_fk_category",
+              "baseTableName" : "st_category",
+              "baseColumnNames" : "parent_id",
+              "referencedTableName" : "st_category",
+              "referencedColumnNames" : "category_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
             "createTable" :
             {
               "tableName" : "st_tag_category",
-              "remarks": "Convenience to avoid reparsing tags for the active categories",
+              "remarks": "Categories of a tag",
               "columns" :
               [
                 {
@@ -375,10 +515,9 @@
                     "type" : "INT",
                     "constraints":
                     {
-                      "foreignKeyName" : "tagcategory_fk_tag",
-                      "references" : "st_tag( tag_id )",
                       "nullable" : false
-                    }
+                    },
+                    "remarks": "fk"
                   }
                 },
                 {
@@ -388,10 +527,9 @@
                     "type" : "INT",
                     "constraints":
                     {
-                      "foreignKeyName" : "tagcategory_fk_category",
-                      "references" : "st_category( category_id )",
                       "nullable" : false
-                    }
+                    },
+                    "remarks": "fk"
                   }
                 }
               ]
@@ -403,8 +541,31 @@
               "tableName" : "st_tag_category",
               "remarks": "Ensures the pivot table is compound id",
               "columnNames" : "tag_id, category_id",
-              "constraintName" : "tagcategory_pk",
-              "validate": true
+              "constraintName" : "tagcategory_pk"
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "tagcategory_fk_tag",
+              "baseTableName" : "st_tag_category",
+              "baseColumnNames" : "tag_id",
+              "referencedTableName" : "st_tag",
+              "referencedColumnNames" : "tag_id",
+              "onDelete": "CASCADE",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "tagcategory_fk_category",
+              "baseTableName" : "st_tag_category",
+              "baseColumnNames" : "category_id",
+              "referencedTableName" : "st_category",
+              "referencedColumnNames" : "category_id",
+              "onDelete": "CASCADE",
+              "onUpdate": "CASCADE"
             }
           },
           {
@@ -440,12 +601,7 @@
                   {
                     "name" : "type_id",
                     "type" : "INT",
-                    "defaultValue" : "NULL",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "configuration_fk_type",
-                      "references" : "st_type( type_id )"
-                    }
+                    "remarks": "fk; redundant"
                   }
                 },
                 {
@@ -453,19 +609,13 @@
                   {
                     "name" : "recording_device_id",
                     "type" : "INT",
-                    "defaultValue" : "NULL",
-                    "constraints":
-                    {
-                      "foreignKeyName" : "configuration_fk_recdevice",
-                      "references" : "st_recording_device( recording_device_id )"
-                    },
-                    "remarks": "ex to enable an easier undo string on a phone"
+                    "remarks": "fk; ex to enable an easier undo string on a phone"
                   }
                 },
                 {
                   "column":
                   {
-                    "name" : "string_value",
+                    "name" : "textual_value",
                     "type" : "VARCHAR( 30 )",
                     "remarks": "Large, in case ST allows custom datetime format"
                   }
@@ -480,8 +630,272 @@
                 {
                   "column":
                   {
-                    "name" : "boolean_value",
+                    "name" : "binary_value",
                     "type" : "BOOLEAN"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "configuration_fk_recdevice",
+              "baseTableName" : "st_configuration",
+              "baseColumnNames" : "recording_device_id",
+              "referencedTableName" : "st_recording_device",
+              "referencedColumnNames" : "recording_device_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "addForeignKeyConstraint" :
+            {
+              "constraintName": "configuration_fk_type",
+              "baseTableName" : "st_configuration",
+              "baseColumnNames" : "type_id",
+              "referencedTableName" : "st_type",
+              "referencedColumnNames" : "type_id",
+              "onDelete": "SET NULL",
+              "onUpdate": "CASCADE"
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Where to export day file",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "output_path"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "~/Documents/daily"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Morning tag",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "initial_tag"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "started up"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "pop one tag from stack",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "undo_phrase"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "j8x"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "How many times to press to close day",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "press_finish"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "integral_value",
+                    "value" : 2
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Wrap category in this",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "sum_delimiter"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "^"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Exported day file should include category summary",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "want_final_sum"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "binary_value",
+                    "value" : true
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Typical time before category expires",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "category_grace_days"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "integral_value",
+                    "value" : 29
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "formerly 12_hour_format",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "time_format"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "HH:MM"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Flag to check if is an unexpired category",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "vet_category"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "??cat"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "insert" :
+            {
+              "tableName" : "st_configuration",
+              "remarks": "Flag to check elapsed since this category",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "configuration_desc",
+                    "value" : "time_since"
+                  }
+                },
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "value" : "??ts"
                   }
                 }
               ]
@@ -492,3 +906,4 @@
     }
   ]
 }
+

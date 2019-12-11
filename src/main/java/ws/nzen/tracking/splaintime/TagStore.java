@@ -9,18 +9,24 @@ package ws.nzen.tracking.splaintime;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -50,6 +56,7 @@ public class TagStore implements Store {
     String tempFile;
     final static boolean amSubTask = true;
     final static boolean forClient = true;
+    final static String deviceIdFilename = "st_rec_device_id.txt";
     private final Logger outChannel = LoggerFactory.getLogger( TagStore.class );
     private LinkedList<WhenTag> tags;
     private SimpleDateFormat toHourMs;
@@ -57,6 +64,7 @@ public class TagStore implements Store {
     private String restartTag = "";
     private List<Tag> recorded = new LinkedList<>();
     private JdbcConnectionPool cPool;
+    private int recordingDeviceId = 0;
 
 
     /** Setup the store's output, guarantee an initial task */
@@ -76,24 +84,49 @@ public class TagStore implements Store {
                 +" "+ ensureTwoDigits( willBeName.get( Calendar.DAY_OF_MONTH ) );
         tempFile = userFile + " tmp.txt";
         userFile += " splained.txt";
+        ensureDataFolderExists();
         prepDb( config );
+        identifyRecordingDevice();
 		insertFirst( introText );
     }
 
+	protected void ensureDataFolderExists()
+	{
+		try
+		{
+			Path programDataFolder = Paths.get(
+					System.getProperty( "user.home" )
+					+ File.separator
+					+".splaintime" );
+			File pdFolder = programDataFolder.toFile();
+			if ( ! pdFolder.exists() )
+			{
+				Files.createDirectory( programDataFolder );
+				/*
+				PosixFilePermission.OWNER_READ.asFileAttribute,
+				PosixFilePermission.OTHERS_WRITE,
+				PosixFilePermission.GROUP_READ,
+				PosixFilePermission.OTHERS_READ );
+				*/
+			}
+		}
+		catch ( IOException ie )
+		{
+			outChannel.info( "unable to create st dir because "+ ie );
+		}
+	}
+
 	protected void prepDb( StPreference config )
 	{
-		// if ( ! System.getProperty( "os.name" ).equals( "Linux" ) ) // possibly for user home folder
     	cPool = JdbcConnectionPool.create(
-    			"jdbc:h2:file:~/.splaintime",
+    			"jdbc:h2:file:~/.splaintime/st_data",
     			"sp_admin_user",
     			"alot1ofcomputerizedneeds" );
     	// NOTE migrate db, if necessary
     	String expectedChangeLogFile = "_st_changesets.json";
     	JdbcConnection liquibasePipe = null;
     	try
-    	(
-    			Connection pipe = cPool.getConnection();
-    	)
+    	( Connection pipe = cPool.getConnection(); )
 		{
     		ResourceAccessor fileProbe = new FileSystemResourceAccessor();
      		liquibasePipe = new JdbcConnection( pipe );
@@ -105,14 +138,14 @@ public class TagStore implements Store {
 			migrator.update( new Contexts() );
 			// 4TESTS check if it went in
 			Statement executor = liquibasePipe.createStatement();
-			ResultSet rows = executor.executeQuery( "SHOW TABLES;" );
+			ResultSet rows = executor.executeQuery( "SELECT hashing_algorithm_id, hashing_algorithm_desc FROM st_hashing_algorithm;" );
 			if ( rows.next() )
 			{
 				outChannel.info( "tables exist :" );
 				do
 				{
-					
-					outChannel.info( rows.getString( 1 ) );
+					outChannel.info( "id is "+ rows.getInt( 1 ) );
+					outChannel.info( "desc is "+ rows.getString( 2 ) );
 				}
 				while ( rows.next() );
 			}
@@ -127,6 +160,7 @@ public class TagStore implements Store {
     	finally
     	{
     		if ( liquibasePipe != null )
+    		{
 				try
 				{
 					liquibasePipe.close();
@@ -135,7 +169,116 @@ public class TagStore implements Store {
 				{
 					outChannel.error( de.toString() );
 				}
+    		}
     	}
+	}
+
+	protected void identifyRecordingDevice()
+	{
+		try
+		{
+			Path recordingDeviceIdP = Paths.get(
+					System.getProperty( "user.home" )
+					+ File.separator
+					+".splaintime"
+					+ File.separator
+					+ deviceIdFilename );
+			File deviceIdContainer = recordingDeviceIdP.toFile();
+			if ( ! deviceIdContainer.exists() )
+			{
+		    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+			}
+			else
+			{
+				List<String> lines = Files.readAllLines( recordingDeviceIdP );
+				if ( lines.isEmpty() )
+				{
+			    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+				}
+				String ownIdentifier = lines.get( 0 );
+	    		String deviceOfGuidQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = ?";
+		    	try
+		    	(
+		    			Connection pipe = cPool.getConnection();
+						PreparedStatement executor = pipe.prepareStatement( deviceOfGuidQ );
+		    			)
+				{
+					executor.setString( 1, ownIdentifier );
+					ResultSet rows = executor.executeQuery();
+					if ( rows.next() )
+					{
+						outChannel.debug( "am a known device" );
+						recordingDeviceId = rows.getInt( 1 );
+					}
+					else
+					{
+				    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+					}
+					rows.close();
+					return;
+				}
+				catch ( SQLException se )
+				{
+					outChannel.error( se.toString() );
+				}
+		    	// else
+		    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+			}
+		}
+		catch ( IOException ie )
+		{
+			outChannel.info( "unable to create st dir because "+ ie );
+		}
+	}
+
+	protected void ensureRecordingDeviceFileExists(
+			Path deviceIdContainer ) throws IOException
+	{
+		String ownIdentifier = OffsetDateTime.now()
+				+"_"
+				+ String.format( "%03d", new Random().nextInt( 999 ) );
+		Files.write( deviceIdContainer, ownIdentifier.getBytes() );
+
+    	try
+    	(
+			Connection pipe = cPool.getConnection();
+			Statement executor = pipe.createStatement();
+    	)
+		{
+    		String addDeviceI = "INSERT INTO st_recording_device ( home_dir_guid, ipv4_address )"
+    				+ " VALUES ( '"+ ownIdentifier +"', '"+ ipv4AddressOfCurrentRecordingDevice() +"' )";
+			executor.executeUpdate( addDeviceI );
+
+			String idOfDeviceQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = '"+ ownIdentifier +"' ";
+			ResultSet rows = executor.executeQuery( idOfDeviceQ );
+			if ( rows.next() )
+			{
+				recordingDeviceId = rows.getInt( 1 );
+				outChannel.error( "am r device id "+ recordingDeviceId );
+			}
+			rows.close();
+			return;
+		}
+		catch ( SQLException se )
+		{
+			outChannel.error( se.toString() );
+		}
+	}
+
+	protected String ipv4AddressOfCurrentRecordingDevice()
+	{
+		try
+		( final DatagramSocket ear = new DatagramSocket() )
+		{
+			String googleDnsIpv4 = "8.8.8.8";
+			ear.connect( InetAddress.getByName( googleDnsIpv4 ), 10002 );
+			return ear.getLocalAddress().getHostAddress();
+		}
+		catch ( SocketException | UnknownHostException se )
+		{
+			outChannel.error( se.toString() );
+		}
+		return "";
 	}
 
     /** Ensure a task is ready on startup */
