@@ -7,6 +7,12 @@
       {
         "file": "0_initial_tables.json"
       }
-    }
+    },
+    {
+      "include" :
+      {
+        "file": "1_device_guid_39.json"
+      }
+    },
   ]
 }

@@ -1,0 +1,27 @@
+
+{
+  "databaseChangeLog" :
+  [
+    {
+      "changeSet" :
+      {
+        "id": "1_device_guid_39",
+        "author": "Nicholas Prado (Nzen)",
+        "dbms" : "H2",
+        "changes" :
+        [
+          {
+            "modifyDataType" :
+            {
+              "tableName" : "st_recording_device",
+              "columnName": "home_dir_guid",
+              "newDataType" : "VARCHAR( 39 )",
+              "remarks": "OffsetDateTime didnt fit in 33 chars'"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+
