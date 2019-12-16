@@ -1,0 +1,63 @@
+
+{
+  "databaseChangeLog" :
+  [
+    {
+      "changeSet" :
+      {
+        "id": "2_tag_isAbsolute_happenedWhen",
+        "author": "Nicholas Prado (Nzen)",
+        "dbms" : "H2",
+        "changes" :
+        [
+          {
+            "renameColumn" :
+            {
+              "tableName" : "st_tag",
+              "oldColumnName": "recorded_when",
+              "newColumnName": "happened_when",
+              "remarks": "Recorded sounds like adjusted; happened is intentional"
+            }
+          },
+          {
+            "addColumn" :
+            {
+              "tableName" : "st_tag",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "adjusted_with_hhmm",
+                    "type": "BOOLEAN",
+                    "remarks": "Whether used -4 or -1:30"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "update" :
+            {
+              "tableName" : "st_configuration",
+              "columns" :
+              [
+                {
+                  "column":
+                  {
+                    "name" : "textual_value",
+                    "type": "VARCHAR( 30 )",
+                    "value" : "HH:MM:SS"
+                  }
+                }
+              ],
+              "where" : "configuration_desc = 'time_format'",
+              "remarks": "Default time format needed seconds"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+

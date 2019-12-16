@@ -14,5 +14,11 @@
         "file": "1_device_guid_39.json"
       }
     },
+    {
+      "include" :
+      {
+        "file": "2_tag_isHhmm_happenedWhen.json"
+      }
+    }
   ]
 }

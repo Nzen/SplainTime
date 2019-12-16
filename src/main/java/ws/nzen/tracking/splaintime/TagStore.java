@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -48,8 +49,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import ws.nzen.tracking.splaintime.model.Tag;
 
-/** @author Nzen
- */
+/** A means of storing tags throughout a session and resuming a session. */
 public class TagStore implements Store {
 
     String userFile;
@@ -65,6 +65,9 @@ public class TagStore implements Store {
     private List<Tag> recorded = new LinkedList<>();
     private JdbcConnectionPool cPool;
     private int recordingDeviceId = 0;
+    private int personId = 1;
+    // IMPROVE check periodically, in case it's daylight savings or other non monotonically increasing time
+    private ZoneOffset startingOffset = OffsetDateTime.now().getOffset();
 
 
     /** Setup the store's output, guarantee an initial task */
@@ -119,7 +122,7 @@ public class TagStore implements Store {
 	protected void prepDb( StPreference config )
 	{
     	cPool = JdbcConnectionPool.create(
-    			"jdbc:h2:file:~/.splaintime/st_data",
+    			"jdbc:h2:file:~/.splaintime/"+ config.getDatabaseFilename(),
     			"sp_admin_user",
     			"alot1ofcomputerizedneeds" );
     	// NOTE migrate db, if necessary
@@ -320,7 +323,50 @@ public class TagStore implements Store {
         	msSinceRestartTag = 0L;
         }
         recorded.add( fromGui );
+        addToDb( fromGui );
     }
+
+
+    // IMPROVE use actual dao instead of hardcoded sql
+	private void addToDb( Tag fromGui )
+	{
+		if ( fromGui.getTagText().contains( "'" ) )
+			fromGui.hackSetTagText( fromGui.getTagText().replaceAll( "'", "''" ) );
+    	try
+    	(
+			Connection pipe = cPool.getConnection();
+			Statement executor = pipe.createStatement();
+    	)
+		{
+    		String addTagI;
+    		if ( fromGui.getUserWhen() == null
+    				|| fromGui.getUserWhen().isEqual( fromGui.getWhen() ) )
+    		{
+        		addTagI = "INSERT INTO st_tag ("
+        				+ " recorded_when, recording_device_id, person_id, tag_value )"
+        				+ " VALUES ( '"+ OffsetDateTime.of( fromGui.getWhen(), startingOffset )
+        				+"', "+ recordingDeviceId
+        				+", "+ personId
+        				+", '"+ fromGui.getTagText() +"' )";
+    		}
+    		else
+    		{
+        		addTagI = "INSERT INTO st_tag ("
+        				+ " recorded_when, adjusted_when, recording_device_id, person_id, tag_value )"
+        				+ " VALUES ( '"+ OffsetDateTime.of( fromGui.getUserWhen(), startingOffset )
+        				+"', '"+ OffsetDateTime.of( fromGui.getWhen(), startingOffset )
+        				+"', "+ recordingDeviceId
+        				+", "+ personId
+        				+", '"+ fromGui.getTagText() +"' )";
+    		}
+			executor.executeUpdate( addTagI );
+			return;
+		}
+		catch ( SQLException se )
+		{
+			outChannel.error( se.toString() );
+		}
+	}
 
 
     public void replaceActiveWith( Tag fromGui )
@@ -616,8 +662,8 @@ public class TagStore implements Store {
 
 	/** Uses in-memory only, not the file stored tags; returns
 	 * a Duration of 0 seconds if the tag is not found. */
-    public Duration timeSince( String someInput,
-			LocalDateTime reference, StPreference config )
+    public Duration timeSince(
+    		String someInput, LocalDateTime reference, StPreference config )
 	{
 		if ( someInput == null || someInput.isEmpty() )
 		{
@@ -640,13 +686,49 @@ public class TagStore implements Store {
 		}
 		if ( latestRelevant == null )
 		{
-			return Duration.ofSeconds( 0L );
+			return Duration.ofSeconds( timeSinceInDb( someInput, reference ) );
 		}
 		else
 		{
 			return Duration.between( latestRelevant.getWhen(), reference );
 		}
 	}
+
+
+	private long timeSinceInDb(
+			String someInput, LocalDateTime reference )
+	{
+		/*
+		String ownIdentifier = lines.get( 0 );
+		String deviceOfGuidQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = ?";
+    	try
+    	(
+    			Connection pipe = cPool.getConnection();
+				PreparedStatement executor = pipe.prepareStatement( deviceOfGuidQ );
+    			)
+		{
+			executor.setString( 1, ownIdentifier );
+			ResultSet rows = executor.executeQuery();
+			if ( rows.next() )
+			{
+				outChannel.debug( "am a known device" );
+				recordingDeviceId = rows.getInt( 1 );
+			}
+			else
+			{
+		    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+			}
+			rows.close();
+			return;
+		}
+		catch ( SQLException se )
+		{
+			outChannel.error( se.toString() );
+		}
+    	*/
+		return 0L; // FIX todo
+	}
+
 
     /** delete the temp file ; write the last one */ // UNREADY
     public void wrapUp( StPreference config ) {

@@ -1,7 +1,15 @@
 
-= Enohar Changelog
+= Splaintime Changelog
 
 == Unreleased
+
+=== [4.3] - 2019-12-00
+
+==== Added
+
+* writes and reads tags from a db in ~/.splaintime/st_data.mv.db, in addition to writing splained.txt
+* relies on H2 db, Jooq, slf4j, and Liquibase. Dependencies must be alongside the splaintime jar.
+* property to change the vet category and time since directive
 
 == [4.2] - 2019-11-26
 
@@ -32,6 +40,19 @@
 === Added
 
 * directive to immediately start a new tag when splaintime restarts.
+
+// others
+
+== [2.0] - 2018-06-01
+
+=== Added
+
+* symbol to surround a category
+* property for category expiration
+
+=== Changed
+
+* finishing a day, by default, adds summary of categories to splained.txt
 
 
 // Added Changed Removed

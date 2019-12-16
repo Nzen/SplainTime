@@ -26,15 +26,17 @@ public class StPreference
 	private String timeSinceFlag = "??ts";
 	private String pathToCategoryFile = "st_categories.tsv";
 	private boolean hourFormatIs12Not24 = true;
-	/** Means of changing the active text. No time interpretation */
+	private String databaseFilename = "st_data";
 	@Deprecated
+	/** Means of changing the active text. No time interpretation */
 	private String relabelFlag = "f4l";
 	private static final String FC_UNDO = "undo_phrase", FC_FUSE = "press_finish",
 			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter",
 			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days",
-			FC_12_HOUR = "12_hour_format", FC_CHECK_CATEGORY = "vet_category";
+			FC_12_HOUR = "12_hour_format", FC_CHECK_CATEGORY = "vet_category",
+			FC_TIME_SINCE = "time_since", FC_DB_FILE = "database_filename";
 	private float wayFutureVersion = 54F;
-	//private boolean showSeconds = false;
+	//private boolean showSeconds = false; // or just the format
 	// adjustment verbosity
 	// try to cleanup leftover files
 
@@ -82,9 +84,11 @@ public class StPreference
 			doesntNeedSum = temp != null && ! temp.toLowerCase().equals( "yes" )
 					 && ! temp.toLowerCase().equals( "true" );
 			temp = fileConfig.getProperty( FC_12_HOUR );
-			hourFormatIs12Not24 = temp == null || ( temp != null && ( temp.toLowerCase()
-					.equals( "yes" ) || temp.toLowerCase().equals( "true" ) ) );
- 			temp = fileConfig.getProperty( FC_CATEGORY_DAYS, "29" );
+			hourFormatIs12Not24 = temp == null
+					|| temp.toLowerCase().equals( "yes" )
+					|| temp.toLowerCase().equals( "true" );
+ 			temp = fileConfig.getProperty( FC_CATEGORY_DAYS,
+ 					Integer.valueOf( categoryDaysToExpiration ).toString() );
 			try
 			{
 				categoryDaysToExpiration = Integer.parseInt( temp );
@@ -93,6 +97,12 @@ public class StPreference
 			{
 				System.err.println( cl +"pc config category days should be an integer" );
 			}
+		}
+		if ( configVersion > 2F && configVersion < wayFutureVersion )
+		{
+			checkCategoryFlag = fileConfig.getProperty( FC_CHECK_CATEGORY, checkCategoryFlag );
+			timeSinceFlag = fileConfig.getProperty( FC_TIME_SINCE, timeSinceFlag );
+			databaseFilename = fileConfig.getProperty( FC_DB_FILE, databaseFilename );
 		}
 		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag
 				+" ;; initail "+ initialTagText +" ;; sum "+ sumDelimiter );
@@ -251,6 +261,12 @@ public class StPreference
 	public String getPathToCategoryFile()
 	{
 		return pathToCategoryFile;
+	}
+
+
+	public String getDatabaseFilename()
+	{
+		return databaseFilename;
 	}
 
 	
