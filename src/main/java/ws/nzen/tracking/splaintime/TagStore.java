@@ -36,6 +36,12 @@ import java.util.List;
 import java.util.Random; // for self testing
 
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +53,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import ws.nzen.tracking.splaintime.dao.jooq.tables.StRecordingDevice;
 import ws.nzen.tracking.splaintime.model.Tag;
 
 /** A means of storing tags throughout a session and resuming a session. */
@@ -199,28 +206,27 @@ public class TagStore implements Store {
 			    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
 				}
 				String ownIdentifier = lines.get( 0 );
-	    		String deviceOfGuidQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = ?";
 		    	try
-		    	(
-		    			Connection pipe = cPool.getConnection();
-						PreparedStatement executor = pipe.prepareStatement( deviceOfGuidQ );
-		    			)
+		    	( Connection pipe = cPool.getConnection(); )
 				{
-					executor.setString( 1, ownIdentifier );
-					ResultSet rows = executor.executeQuery();
-					if ( rows.next() )
-					{
-						outChannel.debug( "am a known device" );
-						recordingDeviceId = rows.getInt( 1 );
-					}
+		    		DSLContext deviceQuery = DSL.using( pipe, SQLDialect.H2 );
+		    		Record1<Integer> oneDevice = deviceQuery
+		    				.select( StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID )
+		    				.from( StRecordingDevice.ST_RECORDING_DEVICE )
+		    				.where( StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID.eq( DSL.val( ownIdentifier ) ) )
+		    				.fetchAny();
+		    		if ( oneDevice == null )
+		    		{
+				    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+		    		}
 					else
 					{
-				    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+						recordingDeviceId = (Integer)oneDevice.getValue(
+								StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID );
 					}
-					rows.close();
 					return;
 				}
-				catch ( SQLException se )
+				catch ( SQLException | DataAccessException se )
 				{
 					outChannel.error( se.toString() );
 				}
@@ -251,7 +257,7 @@ public class TagStore implements Store {
     		String addDeviceI = "INSERT INTO st_recording_device ( home_dir_guid, ipv4_address )"
     				+ " VALUES ( '"+ ownIdentifier +"', '"+ ipv4AddressOfCurrentRecordingDevice() +"' )";
 			executor.executeUpdate( addDeviceI );
-
+			// 4TESTS
 			String idOfDeviceQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = '"+ ownIdentifier +"' ";
 			ResultSet rows = executor.executeQuery( idOfDeviceQ );
 			if ( rows.next() )
