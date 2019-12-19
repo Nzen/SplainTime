@@ -42,7 +42,7 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StRecordingDeviceReco
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class StRecordingDevice extends TableImpl<StRecordingDeviceRecord> {
 
-    private static final long serialVersionUID = -281750798;
+    private static final long serialVersionUID = 2014918416;
 
     /**
      * The reference instance of <code>PUBLIC.ST_RECORDING_DEVICE</code>
@@ -73,9 +73,9 @@ public class StRecordingDevice extends TableImpl<StRecordingDeviceRecord> {
     public final TableField<StRecordingDeviceRecord, Integer> RECORDING_DEVICE_TYPE_ID = createField(DSL.name("RECORDING_DEVICE_TYPE_ID"), org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.field("1", org.jooq.impl.SQLDataType.INTEGER)), this, "fk; assume pc");
 
     /**
-     * The column <code>PUBLIC.ST_RECORDING_DEVICE.HOME_DIR_GUID</code>. offsetdatetime separator 3digit random
+     * The column <code>PUBLIC.ST_RECORDING_DEVICE.HOME_DIR_GUID</code>.
      */
-    public final TableField<StRecordingDeviceRecord, String> HOME_DIR_GUID = createField(DSL.name("HOME_DIR_GUID"), org.jooq.impl.SQLDataType.VARCHAR(33), this, "offsetdatetime separator 3digit random");
+    public final TableField<StRecordingDeviceRecord, String> HOME_DIR_GUID = createField(DSL.name("HOME_DIR_GUID"), org.jooq.impl.SQLDataType.VARCHAR(39), this, "");
 
     /**
      * The column <code>PUBLIC.ST_RECORDING_DEVICE.IPV4_ADDRESS</code>. as an assist to initial user identification
@@ -122,7 +122,7 @@ public class StRecordingDevice extends TableImpl<StRecordingDeviceRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.PRIMARY_KEY_F, Indexes.RECDEVICE_FK_RECDEVICE_TYPE_INDEX_F);
+        return Arrays.<Index>asList(Indexes.PRIMARY_KEY_E, Indexes.RECDEVICE_FK_RECDEVICE_TYPE_INDEX_E);
     }
 
     @Override

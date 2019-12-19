@@ -11,7 +11,6 @@ import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
 
-import ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangeloglock;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StCategory;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StConfiguration;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StHashingAlgorithm;
@@ -21,7 +20,6 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.StRecordingDeviceType;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StTag;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StTagCategory;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StType;
-import ws.nzen.tracking.splaintime.dao.jooq.tables.records.DatabasechangeloglockRecord;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StCategoryRecord;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StConfigurationRecord;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StHashingAlgorithmRecord;
@@ -64,7 +62,6 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<DatabasechangeloglockRecord> PK_DATABASECHANGELOGLOCK = UniqueKeys0.PK_DATABASECHANGELOGLOCK;
     public static final UniqueKey<StCategoryRecord> PK_ST_CATEGORY = UniqueKeys0.PK_ST_CATEGORY;
     public static final UniqueKey<StConfigurationRecord> PK_ST_CONFIGURATION = UniqueKeys0.PK_ST_CONFIGURATION;
     public static final UniqueKey<StHashingAlgorithmRecord> PK_ST_HASHING_ALGORITHM = UniqueKeys0.PK_ST_HASHING_ALGORITHM;
@@ -107,7 +104,6 @@ public class Keys {
     }
 
     private static class UniqueKeys0 {
-        public static final UniqueKey<DatabasechangeloglockRecord> PK_DATABASECHANGELOGLOCK = Internal.createUniqueKey(Databasechangeloglock.DATABASECHANGELOGLOCK, "PK_DATABASECHANGELOGLOCK", Databasechangeloglock.DATABASECHANGELOGLOCK.ID);
         public static final UniqueKey<StCategoryRecord> PK_ST_CATEGORY = Internal.createUniqueKey(StCategory.ST_CATEGORY, "PK_ST_CATEGORY", StCategory.ST_CATEGORY.CATEGORY_ID);
         public static final UniqueKey<StConfigurationRecord> PK_ST_CONFIGURATION = Internal.createUniqueKey(StConfiguration.ST_CONFIGURATION, "PK_ST_CONFIGURATION", StConfiguration.ST_CONFIGURATION.CONFIGURATION_ID);
         public static final UniqueKey<StHashingAlgorithmRecord> PK_ST_HASHING_ALGORITHM = Internal.createUniqueKey(StHashingAlgorithm.ST_HASHING_ALGORITHM, "PK_ST_HASHING_ALGORITHM", StHashingAlgorithm.ST_HASHING_ALGORITHM.HASHING_ALGORITHM_ID);

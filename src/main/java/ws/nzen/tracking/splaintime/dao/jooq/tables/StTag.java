@@ -16,7 +16,7 @@ import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row6;
+import org.jooq.Row7;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -43,7 +43,7 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StTagRecord;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class StTag extends TableImpl<StTagRecord> {
 
-    private static final long serialVersionUID = 2110451151;
+    private static final long serialVersionUID = 1863562748;
 
     /**
      * The reference instance of <code>PUBLIC.ST_TAG</code>
@@ -64,9 +64,9 @@ public class StTag extends TableImpl<StTagRecord> {
     public final TableField<StTagRecord, Integer> TAG_ID = createField(DSL.name("TAG_ID"), org.jooq.impl.SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>PUBLIC.ST_TAG.RECORDED_WHEN</code>. ASK is this the resolved date or only when entered
+     * The column <code>PUBLIC.ST_TAG.HAPPENED_WHEN</code>. ASK is this the resolved date or only when entered
      */
-    public final TableField<StTagRecord, OffsetDateTime> RECORDED_WHEN = createField(DSL.name("RECORDED_WHEN"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.precision(6).defaultValue(org.jooq.impl.DSL.field("NOW()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "ASK is this the resolved date or only when entered");
+    public final TableField<StTagRecord, OffsetDateTime> HAPPENED_WHEN = createField(DSL.name("HAPPENED_WHEN"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.precision(6).defaultValue(org.jooq.impl.DSL.field("NOW()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "ASK is this the resolved date or only when entered");
 
     /**
      * The column <code>PUBLIC.ST_TAG.ADJUSTED_WHEN</code>. ASK is this null when not adjusted
@@ -87,6 +87,11 @@ public class StTag extends TableImpl<StTagRecord> {
      * The column <code>PUBLIC.ST_TAG.TAG_VALUE</code>.
      */
     public final TableField<StTagRecord, String> TAG_VALUE = createField(DSL.name("TAG_VALUE"), org.jooq.impl.SQLDataType.VARCHAR(90), this, "");
+
+    /**
+     * The column <code>PUBLIC.ST_TAG.ADJUSTED_WITH_HHMM</code>. Whether used -4 or -1:30
+     */
+    public final TableField<StTagRecord, Boolean> ADJUSTED_WITH_HHMM = createField(DSL.name("ADJUSTED_WITH_HHMM"), org.jooq.impl.SQLDataType.BOOLEAN, this, "Whether used -4 or -1:30");
 
     /**
      * Create a <code>PUBLIC.ST_TAG</code> table reference
@@ -128,7 +133,7 @@ public class StTag extends TableImpl<StTagRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.PRIMARY_KEY_9, Indexes.TAG_FK_PERSON_INDEX_9, Indexes.TAG_FK_RECDEVICE_INDEX_9);
+        return Arrays.<Index>asList(Indexes.PRIMARY_KEY_EC, Indexes.TAG_FK_PERSON_INDEX_E, Indexes.TAG_FK_RECDEVICE_INDEX_E);
     }
 
     @Override
@@ -186,11 +191,11 @@ public class StTag extends TableImpl<StTagRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row6 type methods
+    // Row7 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row6<Integer, OffsetDateTime, OffsetDateTime, Integer, Integer, String> fieldsRow() {
-        return (Row6) super.fieldsRow();
+    public Row7<Integer, OffsetDateTime, OffsetDateTime, Integer, Integer, String, Boolean> fieldsRow() {
+        return (Row7) super.fieldsRow();
     }
 }

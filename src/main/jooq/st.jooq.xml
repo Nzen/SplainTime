@@ -6,7 +6,7 @@
 			org.h2.Driver
 			</driver>
 		<url>
-			jdbc:h2:file:~/.splaintime/st_data
+			jdbc:h2:file:~/.splaintime/st_data_testing
 			</url>
 		<user>
 			sp_admin_user
@@ -20,9 +20,10 @@
 			<name>
 				org.jooq.meta.h2.H2Database
 				</name>
+			<!-- ignore liquibase tables -->
 			<excludes>
-				<!-- liquibase tables -->
-				DATABASECHANGELOG*
+				DATABASECHANGELOG
+				| DATABASECHANGELOGLOCK
 				</excludes>
 			<inputSchema>
 				PUBLIC
@@ -32,9 +33,17 @@
 			<javaTimeTypes>
 				true
 				</javaTimeTypes>
-			<generatedAnnotationType>
-				JAVAX_ANNOTATION_GENERATED
-				</generatedAnnotationType>
+			<pojos>
+				true
+				</pojos>
+			<interfaces>
+				true
+				</interfaces>
+			<daos>
+				true
+				</daos>
+			<!-- no trimming means enums must be on the same line -->
+			<generatedAnnotationType>JAVAX_ANNOTATION_GENERATED</generatedAnnotationType>
 			</generate>
 		<target>
 			<packageName>

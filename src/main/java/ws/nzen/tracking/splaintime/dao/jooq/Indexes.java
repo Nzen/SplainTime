@@ -10,7 +10,6 @@ import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
 
-import ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangeloglock;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StCategory;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StConfiguration;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StHashingAlgorithm;
@@ -39,7 +38,6 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
-    public static final Index PRIMARY_KEY_D = Indexes0.PRIMARY_KEY_D;
     public static final Index CATEGORY_FK_CATEGORY_INDEX_A = Indexes0.CATEGORY_FK_CATEGORY_INDEX_A;
     public static final Index CATEGORY_FK_TYPE_INDEX_A = Indexes0.CATEGORY_FK_TYPE_INDEX_A;
     public static final Index PRIMARY_KEY_A = Indexes0.PRIMARY_KEY_A;
@@ -49,12 +47,12 @@ public class Indexes {
     public static final Index PRIMARY_KEY_2 = Indexes0.PRIMARY_KEY_2;
     public static final Index PERSON_FK_HASH_INDEX_5 = Indexes0.PERSON_FK_HASH_INDEX_5;
     public static final Index PRIMARY_KEY_5 = Indexes0.PRIMARY_KEY_5;
-    public static final Index PRIMARY_KEY_F = Indexes0.PRIMARY_KEY_F;
-    public static final Index RECDEVICE_FK_RECDEVICE_TYPE_INDEX_F = Indexes0.RECDEVICE_FK_RECDEVICE_TYPE_INDEX_F;
+    public static final Index PRIMARY_KEY_E = Indexes0.PRIMARY_KEY_E;
+    public static final Index RECDEVICE_FK_RECDEVICE_TYPE_INDEX_E = Indexes0.RECDEVICE_FK_RECDEVICE_TYPE_INDEX_E;
     public static final Index PRIMARY_KEY_4 = Indexes0.PRIMARY_KEY_4;
-    public static final Index PRIMARY_KEY_9 = Indexes0.PRIMARY_KEY_9;
-    public static final Index TAG_FK_PERSON_INDEX_9 = Indexes0.TAG_FK_PERSON_INDEX_9;
-    public static final Index TAG_FK_RECDEVICE_INDEX_9 = Indexes0.TAG_FK_RECDEVICE_INDEX_9;
+    public static final Index PRIMARY_KEY_EC = Indexes0.PRIMARY_KEY_EC;
+    public static final Index TAG_FK_PERSON_INDEX_E = Indexes0.TAG_FK_PERSON_INDEX_E;
+    public static final Index TAG_FK_RECDEVICE_INDEX_E = Indexes0.TAG_FK_RECDEVICE_INDEX_E;
     public static final Index PRIMARY_KEY_D5 = Indexes0.PRIMARY_KEY_D5;
     public static final Index TAGCATEGORY_FK_CATEGORY_INDEX_D = Indexes0.TAGCATEGORY_FK_CATEGORY_INDEX_D;
     public static final Index TAGCATEGORY_FK_TAG_INDEX_D = Indexes0.TAGCATEGORY_FK_TAG_INDEX_D;
@@ -65,7 +63,6 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
-        public static Index PRIMARY_KEY_D = Internal.createIndex("PRIMARY_KEY_D", Databasechangeloglock.DATABASECHANGELOGLOCK, new OrderField[] { Databasechangeloglock.DATABASECHANGELOGLOCK.ID }, true);
         public static Index CATEGORY_FK_CATEGORY_INDEX_A = Internal.createIndex("CATEGORY_FK_CATEGORY_INDEX_A", StCategory.ST_CATEGORY, new OrderField[] { StCategory.ST_CATEGORY.PARENT_ID }, false);
         public static Index CATEGORY_FK_TYPE_INDEX_A = Internal.createIndex("CATEGORY_FK_TYPE_INDEX_A", StCategory.ST_CATEGORY, new OrderField[] { StCategory.ST_CATEGORY.TYPE_ID }, false);
         public static Index PRIMARY_KEY_A = Internal.createIndex("PRIMARY_KEY_A", StCategory.ST_CATEGORY, new OrderField[] { StCategory.ST_CATEGORY.CATEGORY_ID }, true);
@@ -75,12 +72,12 @@ public class Indexes {
         public static Index PRIMARY_KEY_2 = Internal.createIndex("PRIMARY_KEY_2", StHashingAlgorithm.ST_HASHING_ALGORITHM, new OrderField[] { StHashingAlgorithm.ST_HASHING_ALGORITHM.HASHING_ALGORITHM_ID }, true);
         public static Index PERSON_FK_HASH_INDEX_5 = Internal.createIndex("PERSON_FK_HASH_INDEX_5", StPerson.ST_PERSON, new OrderField[] { StPerson.ST_PERSON.HASHING_ALGORITHM_ID }, false);
         public static Index PRIMARY_KEY_5 = Internal.createIndex("PRIMARY_KEY_5", StPerson.ST_PERSON, new OrderField[] { StPerson.ST_PERSON.PERSON_ID }, true);
-        public static Index PRIMARY_KEY_F = Internal.createIndex("PRIMARY_KEY_F", StRecordingDevice.ST_RECORDING_DEVICE, new OrderField[] { StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID }, true);
-        public static Index RECDEVICE_FK_RECDEVICE_TYPE_INDEX_F = Internal.createIndex("RECDEVICE_FK_RECDEVICE_TYPE_INDEX_F", StRecordingDevice.ST_RECORDING_DEVICE, new OrderField[] { StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_TYPE_ID }, false);
+        public static Index PRIMARY_KEY_E = Internal.createIndex("PRIMARY_KEY_E", StRecordingDevice.ST_RECORDING_DEVICE, new OrderField[] { StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID }, true);
+        public static Index RECDEVICE_FK_RECDEVICE_TYPE_INDEX_E = Internal.createIndex("RECDEVICE_FK_RECDEVICE_TYPE_INDEX_E", StRecordingDevice.ST_RECORDING_DEVICE, new OrderField[] { StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_TYPE_ID }, false);
         public static Index PRIMARY_KEY_4 = Internal.createIndex("PRIMARY_KEY_4", StRecordingDeviceType.ST_RECORDING_DEVICE_TYPE, new OrderField[] { StRecordingDeviceType.ST_RECORDING_DEVICE_TYPE.RECORDING_DEVICE_TYPE_ID }, true);
-        public static Index PRIMARY_KEY_9 = Internal.createIndex("PRIMARY_KEY_9", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.TAG_ID }, true);
-        public static Index TAG_FK_PERSON_INDEX_9 = Internal.createIndex("TAG_FK_PERSON_INDEX_9", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.PERSON_ID }, false);
-        public static Index TAG_FK_RECDEVICE_INDEX_9 = Internal.createIndex("TAG_FK_RECDEVICE_INDEX_9", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.RECORDING_DEVICE_ID }, false);
+        public static Index PRIMARY_KEY_EC = Internal.createIndex("PRIMARY_KEY_EC", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.TAG_ID }, true);
+        public static Index TAG_FK_PERSON_INDEX_E = Internal.createIndex("TAG_FK_PERSON_INDEX_E", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.PERSON_ID }, false);
+        public static Index TAG_FK_RECDEVICE_INDEX_E = Internal.createIndex("TAG_FK_RECDEVICE_INDEX_E", StTag.ST_TAG, new OrderField[] { StTag.ST_TAG.RECORDING_DEVICE_ID }, false);
         public static Index PRIMARY_KEY_D5 = Internal.createIndex("PRIMARY_KEY_D5", StTagCategory.ST_TAG_CATEGORY, new OrderField[] { StTagCategory.ST_TAG_CATEGORY.TAG_ID, StTagCategory.ST_TAG_CATEGORY.CATEGORY_ID }, true);
         public static Index TAGCATEGORY_FK_CATEGORY_INDEX_D = Internal.createIndex("TAGCATEGORY_FK_CATEGORY_INDEX_D", StTagCategory.ST_TAG_CATEGORY, new OrderField[] { StTagCategory.ST_TAG_CATEGORY.CATEGORY_ID }, false);
         public static Index TAGCATEGORY_FK_TAG_INDEX_D = Internal.createIndex("TAGCATEGORY_FK_TAG_INDEX_D", StTagCategory.ST_TAG_CATEGORY, new OrderField[] { StTagCategory.ST_TAG_CATEGORY.TAG_ID }, false);

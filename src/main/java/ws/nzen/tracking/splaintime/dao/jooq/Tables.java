@@ -6,7 +6,6 @@ package ws.nzen.tracking.splaintime.dao.jooq;
 
 import javax.annotation.Generated;
 
-import ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangeloglock;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StCategory;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StConfiguration;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StHashingAlgorithm;
@@ -30,11 +29,6 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.StType;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>PUBLIC.DATABASECHANGELOGLOCK</code>.
-     */
-    public static final Databasechangeloglock DATABASECHANGELOGLOCK = Databasechangeloglock.DATABASECHANGELOGLOCK;
 
     /**
      * Characterizaton of tag, ex break or cooking
