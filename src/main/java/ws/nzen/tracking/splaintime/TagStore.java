@@ -207,9 +207,8 @@ public class TagStore implements Store {
 				}
 				String ownIdentifier = lines.get( 0 );
 		    	try
-		    	( Connection pipe = cPool.getConnection(); )
 				{
-		    		DSLContext deviceQuery = DSL.using( pipe, SQLDialect.H2 );
+		    		DSLContext deviceQuery = DSL.using( cPool, SQLDialect.H2 );
 		    		Record1<Integer> oneDevice = deviceQuery
 		    				.select( StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID )
 		    				.from( StRecordingDevice.ST_RECORDING_DEVICE )
@@ -226,7 +225,7 @@ public class TagStore implements Store {
 					}
 					return;
 				}
-				catch ( SQLException | DataAccessException se )
+				catch ( DataAccessException se )
 				{
 					outChannel.error( se.toString() );
 				}
