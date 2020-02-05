@@ -27,6 +27,7 @@ public class StPreference
 	private String pathToCategoryFile = "st_categories.tsv";
 	private boolean hourFormatIs12Not24 = true;
 	private String databaseFilename = "st_data";
+	private boolean lightLookAndFeel = true;
 	@Deprecated
 	/** Means of changing the active text. No time interpretation */
 	private String relabelFlag = "f4l";
@@ -34,7 +35,8 @@ public class StPreference
 			FC_INITIAL = "initial_tag", FC_VERSION = "version", FC_SUM = "sum_delimiter",
 			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days",
 			FC_12_HOUR = "12_hour_format", FC_CHECK_CATEGORY = "vet_category",
-			FC_TIME_SINCE = "time_since", FC_DB_FILE = "database_filename";
+			FC_TIME_SINCE = "time_since", FC_DB_FILE = "database_filename",
+			FC_LOOKFEEL = "theme";
 	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false; // or just the format
 	// adjustment verbosity
@@ -103,6 +105,8 @@ public class StPreference
 			checkCategoryFlag = fileConfig.getProperty( FC_CHECK_CATEGORY, checkCategoryFlag );
 			timeSinceFlag = fileConfig.getProperty( FC_TIME_SINCE, timeSinceFlag );
 			databaseFilename = fileConfig.getProperty( FC_DB_FILE, databaseFilename );
+			lightLookAndFeel = ! fileConfig.getProperty( FC_LOOKFEEL, "light" )
+					.equals( "dark" );
 		}
 		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag
 				+" ;; initail "+ initialTagText +" ;; sum "+ sumDelimiter );
@@ -268,6 +272,17 @@ public class StPreference
 	{
 		return databaseFilename;
 	}
+
+
+	public boolean isLightLookAndFeel()
+	{
+		return lightLookAndFeel;
+	}
+	public void setLightLookAndFeel( boolean lightLookAndFeel )
+	{
+		this.lightLookAndFeel = lightLookAndFeel;
+	}
+
 
 	
 	

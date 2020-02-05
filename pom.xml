@@ -118,6 +118,17 @@
 				1.3.2
 				</version>
 			</dependency>
+		<dependency>
+			<groupId>
+				org.clojars.nakkaya
+				</groupId>
+			<artifactId>
+				darcula
+				</artifactId>
+			<version>
+				1.0.0
+				</version>
+			</dependency>
 		<!--
 			NOTE removed, given that liquibase uses logback : 1.2.3
 		<dependency>
@@ -144,6 +155,20 @@
 				</artifactId>
 			<version>
 				0.9.0
+				</version>
+			</dependency>
+			-->
+		<!--
+		GPL ; not coloring the main panel either
+		<dependency>
+			<groupId>
+				com.jtattoo
+				</groupId>
+			<artifactId>
+				JTattoo
+				</artifactId>
+			<version>
+				1.6.13
 				</version>
 			</dependency>
 			-->
@@ -396,8 +421,10 @@
 				</plugin>
 	<!--
 	disabled outside of home; move to a profile
+	http://maven.apache.org/plugins/maven-jarsigner-plugin/usage.html
+	https://stackoverflow.com/a/4210860
 			<plugin>
-				<!- - sign the jar itself - ->
+				yyxx sign the jar itself xxyy
 				<groupId>
 					org.apache.maven.plugins
 					</groupId>
@@ -441,7 +468,7 @@
 						</storepass>
 					</configuration>
 				</plugin>
-		-->
+				-->
 			<plugin>
 	    		<!-- maven is able to start splaintime -->
 				<groupId>
@@ -540,7 +567,48 @@
 		</scm>
 	<!--
 		prerequisites
-		repositories
+		-->
+	<repositories>
+		<repository>
+			<id>
+				central
+				</id>
+			<name>
+				Sonatype Central
+				</name>
+			<url>
+				https://repo.maven.apache.org/maven2
+				</url>
+			<layout>
+				default
+				</layout>
+			<snapshots>
+				<enabled>
+					false
+					</enabled>
+				</snapshots>
+			</repository>
+		<repository>
+			<id>
+				clojars
+				</id>
+			<name>
+				Clojure central
+				</name>
+			<url>
+				https://clojars.org/repo/
+				</url>
+			<layout>
+				default
+				</layout>
+			<snapshots>
+				<enabled>
+					false
+					</enabled>
+				</snapshots>
+			</repository>
+		</repositories>
+	<!--
 		pluginRepositories
 		-->
 	<distributionManagement>

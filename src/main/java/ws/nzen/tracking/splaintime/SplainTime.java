@@ -9,6 +9,8 @@ remove tagstore adj previous
 
 package ws.nzen.tracking.splaintime;
 
+import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,9 +27,15 @@ import java.util.Date;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ws.nzen.tracking.splaintime.model.Tag;
 
@@ -38,6 +46,7 @@ public class SplainTime extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private static final String configFile = "Splaintime.properties";
+    private final Logger outChannel = LoggerFactory.getLogger( SplainTime.class );
 	private Store tagHandler;
     private javax.swing.Timer cron;
     private SimpleDateFormat hourFormat;
@@ -46,11 +55,19 @@ public class SplainTime extends javax.swing.JFrame {
     private final int delayms = 60_001; // 60 * 1000
     private StPreference config;
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private JButton btnConfig;
+    private JButton btnFinish;
+    private JButton btnOpensFile;
+    private JLabel jlSaysPrevious;
+    private JLabel jlShowsRoughTime;
+    private JTextField jtfForTag;
+    // End of variables declaration//GEN-END:variables
 
 
 	public static void main( String args[] )
 	{
-		java.awt.EventQueue.invokeLater( new Runnable()
+		EventQueue.invokeLater( new Runnable()
 		{
 			public void run()
 			{
@@ -70,7 +87,7 @@ public class SplainTime extends javax.swing.JFrame {
 		hourFormat = ( config.isHourFormatIs12Not24() )
 				? new SimpleDateFormat( "h:mm a" )
 				: new SimpleDateFormat( "k:mm" );
-        initComponents();
+        initComponents( config );
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
 		updateTimeDiffLabel( new Date() );
         ActionListener taskPerformer = new ActionListener() {
@@ -89,8 +106,24 @@ public class SplainTime extends javax.swing.JFrame {
     Netbeans generated gui initialization
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        jtfForTag = new JTextField();
+    private void initComponents( StPreference config ) {
+    	if ( ! config.isLightLookAndFeel() )
+    	{
+    		try
+			{
+				UIManager.setLookAndFeel( "com.bulenkov.darcula.DarculaLaf" );
+				// UIManager.setLookAndFeel( "com.jtattoo.plaf.hifi.HiFiLookAndFeel" );
+			}
+			catch ( ClassNotFoundException
+					| InstantiationException
+					| IllegalAccessException
+					| UnsupportedLookAndFeelException cnfe )
+			{
+				outChannel.error( "st.ic unable to find Darcula L-F because"+ cnfe.toString() );
+			}
+    	}
+
+    	jtfForTag = new JTextField();
         btnFinish = new JButton();
         jlSaysPrevious = new JLabel();
         btnOpensFile = new JButton();
@@ -138,14 +171,13 @@ public class SplainTime extends javax.swing.JFrame {
         jlShowsRoughTime.setText("0 min");
 
         btnConfig.setFont(new Font("Times New Roman", 0, 14)); // NOI18N
-        btnConfig.setText("Config");
-        btnConfig.setToolTipText("Choose settings");
+        btnConfig.setText("About");
+        btnConfig.setToolTipText("Acknowledgements");
         btnConfig.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 openConfig(evt);
             }
         });
-        btnConfig.setEnabled( false );
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -266,9 +298,12 @@ public class SplainTime extends javax.swing.JFrame {
         // NOTE not wrapUp() so it won't delete the temp file
     }//GEN-LAST:event_closingFrame
 
-    @Deprecated
     private void openConfig(ActionEvent evt) {//GEN-FIRST:event_openConfig
-        System.out.println( "st.oc no longer implemented" );
+        JOptionPane.showMessageDialog(
+        		this,
+        		"Splaintime is released as Fair licence"
+        		+ "\nSt relies on Jooq, Liquibase, snakeyaml,"
+        		+ "\nslf4j, javax.annotation, and darcula." );
     }//GEN-LAST:event_openConfig
 
 
@@ -749,13 +784,4 @@ public class SplainTime extends javax.swing.JFrame {
         } else
 			return ! failed;
 	}*/
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnConfig;
-    private JButton btnFinish;
-    private JButton btnOpensFile;
-    private JLabel jlSaysPrevious;
-    private JLabel jlShowsRoughTime;
-    private JTextField jtfForTag;
-    // End of variables declaration//GEN-END:variables
 }
