@@ -3,11 +3,21 @@
 
 == Unreleased
 
+=== [5.0] - 2020-02-04
+
+==== Added
+
+* writes and deletes tags from db (previous had an invalid column in sql)
+
+==== Changed
+
+* adds tagId to Tag and TagStore.WhenTag
+
 === [4.3] - 2019-12-00
 
 ==== Added
 
-* writes and reads tags from a db in ~/.splaintime/st_data.mv.db, in addition to writing splained.txt
+* writes and reads recording devices from a db in ~/.splaintime/st_data.mv.db, in addition to writing splained.txt
 * relies on H2 db, Jooq, slf4j, and Liquibase. Dependencies must be alongside the splaintime jar.
 * property to change the vet category and time since directive
 

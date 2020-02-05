@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -54,6 +53,8 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StRecordingDevice;
+import ws.nzen.tracking.splaintime.dao.jooq.tables.StTag;
+import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StTagRecord;
 import ws.nzen.tracking.splaintime.model.Tag;
 
 /** A means of storing tags throughout a session and resuming a session. */
@@ -320,7 +321,8 @@ public class TagStore implements Store {
 
     /** Add a tag, when started, whether ends previous tag */
     public void add( Tag fromGui ) {
-        tags.add( new WhenTag( fromGui ) );
+    	WhenTag secondVersion = new WhenTag( fromGui );
+        tags.add( secondVersion );
         // pr( "ts.a() got "+ when.toString() +" _ "+ what ); // 4TESTS
         if ( ! restartTag.isEmpty() )
         {
@@ -328,46 +330,65 @@ public class TagStore implements Store {
         	msSinceRestartTag = 0L;
         }
         recorded.add( fromGui );
-        addToDb( fromGui );
+        addToDb( fromGui, secondVersion );
     }
 
 
-    // IMPROVE use actual dao instead of hardcoded sql
-	private void addToDb( Tag fromGui )
+	private void addToDb( Tag fromGui, WhenTag secondVersion )
 	{
 		if ( fromGui.getTagText().contains( "'" ) )
-			fromGui.hackSetTagText( fromGui.getTagText().replaceAll( "'", "''" ) );
-    	try
-    	(
-			Connection pipe = cPool.getConnection();
-			Statement executor = pipe.createStatement();
-    	)
+			fromGui.hackSetTagText(
+					fromGui.getTagText().replaceAll( "'", "''" ) );
+		try
 		{
-    		String addTagI;
-    		if ( fromGui.getUserWhen() == null
-    				|| fromGui.getUserWhen().isEqual( fromGui.getWhen() ) )
-    		{
-        		addTagI = "INSERT INTO st_tag ("
-        				+ " recorded_when, recording_device_id, person_id, tag_value )"
-        				+ " VALUES ( '"+ OffsetDateTime.of( fromGui.getWhen(), startingOffset )
-        				+"', "+ recordingDeviceId
-        				+", "+ personId
-        				+", '"+ fromGui.getTagText() +"' )";
-    		}
-    		else
-    		{
-        		addTagI = "INSERT INTO st_tag ("
-        				+ " recorded_when, adjusted_when, recording_device_id, person_id, tag_value )"
-        				+ " VALUES ( '"+ OffsetDateTime.of( fromGui.getUserWhen(), startingOffset )
-        				+"', '"+ OffsetDateTime.of( fromGui.getWhen(), startingOffset )
-        				+"', "+ recordingDeviceId
-        				+", "+ personId
-        				+", '"+ fromGui.getTagText() +"' )";
-    		}
-			executor.executeUpdate( addTagI );
-			return;
+			//
+			DSLContext additionRequest = DSL.using( cPool, SQLDialect.H2 );
+			StTagRecord inserted;
+			if ( fromGui.getUserWhen() == null
+					|| fromGui.getUserWhen().isEqual( fromGui.getWhen() ) )
+			{
+				inserted = additionRequest.insertInto( StTag.ST_TAG,
+						StTag.ST_TAG.HAPPENED_WHEN,
+						StTag.ST_TAG.RECORDING_DEVICE_ID,
+						StTag.ST_TAG.PERSON_ID,
+						StTag.ST_TAG.TAG_VALUE )
+						.values( OffsetDateTime.of( fromGui.getWhen(), startingOffset ),
+								recordingDeviceId,
+								personId,
+								fromGui.getTagText() )
+						.returning()
+						.fetchOne();
+			}
+			else
+			{
+				boolean adjustedByHhmm = fromGui.getUserText()
+							.charAt( "-1:".length() -1 ) == ':'
+						|| fromGui.getUserText()
+							.charAt( "-12:".length() -1 ) == ':';
+				// IMPROVE get a better heuristic, perhaps send back a parse tree
+				inserted = additionRequest.insertInto( StTag.ST_TAG,
+						StTag.ST_TAG.HAPPENED_WHEN,
+						StTag.ST_TAG.ADJUSTED_WHEN,
+						StTag.ST_TAG.ADJUSTED_WITH_HHMM,
+						StTag.ST_TAG.RECORDING_DEVICE_ID,
+						StTag.ST_TAG.PERSON_ID,
+						StTag.ST_TAG.TAG_VALUE )
+						.values(
+								OffsetDateTime.of(
+										fromGui.getUserWhen(), startingOffset ),
+								OffsetDateTime.of(
+										fromGui.getWhen(), startingOffset ),
+								adjustedByHhmm,
+								recordingDeviceId,
+								personId,
+								fromGui.getTagText() )
+						.returning()
+						.fetchOne();
+			}
+			fromGui.setTagId( inserted.getTagId() );
+			secondVersion.tagId = inserted.getTagId();
 		}
-		catch ( SQLException se )
+		catch ( DataAccessException se )
 		{
 			outChannel.error( se.toString() );
 		}
@@ -801,7 +822,22 @@ public class TagStore implements Store {
 
     public void removePrevious()
     {
-    	tags.removeLast();
+    	removeLatestFromDb( tags.removeLast() );
+    }
+
+    private void removeLatestFromDb( WhenTag toRemove )
+    {
+		try
+		{
+    		DSL.using( cPool, SQLDialect.H2 )
+    				.delete( StTag.ST_TAG )
+    				.where( StTag.ST_TAG.TAG_ID.eq( toRemove.tagId ) )
+    				.execute();
+		}
+		catch ( DataAccessException se )
+		{
+			outChannel.error( se.toString() );
+		}
     }
 
     public void setRestartTag( String restartTag )
@@ -893,6 +929,7 @@ public class TagStore implements Store {
         public String didWhat;
         public String originallySaid;
         public boolean subT;
+        public int tagId;
         /** Provisional, given that WhenTag was the original form, but I kept it solely in here */
         public WhenTag( Tag fromGui ) {
         	tagTime = fromGui.utilDate;

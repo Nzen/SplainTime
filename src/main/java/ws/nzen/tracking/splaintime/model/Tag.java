@@ -13,6 +13,7 @@ public class Tag
 	private int minuteAdjustment;
 	private boolean isSubTag;
 	private String tagText;
+	private int tagId;
 	@Deprecated
 	/** Solely for legacy compatibility.
 	 * I'll toss this in a bit, in favor of LocalDateTime */
@@ -116,6 +117,16 @@ public class Tag
 	public void setUserWhen( LocalDateTime userWhen )
 	{
 		this.userWhen = userWhen;
+	}
+
+
+	public int getTagId()
+	{
+		return tagId;
+	}
+	public void setTagId( int tagId )
+	{
+		this.tagId = tagId;
 	}
 
 }

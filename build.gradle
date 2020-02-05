@@ -32,7 +32,7 @@ dependencies {
 }
 
 group = 'ws.nzen.tracking'
-version = '4.3-j8'
+version = '5.0-j8'
 description = 'Splaintime'
 sourceCompatibility = '1.8'
 
