@@ -20,10 +20,9 @@
 			<name>
 				org.jooq.meta.h2.H2Database
 				</name>
-			<!-- ignore liquibase tables -->
+			<!-- ignore one liquibase table -->
 			<excludes>
-				DATABASECHANGELOG
-				| DATABASECHANGELOGLOCK
+				DATABASECHANGELOGLOCK
 				</excludes>
 			<inputSchema>
 				PUBLIC

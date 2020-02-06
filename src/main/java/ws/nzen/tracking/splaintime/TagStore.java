@@ -37,7 +37,6 @@ import java.util.Random; // for self testing
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
-import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -52,6 +51,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangelog;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StRecordingDevice;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StTag;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.records.StTagRecord;
@@ -72,6 +72,7 @@ public class TagStore implements Store {
     private String restartTag = "";
     private List<Tag> recorded = new LinkedList<>();
     private JdbcConnectionPool cPool;
+    private DSLContext jqPool = null;
     private int recordingDeviceId = 0;
     private int personId = 1;
     // IMPROVE check periodically, in case it's daylight savings or other non monotonically increasing time
@@ -135,6 +136,7 @@ public class TagStore implements Store {
     			"alot1ofcomputerizedneeds" );
     	// NOTE migrate db, if necessary
     	String expectedChangeLogFile = "_st_changesets.json";
+		jqPool = DSL.using( cPool, SQLDialect.H2 );
     	JdbcConnection liquibasePipe = null;
     	try
     	( Connection pipe = cPool.getConnection(); )
@@ -147,21 +149,6 @@ public class TagStore implements Store {
 					DatabaseFactory.getInstance()
 						.findCorrectDatabaseImplementation( liquibasePipe ) );
 			migrator.update( new Contexts() );
-			// 4TESTS check if it went in
-			Statement executor = liquibasePipe.createStatement();
-			ResultSet rows = executor.executeQuery( "SELECT hashing_algorithm_id, hashing_algorithm_desc FROM st_hashing_algorithm;" );
-			if ( rows.next() )
-			{
-				outChannel.info( "tables exist :" );
-				do
-				{
-					outChannel.info( "id is "+ rows.getInt( 1 ) );
-					outChannel.info( "desc is "+ rows.getString( 2 ) );
-				}
-				while ( rows.next() );
-			}
-			rows.close();
-			executor.close();
 		}
 		catch ( SQLException | LiquibaseException se )
 		{
@@ -182,7 +169,28 @@ public class TagStore implements Store {
 				}
     		}
     	}
+    	ensureLatestDbChanges();
 	}
+
+
+	private void ensureLatestDbChanges()
+	{
+		final String newestChangeset = "2_tag_isAbsolute_happenedWhen";
+		List<String> ids = jqPool.select( Databasechangelog.DATABASECHANGELOG.ID )
+				.from( Databasechangelog.DATABASECHANGELOG )
+				.fetch( Databasechangelog.DATABASECHANGELOG.ID );
+		boolean found = false;
+		for ( String changeSet : ids )
+		{
+			found = newestChangeset.equals( changeSet );
+			if ( found )
+				break;
+		}
+		if ( ! found )
+			throw new IllegalStateException(
+					"Missing expected changeset "+ newestChangeset );
+	}
+
 
 	protected void identifyRecordingDevice()
 	{
@@ -209,8 +217,7 @@ public class TagStore implements Store {
 				String ownIdentifier = lines.get( 0 );
 		    	try
 				{
-		    		DSLContext deviceQuery = DSL.using( cPool, SQLDialect.H2 );
-		    		Record1<Integer> oneDevice = deviceQuery
+		    		Record1<Integer> oneDevice = jqPool
 		    				.select( StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID )
 		    				.from( StRecordingDevice.ST_RECORDING_DEVICE )
 		    				.where( StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID.eq( DSL.val( ownIdentifier ) ) )
@@ -254,19 +261,12 @@ public class TagStore implements Store {
 			Statement executor = pipe.createStatement();
     	)
 		{
-    		String addDeviceI = "INSERT INTO st_recording_device ( home_dir_guid, ipv4_address )"
-    				+ " VALUES ( '"+ ownIdentifier +"', '"+ ipv4AddressOfCurrentRecordingDevice() +"' )";
-			executor.executeUpdate( addDeviceI );
-			// 4TESTS
-			String idOfDeviceQ = "SELECT recording_device_id FROM st_recording_device WHERE home_dir_guid = '"+ ownIdentifier +"' ";
-			ResultSet rows = executor.executeQuery( idOfDeviceQ );
-			if ( rows.next() )
-			{
-				recordingDeviceId = rows.getInt( 1 );
-				outChannel.error( "am r device id "+ recordingDeviceId );
-			}
-			rows.close();
-			return;
+    		recordingDeviceId = jqPool.insertInto(
+    				StRecordingDevice.ST_RECORDING_DEVICE,
+    				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
+    				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS )
+    				.values( ownIdentifier, ipv4AddressOfCurrentRecordingDevice() )
+    				.returning().fetchOne().getRecordingDeviceId();
 		}
 		catch ( SQLException se )
 		{
@@ -341,13 +341,11 @@ public class TagStore implements Store {
 					fromGui.getTagText().replaceAll( "'", "''" ) );
 		try
 		{
-			//
-			DSLContext additionRequest = DSL.using( cPool, SQLDialect.H2 );
 			StTagRecord inserted;
 			if ( fromGui.getUserWhen() == null
 					|| fromGui.getUserWhen().isEqual( fromGui.getWhen() ) )
 			{
-				inserted = additionRequest.insertInto( StTag.ST_TAG,
+				inserted = jqPool.insertInto( StTag.ST_TAG,
 						StTag.ST_TAG.HAPPENED_WHEN,
 						StTag.ST_TAG.RECORDING_DEVICE_ID,
 						StTag.ST_TAG.PERSON_ID,
@@ -366,7 +364,7 @@ public class TagStore implements Store {
 						|| fromGui.getUserText()
 							.charAt( "-12:".length() -1 ) == ':';
 				// IMPROVE get a better heuristic, perhaps send back a parse tree
-				inserted = additionRequest.insertInto( StTag.ST_TAG,
+				inserted = jqPool.insertInto( StTag.ST_TAG,
 						StTag.ST_TAG.HAPPENED_WHEN,
 						StTag.ST_TAG.ADJUSTED_WHEN,
 						StTag.ST_TAG.ADJUSTED_WITH_HHMM,
@@ -829,7 +827,7 @@ public class TagStore implements Store {
     {
 		try
 		{
-    		DSL.using( cPool, SQLDialect.H2 )
+			jqPool
     				.delete( StTag.ST_TAG )
     				.where( StTag.ST_TAG.TAG_ID.eq( toRemove.tagId ) )
     				.execute();

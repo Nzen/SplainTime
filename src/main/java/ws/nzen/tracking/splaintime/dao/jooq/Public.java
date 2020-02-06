@@ -14,6 +14,7 @@ import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
+import ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangelog;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StCategory;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StConfiguration;
 import ws.nzen.tracking.splaintime.dao.jooq.tables.StHashingAlgorithm;
@@ -38,12 +39,17 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.StType;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1732397871;
+    private static final long serialVersionUID = -331299209;
 
     /**
      * The reference instance of <code>PUBLIC</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * The table <code>PUBLIC.DATABASECHANGELOG</code>.
+     */
+    public final Databasechangelog DATABASECHANGELOG = ws.nzen.tracking.splaintime.dao.jooq.tables.Databasechangelog.DATABASECHANGELOG;
 
     /**
      * Characterizaton of tag, ex break or cooking
@@ -112,6 +118,7 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
+            Databasechangelog.DATABASECHANGELOG,
             StCategory.ST_CATEGORY,
             StConfiguration.ST_CONFIGURATION,
             StHashingAlgorithm.ST_HASHING_ALGORITHM,

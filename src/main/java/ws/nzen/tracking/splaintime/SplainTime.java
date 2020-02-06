@@ -82,12 +82,22 @@ public class SplainTime extends javax.swing.JFrame {
     public SplainTime() {
 		config = new StPreference();
 		config.parseConfig( configFile );
-        tagHandler = new TagStore( config.getInitialTagText(), config );
 		exitFlubsLeft = config.getFinishFuse();
 		hourFormat = ( config.isHourFormatIs12Not24() )
 				? new SimpleDateFormat( "h:mm a" )
 				: new SimpleDateFormat( "k:mm" );
         initComponents( config );
+		try
+		{
+			tagHandler = new TagStore( config.getInitialTagText(), config );
+		}
+        catch ( IllegalStateException ise )
+		{
+        	// N- assuming this is liquibase changeset not found
+        	outChannel.error( ise.toString() );
+        	JOptionPane.showMessageDialog( this, ise.getMessage() );
+        	System.exit( 1 );
+		}
 		updateLatestTaskLabel( tagHandler.gPreviousTag() );
 		updateTimeDiffLabel( new Date() );
         ActionListener taskPerformer = new ActionListener() {

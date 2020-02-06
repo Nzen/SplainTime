@@ -8,6 +8,7 @@
 ==== Added
 
 * writes and deletes tags from db (previous had an invalid column in sql)
+* property to use a dark look and feel
 
 ==== Changed
 
