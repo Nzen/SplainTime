@@ -5,8 +5,7 @@
 
 assignee : 
 
-title :
-	| 
+title : 
 
 status : to do
 
@@ -15,8 +14,6 @@ priority :
 -- desc
 
 -- desc
-
->labels:
 
 >## yyMMdd hhMM zzz
 
