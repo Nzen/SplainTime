@@ -5,17 +5,17 @@
 
 assignee : Nicholas Prado (Nzen)
 
-title : Unable / difficult to exchange tags across devices
+title : Difficult to exchange tags across devices
 
 status : to do
 
 priority : low
 
 -- desc
+I record time on both my work and home computer. However, to ensure that I have tags from both in one splaintime file, I need to copy the values from each and edit them by hand. There isn't a means of accomplishing the same for the database yet, short of using H2 console to assist with the etl between them.
 
+Provide a means for two active sessions, on the same lan, to exchange records.
 -- desc
-
->labels:
 
 >## yyMMdd hhMM zzz
 
