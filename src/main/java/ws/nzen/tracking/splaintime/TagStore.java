@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -224,7 +223,12 @@ public class TagStore implements Store {
 		    				.fetchAny();
 		    		if ( oneDevice == null )
 		    		{
-				    	ensureRecordingDeviceFileExists( recordingDeviceIdP );
+		    			recordingDeviceId = jqPool.insertInto(
+		    					StRecordingDevice.ST_RECORDING_DEVICE,
+		    					StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
+		    					StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS )
+		    					.values( ownIdentifier, ipv4AddressOfCurrentRecordingDevice() )
+		    					.returning().fetchOne().getRecordingDeviceId();
 		    		}
 					else
 					{
@@ -254,24 +258,12 @@ public class TagStore implements Store {
 				+"_"
 				+ String.format( "%03d", new Random().nextInt( 999 ) );
 		Files.write( deviceIdContainer, ownIdentifier.getBytes() );
-
-    	try
-    	(
-			Connection pipe = cPool.getConnection();
-			Statement executor = pipe.createStatement();
-    	)
-		{
-    		recordingDeviceId = jqPool.insertInto(
-    				StRecordingDevice.ST_RECORDING_DEVICE,
-    				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
-    				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS )
-    				.values( ownIdentifier, ipv4AddressOfCurrentRecordingDevice() )
-    				.returning().fetchOne().getRecordingDeviceId();
-		}
-		catch ( SQLException se )
-		{
-			outChannel.error( se.toString() );
-		}
+		recordingDeviceId = jqPool.insertInto(
+				StRecordingDevice.ST_RECORDING_DEVICE,
+				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
+				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS )
+				.values( ownIdentifier, ipv4AddressOfCurrentRecordingDevice() )
+				.returning().fetchOne().getRecordingDeviceId();
 	}
 
 	protected String ipv4AddressOfCurrentRecordingDevice()
@@ -751,6 +743,40 @@ public class TagStore implements Store {
 		}
     	*/
 		return 0L; // FIX todo
+	}
+
+
+	public boolean synchronizeAsServer( NetworkPort where )
+	{
+		final boolean worked = true;
+		PeerSynchronizer socket = new PeerSynchronizer(
+				jqPool, recordingDeviceId );
+		try
+		{
+			socket.listen( where );
+			return worked;
+		}
+		catch ( IOException e )
+		{
+			return ! worked;
+		}
+	}
+
+
+	public boolean synchronizeAsClient( InetAddress where, NetworkPort door )
+	{
+		final boolean worked = true;
+		PeerSynchronizer socket = new PeerSynchronizer(
+				jqPool, recordingDeviceId );
+		try
+		{
+			socket.send( where, door );
+			return worked;
+		}
+		catch ( IOException e )
+		{
+			return ! worked;
+		}
 	}
 
 

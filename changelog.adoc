@@ -3,6 +3,17 @@
 
 == Unreleased
 
+
+=== [6.0] - 2020-02-13
+
+==== Added
+
+* able to exchange recording device records with another session
+
+==== Changed
+
+* accepts existing recording device guid, even if not in own db
+
 === [5.0] - 2020-02-04
 
 ==== Added

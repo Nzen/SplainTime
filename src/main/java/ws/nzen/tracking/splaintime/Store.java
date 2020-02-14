@@ -1,6 +1,7 @@
 /* see ../../../../../LICENSE for release details */
 package ws.nzen.tracking.splaintime;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -24,6 +25,9 @@ public interface Store
 	public void wrapUp( StPreference config );
 
 	public OpenResult showStoredTags();
+
+	public boolean synchronizeAsServer( NetworkPort where );
+	public boolean synchronizeAsClient( InetAddress where, NetworkPort door );
 
     /** Gets current tag, there will always be one */
     public Tag gPreviousTag();

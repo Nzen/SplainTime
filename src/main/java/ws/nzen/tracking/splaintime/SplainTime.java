@@ -16,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -42,7 +44,9 @@ import ws.nzen.tracking.splaintime.model.Tag;
 /** @author Nzen
     The gui and main class of SplainTime. Handles user events
  */
-public class SplainTime extends javax.swing.JFrame {
+public class SplainTime extends javax.swing.JFrame
+{
+	public static final String SYNC_AS_CLIENT = "send", SYNC_AS_SERVER = "listen";
 
 	private static final long serialVersionUID = 1L;
 	private static final String configFile = "Splaintime.properties";
@@ -289,6 +293,10 @@ public class SplainTime extends javax.swing.JFrame {
         {
         	replyTimeSince( newestDid );
         }
+        else if ( newestDid.startsWith( config.getSyncFlag() ) )
+        {
+        	synchronizeAs( newestDid );
+        }
         /* relabelActiveTag() is broken
         else if ( newestDid.startsWith( config.getRelabelFlag() ) )
         {
@@ -402,6 +410,60 @@ public class SplainTime extends javax.swing.JFrame {
 				jtfForTag.setText( Long.toString( minutes ) +"m" );
 			}
 		}
+	}
+
+
+	private void synchronizeAs( String userEntered )
+	{
+    	String[] pieces = userEntered.split( " " );
+    	final int roleInd = 1, addrInd = roleInd +1,
+    			portServer = roleInd +1, portClient = addrInd +1;
+        if ( pieces[ roleInd ].equals( SYNC_AS_SERVER ) )
+        {
+        	NetworkPort where;
+			try
+			{
+				where = new NetworkPort(
+						Integer.parseInt( pieces[ portServer ] ) );
+			}
+			catch ( ArrayIndexOutOfBoundsException
+					| NumberFormatException nfe )
+			{
+				jtfForTag.setText( "Invalid port "+ pieces[ portServer ]
+						+"  ("+ config.getSyncFlag() +")" );
+				return;
+			}
+        	tagHandler.synchronizeAsServer( where );
+        }
+        else
+        {
+        	InetAddress peerHost;
+        	try
+			{
+        		peerHost = InetAddress.getByName( pieces[ addrInd ] );
+			}
+			catch ( UnknownHostException ue )
+			{
+				jtfForTag.setText( "Invalid host "+ pieces[ addrInd ]
+						+"  ("+ config.getSyncFlag() +")" );
+				return;
+			}
+        	NetworkPort peerIn;
+        	try
+			{
+				peerIn = new NetworkPort( Integer.parseInt( pieces[ portClient ] ) );
+			}
+			catch ( ArrayIndexOutOfBoundsException
+					| NumberFormatException nfe )
+			{
+				jtfForTag.setText( "Invalid port "+ pieces[ portClient ]
+						+"  ("+ config.getSyncFlag() +")" );
+				return;
+			}
+        	tagHandler.synchronizeAsClient( peerHost, peerIn );
+        }
+		jtfForTag.setText( "synced" );
+		
 	}
 
 

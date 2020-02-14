@@ -28,6 +28,7 @@ public class StPreference
 	private boolean hourFormatIs12Not24 = true;
 	private String databaseFilename = "st_data";
 	private boolean lightLookAndFeel = true;
+	private String syncFlag = "<>sync";
 	@Deprecated
 	/** Means of changing the active text. No time interpretation */
 	private String relabelFlag = "f4l";
@@ -281,6 +282,16 @@ public class StPreference
 	public void setLightLookAndFeel( boolean lightLookAndFeel )
 	{
 		this.lightLookAndFeel = lightLookAndFeel;
+	}
+
+
+	public String getSyncFlag()
+	{
+		return syncFlag;
+	}
+	public void setSyncFlag( String syncFlag )
+	{
+		this.syncFlag = syncFlag;
 	}
 
 

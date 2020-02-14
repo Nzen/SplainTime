@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,9 @@ import ws.nzen.tracking.splaintime.dao.jooq.tables.StRecordingDevice;
 /** Exchange records with another splaintime recording device */
 public class PeerSynchronizer
 {
+	private static final String RT_ENTIRE_RECORD = "gimmieme",
+			RT_CONTINUE = "continue", RT_UNRECOGNIZED = "huh?",
+			RT_END_OF_INPUT = "RT_END_OF_INPUT";
 	private final Logger outChannel = LoggerFactory
 			.getLogger( PeerSynchronizer.class );
 	private DSLContext jqPool;
@@ -52,6 +54,7 @@ public class PeerSynchronizer
 				new InputStreamReader( mouth.getInputStream() ) );
 		PrintWriter out = new PrintWriter( mouth.getOutputStream(), true );
 		Gson mapper = new Gson();
+		// todo exchange device types
 		Map<Integer, Integer> devicePigdin = exchangeDevicesAsClient(
 				in, out, mapper );
 		if ( devicePigdin == null )
@@ -61,11 +64,6 @@ public class PeerSynchronizer
 		}
 
 		//
-		String userInput;
-		while ( (userInput = in.readLine()) != null )
-		{
-			System.out.println( "echo: " + in.readLine() );
-		}
 		//
 		wrapSession( in, out, mouth );
 		/*
@@ -83,26 +81,24 @@ public class PeerSynchronizer
 	}
 
 
-	/** return map of combined device ids, theirs:ours ; maybe -1*ours:theirs
+	/** return map of combined device ids, theirs:ours ; maybe -1*ours:theirs.
+	 * Currently assumes that device type id match.
 	order is
 	<ol>
 	<li>
-	client tells guid, then own id
+	client announces the topic
 	</li>
 	<li>
-	server replies entire or continue
+	client each recording device it's aware of
 	</li>
 	<li>
-	if entire, client sends entire device record for own device
+	client indicates end of input
 	</li>
 	<li>
-	server sends own guid, then own id
+	server each recording device it's aware of
 	</li>
 	<li>
-	client replies entire or continue
-	</li>
-	<li>
-	...
+	server indicates end of input
 	</li>
 	</ol>
 	*/
@@ -112,97 +108,74 @@ public class PeerSynchronizer
 			Gson mapper )
 			throws IOException
 	{
-		// N- client speaks first
-		out.println( jqPool
-				.select( StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID )
-				.from( StRecordingDevice.ST_RECORDING_DEVICE )
-				.where( StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID.eq( DSL.val( ownDeviceId ) ) )
-				.fetchOne( StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID ) );
-		out.println( ownDeviceId );
-		String requestType = in.readLine();
-		if ( requestType == null )
+		out.println( StRecordingDevice.ST_RECORDING_DEVICE
+				.getClass().getSimpleName() );
+		String reply = in.readLine();
+		if ( ! reply.equals( RT_CONTINUE ) )
 		{
-			return null;
+			return null; // N- whatever, server is out of sequence
 		}
-		else if ( requestType.equals( RT_ENTIRE_RECORD ) )
-		{
-			ws.nzen.tracking.splaintime.dao.jooq.tables
-			.pojos.StRecordingDevice ownDeviceR = jqPool
-			.select()
-			.from( StRecordingDevice.ST_RECORDING_DEVICE )
-			.where( StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_ID.eq( DSL.val( ownDeviceId ) ) )
-			.fetchInto( ws.nzen.tracking.splaintime.dao.jooq.tables.pojos.StRecordingDevice.class ).get( 0 );
-			out.println( mapper.toJson( ownDeviceR ) );
-		}
-		else if ( ! requestType.equals( RT_CONTINUE ) )
-		{
-			return null;
-		}
-		// N- else, peer already knows about our device
 		Map<Integer, Integer> combinedDeviceIds = new TreeMap<>();
-		// N- client listens
-		String peerDeviceGuid = in.readLine();
-		if ( peerDeviceGuid == null )
-		{
-			return null;
-		}
-		String peerDeviceId = in.readLine();
-		if ( peerDeviceId == null )
-		{
-			return null;
-		}
-		Integer peerRdIdOwn = Integer.parseInt( peerDeviceId );
-		//  N- resolve that id or ask for the entire record
 		List<ws.nzen.tracking.splaintime.dao.jooq.tables
-		.pojos.StRecordingDevice> peerDeviceDb = jqPool
+		.pojos.StRecordingDevice> knownDevices = jqPool
 				.select()
 				.from( StRecordingDevice.ST_RECORDING_DEVICE )
-				.where( StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID.eq( DSL.val( peerDeviceGuid ) ) )
+				.where()
 				.fetchInto( ws.nzen.tracking.splaintime.dao.jooq.tables.pojos.StRecordingDevice.class );
-		if ( peerDeviceDb.isEmpty() )
+		assert ! knownDevices.isEmpty();
+		Map<String, ws.nzen.tracking.splaintime.dao.jooq.tables
+		.pojos.StRecordingDevice> uniqueDevices = new TreeMap<>();
+		for ( ws.nzen.tracking.splaintime.dao.jooq.tables
+				.pojos.StRecordingDevice currDevice : knownDevices )
 		{
-			out.println( RT_ENTIRE_RECORD );
-			ws.nzen.tracking.splaintime.dao.jooq.tables
-			.pojos.StRecordingDevice peerDeviceR = mapper.fromJson(
-					in.readLine(),
+			uniqueDevices.put( currDevice.getHomeDirGuid(), currDevice );
+		}
+		// N- offer known devices
+		for ( ws.nzen.tracking.splaintime.dao.jooq.tables
+				.pojos.StRecordingDevice currDevice : uniqueDevices.values() )
+		{
+			out.println( mapper.toJson( currDevice ) );
+		}
+		out.println( RT_END_OF_INPUT );
+		// N- listen to peer's known devices
+		ws.nzen.tracking.splaintime.dao.jooq.tables
+		.pojos.StRecordingDevice peerDevice, ownDevice;
+		reply = in.readLine();
+		while ( ! reply.equals( RT_END_OF_INPUT ) )
+		{
+			peerDevice = mapper.fromJson(
+					reply,
 					ws.nzen.tracking.splaintime.dao.jooq.tables
 							.pojos.StRecordingDevice.class );
-			Integer peerRdIdMine = jqPool.insertInto(
-    				StRecordingDevice.ST_RECORDING_DEVICE,
-    				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
-    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_TYPE_ID,
-    				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS,
-    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_DESC )
-    				.values(
-    						peerDeviceR.getHomeDirGuid(),
-    						peerDeviceR.getRecordingDeviceTypeId(),
-    						peerDeviceR.getIpv4Address(),
-    						peerDeviceR.getRecordingDeviceDesc() )
-    				.returning().fetchOne().getRecordingDeviceId();
-			combinedDeviceIds.put( peerRdIdOwn, peerRdIdMine );
+			ownDevice = uniqueDevices.get( peerDevice.getHomeDirGuid() );
+			if ( ownDevice == null )
+			{
+				Integer peerRdIdMine = jqPool.insertInto(
+	    				StRecordingDevice.ST_RECORDING_DEVICE,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_TYPE_ID,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_DESC )
+	    				.values(
+	    						peerDevice.getHomeDirGuid(),
+	    						peerDevice.getRecordingDeviceTypeId(),
+	    						peerDevice.getIpv4Address(),
+	    						peerDevice.getRecordingDeviceDesc() )
+	    				.returning().fetchOne().getRecordingDeviceId();
+				combinedDeviceIds.put(
+						peerDevice.getRecordingDeviceId(), peerRdIdMine );
+			}
+			else
+			{
+				combinedDeviceIds.put(
+						peerDevice.getRecordingDeviceId(),
+						-1 * ownDevice.getRecordingDeviceId() );
+			}
+			reply = in.readLine();
 		}
-		else
-		{
-			combinedDeviceIds.put(
-					peerRdIdOwn, peerDeviceDb.get( 0 ).getRecordingDeviceId() );
-		}
-		/*
-		FIX
-		send all my guids
-		expect a list of unrecognized guids to send the entire records for or empty list
-		send those
-		request peer's list of all guids, preferably without mine, but that's fine too
-
-		rather than rely on these lines, should I drive this with an fsm ?
-		*/  
-
-		Map<Integer, ws.nzen.tracking.splaintime.dao.jooq.tables
-				.pojos.StRecordingDevice> devicePigdin = new TreeMap<>();
-		// parse the string or list or whatever. I should bring in gson or somebody
-		return null;
+		
+		return combinedDeviceIds;
 	}
-	private static final String RT_ENTIRE_RECORD = "gimmieme",
-			RT_CONTINUE = "continue", RT_UNRECOGNIZED = "huh?";
 
 
 	public void listen( NetworkPort peerPort )
@@ -215,10 +188,117 @@ public class PeerSynchronizer
 		BufferedReader in = new BufferedReader(
 				new InputStreamReader( mouth.getInputStream() ) );
 		PrintWriter out = new PrintWriter( mouth.getOutputStream(), true );
+		Gson mapper = new Gson();
+		Map<Integer, Integer> devicePigdin = exchangeDevicesAsServer(
+				in, out, mapper );
+		if ( devicePigdin == null )
+		{
+			wrapSession( in, out, mouth );
+			ear.close();
+			return;
+		}
 
 		//
 		wrapSession( in, out, mouth );
 		ear.close();
+	}
+
+
+	/** return map of combined device ids, theirs:ours ; maybe -1*ours:theirs.
+	 * Currently assumes that device type id match.
+	order is
+	<ol>
+	<li>
+	client announces the topic
+	</li>
+	<li>
+	client each recording device it's aware of
+	</li>
+	<li>
+	client indicates end of input
+	</li>
+	<li>
+	server each recording device it's aware of
+	</li>
+	<li>
+	server indicates end of input
+	</li>
+	</ol>
+	*/
+	private Map<Integer, Integer> exchangeDevicesAsServer(
+			BufferedReader in,
+			PrintWriter out,
+			Gson mapper )
+			throws IOException
+	{
+		String reply = in.readLine();
+		if ( ! reply.equals( StRecordingDevice.ST_RECORDING_DEVICE.getClass().getSimpleName() ) )
+		{
+			out.println( RT_UNRECOGNIZED );
+			return null; // N- whatever, maybe the server thinks we did it too recently
+		}
+		else
+			out.println( RT_CONTINUE );
+		Map<Integer, Integer> combinedDeviceIds = new TreeMap<>();
+		List<ws.nzen.tracking.splaintime.dao.jooq.tables
+		.pojos.StRecordingDevice> knownDevices = jqPool
+				.select()
+				.from( StRecordingDevice.ST_RECORDING_DEVICE )
+				.where()
+				.fetchInto( ws.nzen.tracking.splaintime.dao.jooq.tables.pojos.StRecordingDevice.class );
+		assert ! knownDevices.isEmpty();
+		Map<String, ws.nzen.tracking.splaintime.dao.jooq.tables
+		.pojos.StRecordingDevice> uniqueDevices = new TreeMap<>();
+		for ( ws.nzen.tracking.splaintime.dao.jooq.tables
+				.pojos.StRecordingDevice currDevice : knownDevices )
+		{
+			uniqueDevices.put( currDevice.getHomeDirGuid(), currDevice );
+		}
+		// N- listen to peer's known devices
+		ws.nzen.tracking.splaintime.dao.jooq.tables
+		.pojos.StRecordingDevice peerDevice, ownDevice;
+		reply = in.readLine();
+		while ( ! reply.equals( RT_END_OF_INPUT ) )
+		{
+			peerDevice = mapper.fromJson(
+					reply,
+					ws.nzen.tracking.splaintime.dao.jooq.tables
+							.pojos.StRecordingDevice.class );
+			ownDevice = uniqueDevices.get( peerDevice.getHomeDirGuid() );
+			if ( ownDevice == null )
+			{
+				Integer peerRdIdMine = jqPool.insertInto(
+	    				StRecordingDevice.ST_RECORDING_DEVICE,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.HOME_DIR_GUID,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_TYPE_ID,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.IPV4_ADDRESS,
+	    				StRecordingDevice.ST_RECORDING_DEVICE.RECORDING_DEVICE_DESC )
+	    				.values(
+	    						peerDevice.getHomeDirGuid(),
+	    						peerDevice.getRecordingDeviceTypeId(),
+	    						peerDevice.getIpv4Address(),
+	    						peerDevice.getRecordingDeviceDesc() )
+	    				.returning().fetchOne().getRecordingDeviceId();
+				combinedDeviceIds.put(
+						peerDevice.getRecordingDeviceId(), peerRdIdMine );
+			}
+			else
+			{
+				combinedDeviceIds.put(
+						peerDevice.getRecordingDeviceId(),
+						-1 * ownDevice.getRecordingDeviceId() );
+			}
+			reply = in.readLine();
+		}
+		// N- offer known devices
+		for ( ws.nzen.tracking.splaintime.dao.jooq.tables
+				.pojos.StRecordingDevice currDevice : uniqueDevices.values() )
+		{
+			out.println( mapper.toJson( currDevice ) );
+		}
+		out.println( RT_END_OF_INPUT );
+		
+		return combinedDeviceIds;
 	}
 
 
