@@ -18,7 +18,7 @@
 		splaintime
 		</artifactId>
 	<version>
-		6.0-j8
+		6.0
 		</version>
 	<packaging>
 		jar
@@ -108,6 +108,7 @@
 				</version>
 			</dependency>
 		<dependency>
+			<!-- for jooq -->
 			<groupId>
 				javax.annotation
 				</groupId>
@@ -119,6 +120,7 @@
 				</version>
 			</dependency>
 		<dependency>
+			<!-- to exchange records -->
 			<groupId>
 				com.google.code.gson
 				</groupId>
@@ -130,6 +132,7 @@
 				</version>
 			</dependency>
 		<dependency>
+			<!-- for dark theme -->
 			<groupId>
 				org.clojars.nakkaya
 				</groupId>
@@ -166,20 +169,6 @@
 				</artifactId>
 			<version>
 				0.9.0
-				</version>
-			</dependency>
-			-->
-		<!--
-		GPL ; not coloring the main panel either
-		<dependency>
-			<groupId>
-				com.jtattoo
-				</groupId>
-			<artifactId>
-				JTattoo
-				</artifactId>
-			<version>
-				1.6.13
 				</version>
 			</dependency>
 			-->
@@ -264,30 +253,6 @@
 						</encoding>
 					</configuration>
 				</plugin>
-		    <plugin>
-	    		<!-- make source jar -->
-				<groupId>
-					org.apache.maven.plugins
-					</groupId>
-				<artifactId>
-					maven-source-plugin
-					</artifactId>
-				<version>
-					3.0.1
-					</version>
-				<executions>
-					<execution>
-						<id>
-							attach-sources
-							</id>
-						<goals>
-							<goal>
-								jar
-								</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
 			<plugin>
 		    	<!-- skip tests without remembering -DskipTests -->
 				<groupId>
@@ -307,8 +272,126 @@
 						-->
 					</configuration>
 				</plugin>
-	    	<plugin>
-	    		<!-- config for jar -->
+			<plugin>
+				<!-- path to our java jdk -->
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-toolchains-plugin
+					</artifactId>
+				<version>
+					1.1
+					</version>
+				<configuration>
+					<toolchains>
+						<jdk>
+							<version>
+								[11,)
+								</version>
+							</jdk>
+						</toolchains>
+					</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>
+								toolchain
+								</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			<plugin>
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-enforcer-plugin
+					</artifactId>
+				<version>
+					3.0.0-M3
+					</version>
+				<executions>
+					<execution>
+						<id>
+							enforce-maven
+							</id>
+						<goals>
+							<goal>
+								enforce
+								</goal>
+							</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>
+										3.3.9
+										</version>
+									</requireMavenVersion>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			<plugin>
+				<!-- compile with java 8 compliance -->
+				<groupId>
+					org.apache.maven.plugins
+					</groupId>
+				<artifactId>
+					maven-compiler-plugin
+					</artifactId>
+				<version>
+					3.8.1
+					</version>
+				<executions>
+					<execution>
+						<id>
+							default-compile
+							</id>
+						<goals>
+							<goal>
+								compile
+								</goal>
+							</goals>
+						</execution>
+					<execution>
+						<id>
+							java9
+							</id>
+						<goals>
+							<goal>
+								compile
+								</goal>
+							</goals>
+						<phase>
+							compile
+							</phase>
+						<configuration>
+							<source>
+								11
+								</source>
+							<target>
+								11
+								</target>
+							<release>
+								11
+								</release>
+							<multiReleaseOutput>
+								true
+								</multiReleaseOutput>
+							<compileSourceRoots>
+								<compileSourceRoot>
+									${basedir}/src/main/java9
+									</compileSourceRoot>
+								</compileSourceRoots>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			<plugin>
+				<!-- config for jar -->
 				<groupId>
 					org.apache.maven.plugins
 					</groupId>
@@ -338,42 +421,12 @@
 							<st-version>
 								${project.version}
 								</st-version>
-							taking care of this with multirelease instead
-							<Automatic-Module-Name>
-								ws.nzen.tracking.splaintime
-								</Automatic-Module-Name>
+							<Multi-Release>
+								true
+								</Multi-Release>
 							</manifestEntries>
 						</archive>
 					</configuration>
-				</plugin>
-			<plugin>
-				<!-- Check license compatibility with dependencies -->
-				<groupId>
-					org.codehaus.mojo
-					</groupId>
-				<artifactId>
-					license-maven-plugin
-					</artifactId>
-				<version>
-					2.0.0
-					</version>
-				<executions>
-					<execution>
-						<id>
-							affirm-other-licenses
-							</id>
-						<goals>
-							<goal>
-								add-third-party
-								</goal>
-							</goals>
-						<configuration>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 			<plugin>
 	    		<!-- maven is able to start splaintime -->
@@ -537,250 +590,6 @@
 		</distributionManagement>
 	<profiles>
 		<profile>
-			<!-- profile to compile as java 8 for local repo -->
-			<id>
-				j8
-				</id>
-			<activation>
-				<activeByDefault>
-					true
-					</activeByDefault>
-				</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[1.8]
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 8 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								1.8
-								</source>
-							<target>
-								1.8
-								</target>
-							<encoding>
-								UTF-8
-								</encoding>
-							<excludes>
-								<exclude>
-									module-info.java
-									</exclude>
-								</excludes>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- profile to compile as java 8 for local repo -->
-			<id>
-				j8_11
-				</id>
-			<activation>
-				<activeByDefault>
-					true
-					</activeByDefault>
-				</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[11,)
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-enforcer-plugin
-							</artifactId>
-						<version>
-							3.0.0-M3
-							</version>
-						<executions>
-							<execution>
-								<id>
-									enforce-maven
-									</id>
-								<goals>
-									<goal>
-										enforce
-										</goal>
-									</goals>
-								<configuration>
-									<rules>
-										<requireMavenVersion>
-											<version>
-												3.3.9
-												</version>
-											</requireMavenVersion>
-										</rules>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 8 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.1
-							</version>
-						<executions>
-							<execution>
-								<id>
-									default-compile
-									</id>
-								<goals>
-									<goal>
-										compile
-										</goal>
-									</goals>
-								</execution>
-							<execution>
-								<id>
-									java9
-									</id>
-								<goals>
-									<goal>
-										compile
-										</goal>
-									</goals>
-								<phase>
-									compile
-									</phase>
-								<configuration>
-									<source>
-										11
-										</source>
-									<target>
-										11
-										</target>
-									<release>
-										11
-										</release>
-									<multiReleaseOutput>
-										true
-										</multiReleaseOutput>
-									<compileSourceRoots>
-										<compileSourceRoot>
-											${basedir}/src/main/java9
-											</compileSourceRoot>
-										</compileSourceRoots>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- config for jar -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-jar-plugin
-							</artifactId>
-						<version>
-							3.1.0
-							</version>
-						<configuration>
-							<archive>
-								<index>
-									true
-									</index>
-								<manifest>
-									<addClasspath>
-										true
-										</addClasspath>
-									<mainClass>
-										ws.nzen.tracking.splaintime.SplainTime
-										</mainClass>
-									</manifest>
-								<manifestEntries>
-									<mode>
-										development
-										</mode>
-									<st-version>
-										${project.version}
-										</st-version>
-									<Multi-Release>
-										true
-										</Multi-Release>
-									</manifestEntries>
-								</archive>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
 			<!-- only gen jooq intentionally -->
 			<id>
 				jooq
@@ -826,748 +635,12 @@
 				</build>
 			</profile>
 		<profile>
-			<!-- profile to compile as java 11 for local repo -->
+			<!-- only gen jooq intentionally -->
 			<id>
-				j11
+				zip
 				</id>
 			<build>
 				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[11,)
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 11 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								11
-								</source>
-							<target>
-								11
-								</target>
-							<release>
-								11
-								</release>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						</plugin>
-					<plugin>
-						<!-- show the jdk modules used -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-jdeps-plugin
-							</artifactId>
-						<version>
-							3.1.1
-							</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										jdkinternals
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						<!-- <configuration>
-							</configuration> -->
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- profile to compile as latest java for local repo -->
-			<id>
-				jL
-				</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[13,)
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 11 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								13
-								</source>
-							<target>
-								13
-								</target>
-							<release>
-								13
-								</release>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- publish java 8 to maven -->
-			<!-- invoke with mvn -P j8-r deploy -->
-			<id>
-				j8-r
-				</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[1.8]
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 8 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								1.8
-								</source>
-							<target>
-								1.8
-								</target>
-							<encoding>
-								UTF-8
-								</encoding>
-							<excludes>
-								<exclude>
-									module-info.java
-									</exclude>
-								</excludes>
-							</configuration>
-						</plugin>
-					<plugin>
-						<!-- config for javadoc jar -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-javadoc-plugin
-							</artifactId>
-						<version>
-							3.1.1
-							</version>
-						<configuration>
-							<sourceFileExcludes>
-								<exclude>
-								**/module-info.java
-									</exclude>
-								</sourceFileExcludes>
-							<doclint>
-								<!-- suppress javadoc linter -->
-								all,-missing
-								</doclint>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						<executions>
-							<execution>
-								<id>
-									attach-javadocs
-									</id>
-								<goals>
-									<goal>
-										jar
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- sign the jars -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-gpg-plugin
-							</artifactId>
-						<version>
-							1.6
-							</version>
-						<executions>
-							<execution>
-								<id>
-									sign-artifacts
-									</id>
-								<phase>
-									verify
-									</phase>
-								<goals>
-									<goal>
-										sign
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-			<plugin>
-				<!-- sign the jar itself
-					http://maven.apache.org/plugins/maven-jarsigner-plugin/usage.html
-					https://stackoverflow.com/a/4210860 -->
-				<groupId>
-					org.apache.maven.plugins
-					</groupId>
-				<artifactId>
-					maven-jarsigner-plugin
-					</artifactId>
-				<version>
-					3.0.0
-					</version>
-				<executions>
-					<execution>
-						<id>
-							sign
-							</id>
-						<goals>
-							<goal>
-								sign
-								</goal>
-							</goals>
-						</execution>
-					<execution>
-						<id>
-							verify
-							</id>
-						<goals>
-							<goal>
-								verify
-								</goal>
-							</goals>
-						</execution>
-					</executions>
-				<configuration>
-						<!-- FIXFIXFIX use the other one -->
-					<keystore>
-						../191207_self.pks
-						</keystore>
-					<alias>
-						selfsigned
-						</alias>
-					<storepass>
-						{67NpMzkKDlEHdt+zHoSQLGwpT36EB554VsliU/pY6rR1mULM3Xc6Ahg2bycRa6e8}
-						</storepass>
-					</configuration>
-				</plugin>
-					<plugin>
-						<!-- deploy releases to sonatype's server -->
-						<groupId>
-							org.sonatype.plugins
-							</groupId>
-						<artifactId>
-							nexus-staging-maven-plugin
-							</artifactId>
-						<version>
-							1.6.7
-							</version>
-						<extensions>
-							true
-							</extensions>
-						<configuration>
-							<serverId>
-								ossrh
-								</serverId>
-							<nexusUrl>
-								https://oss.sonatype.org/
-								</nexusUrl>
-							<autoReleaseAfterClose>
-								false
-								</autoReleaseAfterClose>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- publish java 11 to maven -->
-			<id>
-				j11-r
-				</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[11,)
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 11 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								11
-								</source>
-							<target>
-								11
-								</target>
-							<release>
-								11
-								</release>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						</plugin>
-					<plugin>
-						<!-- config for javadoc jar -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-javadoc-plugin
-							</artifactId>
-						<version>
-							3.0.1
-							</version>
-						<configuration>
-							<!--
-							<sourceFileExcludes>
-								**/module-info.java
-								</sourceFileExcludes>
-								-->
-							<doclint>
-								<!-- suppress javadoc linter -->
-								all,-missing
-								</doclint>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						<executions>
-							<execution>
-								<id>
-									attach-javadocs
-									</id>
-								<goals>
-									<goal>
-										jar
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- sign the jars -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-gpg-plugin
-							</artifactId>
-						<version>
-							1.6
-							</version>
-						<executions>
-							<execution>
-								<id>
-									sign-artifacts
-									</id>
-								<phase>
-									verify
-									</phase>
-								<goals>
-									<goal>
-										sign
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- deploy releases to sonatype's server -->
-						<groupId>
-							org.sonatype.plugins
-							</groupId>
-						<artifactId>
-							nexus-staging-maven-plugin
-							</artifactId>
-						<version>
-							1.6.7
-							</version>
-						<extensions>
-							true
-							</extensions>
-						<configuration>
-							<serverId>
-								ossrh
-								</serverId>
-							<nexusUrl>
-								https://oss.sonatype.org/
-								</nexusUrl>
-							<autoReleaseAfterClose>
-								false
-								</autoReleaseAfterClose>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- publish java latest version to maven -->
-			<id>
-				jL-r
-				</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[13,)
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 11 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								13
-								</source>
-							<target>
-								13
-								</target>
-							<release>
-								13
-								</release>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						</plugin>
-					<plugin>
-						<!-- config for javadoc jar -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-javadoc-plugin
-							</artifactId>
-						<version>
-							3.0.1
-							</version>
-						<configuration>
-							<!--
-							<sourceFileExcludes>
-								**/module-info.java
-								</sourceFileExcludes>
-								-->
-							<doclint>
-								<!-- suppress javadoc linter -->
-								all,-missing
-								</doclint>
-							<encoding>
-								UTF-8
-								</encoding>
-							</configuration>
-						<executions>
-							<execution>
-								<id>
-									attach-javadocs
-									</id>
-								<goals>
-									<goal>
-										jar
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- sign the jars -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-gpg-plugin
-							</artifactId>
-						<version>
-							1.6
-							</version>
-						<executions>
-							<execution>
-								<id>
-									sign-artifacts
-									</id>
-								<phase>
-									verify
-									</phase>
-								<goals>
-									<goal>
-										sign
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- deploy releases to sonatype's server -->
-						<groupId>
-							org.sonatype.plugins
-							</groupId>
-						<artifactId>
-							nexus-staging-maven-plugin
-							</artifactId>
-						<version>
-							1.6.7
-							</version>
-						<extensions>
-							true
-							</extensions>
-						<configuration>
-							<serverId>
-								ossrh
-								</serverId>
-							<nexusUrl>
-								https://oss.sonatype.org/
-								</nexusUrl>
-							<autoReleaseAfterClose>
-								false
-								</autoReleaseAfterClose>
-							</configuration>
-						</plugin>
-					</plugins>
-				</build>
-			</profile>
-		<profile>
-			<!-- publish java 8 to maven -->
-			<!-- invoke with mvn -P j8-r deploy -->
-			<id>
-				j8-entire
-				</id>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- path to our java jdk -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-toolchains-plugin
-							</artifactId>
-						<version>
-							1.1
-							</version>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>
-										[1.8]
-										</version>
-									</jdk>
-								</toolchains>
-							</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>
-										toolchain
-										</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					<plugin>
-						<!-- compile with java 8 compliance -->
-						<groupId>
-							org.apache.maven.plugins
-							</groupId>
-						<artifactId>
-							maven-compiler-plugin
-							</artifactId>
-						<version>
-							3.8.0
-							</version>
-						<configuration>
-							<source>
-								1.8
-								</source>
-							<target>
-								1.8
-								</target>
-							<encoding>
-								UTF-8
-								</encoding>
-							<excludes>
-								<exclude>
-									module-info.java
-									</exclude>
-								</excludes>
-							</configuration>
-						</plugin>
 					<plugin>
 						<!-- Prep a zip with all relevant files -->
 						<groupId>
@@ -1601,6 +674,209 @@
 									</configuration>
 								</execution>
 							</executions>
+						</plugin>
+					</plugins>
+				</build>
+			</profile>
+		<profile>
+			<!-- publish java 8 to maven -->
+			<!-- invoke with mvn -P j8-r deploy -->
+			<id>
+				release
+				</id>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- make source jar -->
+						<groupId>
+							org.apache.maven.plugins
+							</groupId>
+						<artifactId>
+							maven-source-plugin
+							</artifactId>
+						<version>
+							3.0.1
+							</version>
+						<executions>
+							<execution>
+								<id>
+									attach-sources
+									</id>
+								<goals>
+									<goal>
+										jar
+										</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+					<plugin>
+						<!-- Check license compatibility with dependencies -->
+						<groupId>
+							org.codehaus.mojo
+							</groupId>
+						<artifactId>
+							license-maven-plugin
+							</artifactId>
+						<version>
+							2.0.0
+							</version>
+						<executions>
+							<execution>
+								<id>
+									affirm-other-licenses
+									</id>
+								<goals>
+									<goal>
+										add-third-party
+										</goal>
+									</goals>
+								<configuration>
+									<encoding>
+										UTF-8
+										</encoding>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+					<plugin>
+						<!-- config for javadoc jar -->
+						<groupId>
+							org.apache.maven.plugins
+							</groupId>
+						<artifactId>
+							maven-javadoc-plugin
+							</artifactId>
+						<version>
+							3.1.1
+							</version>
+						<configuration>
+							<sourceFileExcludes>
+								<exclude>
+								**/module-info.java
+									</exclude>
+								</sourceFileExcludes>
+							<doclint>
+								<!-- suppress javadoc linter -->
+								all,-missing
+								</doclint>
+							<encoding>
+								UTF-8
+								</encoding>
+							</configuration>
+						<executions>
+							<execution>
+								<id>
+									attach-javadocs
+									</id>
+								<goals>
+									<goal>
+										jar
+										</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+					<plugin>
+						<!-- sign the jars -->
+						<groupId>
+							org.apache.maven.plugins
+							</groupId>
+						<artifactId>
+							maven-gpg-plugin
+							</artifactId>
+						<version>
+							1.6
+							</version>
+						<executions>
+							<execution>
+								<id>
+									sign-artifacts
+									</id>
+								<phase>
+									verify
+									</phase>
+								<goals>
+									<goal>
+										sign
+										</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+					<plugin>
+						<!-- sign the jar itself
+							http://maven.apache.org/plugins/maven-jarsigner-plugin/usage.html
+							https://stackoverflow.com/a/4210860 -->
+						<groupId>
+							org.apache.maven.plugins
+							</groupId>
+						<artifactId>
+							maven-jarsigner-plugin
+							</artifactId>
+						<version>
+							3.0.0
+							</version>
+						<executions>
+							<execution>
+								<id>
+									sign
+									</id>
+								<goals>
+									<goal>
+										sign
+										</goal>
+									</goals>
+								</execution>
+							<execution>
+								<id>
+									verify
+									</id>
+								<goals>
+									<goal>
+										verify
+										</goal>
+									</goals>
+								</execution>
+							</executions>
+						<configuration>
+								<!-- FIXFIXFIX use the other one -->
+							<keystore>
+								../191207_self.pks
+								</keystore>
+							<alias>
+								selfsigned
+								</alias>
+							<storepass>
+								{67NpMzkKDlEHdt+zHoSQLGwpT36EB554VsliU/pY6rR1mULM3Xc6Ahg2bycRa6e8}
+								</storepass>
+							</configuration>
+						</plugin>
+					<plugin>
+						<!-- deploy releases to sonatype's server -->
+						<groupId>
+							org.sonatype.plugins
+							</groupId>
+						<artifactId>
+							nexus-staging-maven-plugin
+							</artifactId>
+						<version>
+							1.6.7
+							</version>
+						<extensions>
+							true
+							</extensions>
+						<configuration>
+							<serverId>
+								ossrh
+								</serverId>
+							<nexusUrl>
+								https://oss.sonatype.org/
+								</nexusUrl>
+							<autoReleaseAfterClose>
+								false
+								</autoReleaseAfterClose>
+							</configuration>
 						</plugin>
 					</plugins>
 				</build>
