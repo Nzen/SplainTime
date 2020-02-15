@@ -6,7 +6,7 @@
 			org.h2.Driver
 			</driver>
 		<url>
-			jdbc:h2:file:~/.splaintime/st_data_testing
+			jdbc:h2:file:~/.splaintime/st_data
 			</url>
 		<user>
 			sp_admin_user
