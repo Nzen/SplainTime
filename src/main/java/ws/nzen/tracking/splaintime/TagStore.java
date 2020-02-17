@@ -7,6 +7,7 @@ Next:
 package ws.nzen.tracking.splaintime;
 
 import java.awt.Desktop;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -20,9 +21,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -288,7 +289,8 @@ public class TagStore implements Store {
         String tempSays = gTempSavedTag();
         if ( tempSays.isEmpty() ) {
             pr( "ts.if() no temp file" ); // 4TESTS
-            writeToDisk( forClient, " SplainTime output format v 2.0\r\n" );
+            writeToDisk( forClient, " SplainTime output format v 2.0"
+            		+ "\r\n"+ LocalDate.now() +"\r\n" );
             Tag primingPump = new Tag( basicStartup );
             primingPump.utilDate = new Date();
             add( primingPump );
@@ -575,11 +577,11 @@ public class TagStore implements Store {
     }
 
     /** Appends outStr userFile or truncates temp with outStr */
-    private void writeToDisk( boolean isUser, String outStr ) {
+    private void writeToDisk( boolean forUser, String outStr ) {
         // IMPROVE use imports
         String whichFile;
         StandardOpenOption howTreat;
-        if ( isUser ) {
+        if ( forUser ) {
             whichFile = userFile;
             howTreat = StandardOpenOption.APPEND;
         } else {
@@ -591,12 +593,12 @@ public class TagStore implements Store {
             if ( Files.notExists(relPath) ) {
                 Files.createFile(relPath);
             }
-            try (java.io.BufferedWriter paper = Files.newBufferedWriter(
+            try (BufferedWriter paper = Files.newBufferedWriter(
                     relPath, StandardCharsets.UTF_8, howTreat )
                 ) {
                 paper.append( outStr );
             }
-        } catch ( java.io.IOException ioe ) {
+        } catch ( IOException ioe ) {
             System.err.println( "LF.rsf() had some I/O problem."
                     + " there's like five options\n "+ ioe.toString() );
         }

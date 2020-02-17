@@ -13,6 +13,7 @@
 ==== Changed
 
 * accepts existing recording device guid, even if not in own db
+* second line of a splaintime (output) file has the date
 
 === [5.0] - 2020-02-04
 
