@@ -635,7 +635,7 @@
 				</build>
 			</profile>
 		<profile>
-			<!-- only gen jooq intentionally -->
+			<!-- only zip binaries intentionally -->
 			<id>
 				zip
 				</id>
@@ -679,8 +679,8 @@
 				</build>
 			</profile>
 		<profile>
-			<!-- publish java 8 to maven -->
-			<!-- invoke with mvn -P j8-r deploy -->
+			<!-- publish maven -->
+			<!-- invoke with mvn -P release deploy -->
 			<id>
 				release
 				</id>
@@ -842,14 +842,14 @@
 						<configuration>
 								<!-- FIXFIXFIX use the other one -->
 							<keystore>
-								../191207_self.pks
+								../191217_201215_sectigo_codecert_3des.pfx
 								</keystore>
-							<alias>
-								selfsigned
-								</alias>
 							<storepass>
-								{67NpMzkKDlEHdt+zHoSQLGwpT36EB554VsliU/pY6rR1mULM3Xc6Ahg2bycRa6e8}
+								{ecCfzsJEX1oHtLAzrL1w58Jj+lwmwOtEm88NbJkNczFZ4l2//yzkwd8ALztQOMCu}
 								</storepass>
+							<tsa>
+								http://timestamp.comodoca.com/rfc3161
+								</tsa>
 							</configuration>
 						</plugin>
 					<plugin>

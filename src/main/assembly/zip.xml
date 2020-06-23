@@ -56,6 +56,12 @@
 				${project.build.directory}/classes/THIRD-PARTY.txt
 				</source>
 			</file>
+		<file>
+			<!-- List of changes -->
+			<source>
+				${project.basedir}/changelog.adoc
+				</source>
+			</file>
 		</files>
 	<dependencySets>
 		<dependencySet>

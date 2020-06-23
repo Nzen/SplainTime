@@ -41,6 +41,7 @@ public class PeerSynchronizer
 	}
 
 
+	/** Start the client socket */
 	public void send(
 			InetAddress host, NetworkPort peerPort )
 			throws IOException
@@ -178,6 +179,7 @@ public class PeerSynchronizer
 	}
 
 
+	/** Start the server socket */
 	public void listen( NetworkPort peerPort )
 			throws IOException
 	{
