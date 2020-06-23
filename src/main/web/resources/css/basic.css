@@ -1,0 +1,135 @@
+
+/* Maudlin Honey Cetyre copyright Nicholas Prado;
+	released under Prosperity Public license terms */
+
+body
+{
+	background-color: #203;
+	color: silver;
+}
+
+table
+{
+	width:70%;
+}
+
+input[type="text"]
+{
+	background-color: #606B70;
+	color: #AAA;
+	font-weight: bold;
+	padding-left: 1em;
+}
+
+.filler
+{
+	width:10%;
+	float:left;
+}
+
+.content
+{
+	width:60%;
+	float:left;
+}
+.float30l
+{
+	width:30%;
+	float:left;
+}
+.float30r
+{
+	width:30%;
+	float:right;
+}
+.afterFloat
+{
+	clear:both;
+}
+.notInline
+{
+	display:block;
+}
+
+.showsSelf
+{
+	color: #000;
+	background-color: #879800;
+}
+
+.showsOther
+{
+	color: #000;
+	background-color: #850036;
+}
+
+.showsNone
+{
+	background-color: #506;
+	color: silver;
+}
+
+.disabledSpan
+{
+	color: #555;
+	background-color: #306;
+}
+
+.aside
+{
+	font-size: small;
+}
+
+/*input[type="text"]:disabled*/
+:disabled
+{
+	background-color: #306;
+}
+
+/* respecify because element more specific than :disabled */
+input[type="text"]:disabled
+{
+	background-color: #306;
+}
+
+a:link
+{
+	color:Crimson;
+}
+
+a:visited
+{
+	color:Brown;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

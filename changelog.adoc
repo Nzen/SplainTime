@@ -3,6 +3,10 @@
 
 == Unreleased
 
+=== Added
+
+* web resources for entering tags as a companion
+
 
 === [6.0] - 2020-02-13
 

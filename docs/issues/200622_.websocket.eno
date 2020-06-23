@@ -1,0 +1,45 @@
+
+# issue 200622_2100
+
+## body
+
+title : Enable companion input via websocket
+
+status : to do
+
+priority : medium
+
+assignee : Nicholas Prado
+
+-- desc
+Sometimes I'm away from my computer, but operating another on the same lan. It would be convenient to be able to add tags by visiting a compaion client that can communicate with the living splaintime instance. It would be preferable that the communication mechanism utilize websockets, rather than normal sockets, so I can use a webpage as the companion.
+-- desc
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
