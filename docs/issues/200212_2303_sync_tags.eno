@@ -17,6 +17,14 @@ I record time on both my work and home computer. However, to ensure that I have 
 Provide a means for two active sessions, on the same lan, to exchange records.
 -- desc
 
+## 201006 1131 cst
+
+comment author : Nicholas Prado
+
+-- comment
+I added a means of synchronizing device records with commit e0a8ad06038befd21379887c8c4b7fca584da19c on 2020 02 14. I have yet to use this mechanism for exchanging other types of records.
+-- comment
+
 >## yyMMdd hhMM zzz
 
 >comment author : 

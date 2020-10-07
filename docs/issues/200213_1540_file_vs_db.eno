@@ -5,14 +5,16 @@
 
 assignee : 
 
-title : 
+title : Database can diverge from hand edited file
 
 status : to do
 
 priority : 
 
 -- desc
+While Splaintime does create records in st_tag for user input, these are divorced from the input once written to file. This can be problematic when I need to change the description (or, forfend add a tag) after splaintime has closed the undo window. In that case, I will update the text file itself as I see fit. That's fine when the database didn't exist, I would just not see evidence of the change if I asked the time since some change I made.
 
+Provide some mechanism to reparse the output file, so the database and time since queries can reflect the human changes.
 -- desc
 
 >## yyMMdd hhMM zzz
