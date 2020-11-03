@@ -1,0 +1,45 @@
+
+# issue 20201006_1127
+
+## body
+
+assignee : Nicholas Prado
+
+title : Include tag_id in output file
+
+status : to do
+
+priority : low
+
+-- desc
+Tags in the output file are just text. I am loath to make effort with i200213, as I might insert something twice. One way to remove ambiguity involves adding the tag_id for the corresponding st_tag record to a column in the file. However, this will break consumers of that file (ex Accountant).
+-- desc
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
