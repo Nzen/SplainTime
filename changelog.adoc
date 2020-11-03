@@ -14,6 +14,10 @@
 
 * !!enter allows entering multiple tags via a text dialog
 
+==== Changed
+
+* dark theme reflected on background
+
 === [6.0] - 2020-02-13
 
 ==== Added

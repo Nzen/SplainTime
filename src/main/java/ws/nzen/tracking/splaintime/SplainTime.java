@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -131,14 +132,14 @@ public class SplainTime extends javax.swing.JFrame
     		try
 			{
 				UIManager.setLookAndFeel( "com.bulenkov.darcula.DarculaLaf" );
-				// UIManager.setLookAndFeel( "com.jtattoo.plaf.hifi.HiFiLookAndFeel" );
+	    		SwingUtilities.updateComponentTreeUI( this );
 			}
 			catch ( ClassNotFoundException
 					| InstantiationException
 					| IllegalAccessException
 					| UnsupportedLookAndFeelException cnfe )
 			{
-				outChannel.error( "st.ic unable to find Darcula L-F because"+ cnfe.toString() );
+				outChannel.error( "st.ic unable to find Darcula L-F because"+ cnfe );
 			}
     	}
 
@@ -233,7 +234,6 @@ public class SplainTime extends javax.swing.JFrame
                         .addComponent(btnConfig)))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
         pack();
     }//GEN-END:initComponents
 
