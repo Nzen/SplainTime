@@ -1,0 +1,47 @@
+
+# issue 201102_2055
+
+## body
+
+title : Enable bulk user import
+
+status : to do
+
+priority : medium
+
+assignee : Nicholas Prado
+
+-- desc
+I've been obliged to work apart from my computer. Rather than sync tags, I write my times down and copy them in at the end of the day. This is cumbersome.
+
+Provide a mechanism to harvest many lines of well formed input. Perhaps use !!enter to show a dialog with a text area.
+-- desc
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -8,6 +8,12 @@
 * web resources for entering tags as a companion
 
 
+=== [6.1] - 2020-02-13
+
+==== Added
+
+* !!enter allows entering multiple tags via a text dialog
+
 === [6.0] - 2020-02-13
 
 ==== Added

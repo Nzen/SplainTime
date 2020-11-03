@@ -10,6 +10,7 @@ remove tagstore adj previous
 package ws.nzen.tracking.splaintime;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -26,10 +27,14 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.UIManager;
@@ -303,6 +308,10 @@ public class SplainTime extends javax.swing.JFrame
         	relabelActiveTag( newestDid.substring(
         			config.getRelabelFlag().length() ).trim() );
         } */
+        else if ( newestDid.startsWith( config.getBulkEnterFlag() ) )
+        {
+        	showBulkEnterDialog( evt );
+        }
         else
         {
         	ParsesInput tagGen = new ParsesInput( newestDid );
@@ -380,6 +389,41 @@ public class SplainTime extends javax.swing.JFrame
 		tagHandler.setRestartTag( userEntered
     			.substring( config.getNextTimeFlag().length() ) );
 		jtfForTag.setText( "" );
+	}
+
+
+	private void showBulkEnterDialog( ActionEvent original )
+	{
+		jtfForTag.setText( "" );
+		// fix remove panel
+		JTextArea inputBox = new JTextArea();
+		inputBox.setPreferredSize( new Dimension( 200, 400 ) );
+		JScrollPane upAndDown = new JScrollPane( inputBox );
+		final int okInd = 0, noInd = okInd +1, optionSizes = noInd +1;
+		Object[] options = new Object[ optionSizes ];
+		options[ okInd ] = "OK";
+		options[ noInd ] = "Cancel";
+		int chosen = JOptionPane.showOptionDialog(
+				this,
+				upAndDown,
+				"Enter well formed tags",
+				JOptionPane.OK_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options,
+				options[ okInd ] );
+		if ( chosen != okInd )
+		{
+			jtfForTag.setText( "" );
+			return;
+		}
+		String allInput = inputBox.getText();
+		String[] inputLines = allInput.split( "\\n" );
+		for ( String line : inputLines )
+		{
+			jtfForTag.setText( line );
+			pushedEnter( original );
+		}
 	}
 
 

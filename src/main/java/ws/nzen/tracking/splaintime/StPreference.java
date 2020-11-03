@@ -29,6 +29,7 @@ public class StPreference
 	private String databaseFilename = "st_data";
 	private boolean lightLookAndFeel = true;
 	private String syncFlag = "<>sync";
+	private String bulkEnterFlag = "!!enter";
 	@Deprecated
 	/** Means of changing the active text. No time interpretation */
 	private String relabelFlag = "f4l";
@@ -37,7 +38,7 @@ public class StPreference
 			FC_WANT_SUM = "want_final_sum", FC_CATEGORY_DAYS = "category_grace_days",
 			FC_12_HOUR = "12_hour_format", FC_CHECK_CATEGORY = "vet_category",
 			FC_TIME_SINCE = "time_since", FC_DB_FILE = "database_filename",
-			FC_LOOKFEEL = "theme";
+			FC_LOOKFEEL = "theme", FC_BULK_ENTER = "bulk_insert_dialog";
 	private float wayFutureVersion = 54F;
 	//private boolean showSeconds = false; // or just the format
 	// adjustment verbosity
@@ -108,6 +109,7 @@ public class StPreference
 			databaseFilename = fileConfig.getProperty( FC_DB_FILE, databaseFilename );
 			lightLookAndFeel = ! fileConfig.getProperty( FC_LOOKFEEL, "light" )
 					.equals( "dark" );
+			bulkEnterFlag = fileConfig.getProperty( FC_BULK_ENTER, bulkEnterFlag );
 		}
 		System.out.println( cl +"pc 4TESTS config made undo : "+ undoFlag
 				+" ;; initail "+ initialTagText +" ;; sum "+ sumDelimiter );
@@ -292,6 +294,17 @@ public class StPreference
 	public void setSyncFlag( String syncFlag )
 	{
 		this.syncFlag = syncFlag;
+	}
+
+
+	public String getBulkEnterFlag()
+	{
+		return bulkEnterFlag;
+	}
+
+	public void setBulkEnterFlag( String bulkEnterFlag )
+	{
+		this.bulkEnterFlag = bulkEnterFlag;
 	}
 
 
