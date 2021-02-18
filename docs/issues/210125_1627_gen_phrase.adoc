@@ -1,0 +1,36 @@
+
+= issue 210125 1627
+
+== insert commonly used tag
+
+* assignee : Nicholas
+* status : decide merit
+* priority : low
+
+Maybe a short tag to gen a phrase. For me that phrase would be ^bey ^, perhaps from !tb or something.
+
+== comments
+
+=== 210218 1729 CST
+
+comment author : Nicholas
+
+The trick is making it short enough that it is less than typing the phrase. Really, this merits a table.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

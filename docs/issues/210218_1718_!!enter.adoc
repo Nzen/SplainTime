@@ -1,0 +1,37 @@
+
+= issue 210218_1718
+
+== Ease harvesting tags for !!enter
+
+* assignee : Nicholas
+* status : deciding merit
+* priority : low
+
+I sometimes work at a different computer. To enter times later, I record them out of band in the proper format to use with the !!enter dialog. It would be nice if splaintime offered some means of retrieving tags in a format that I could paste to another splaintime's !!enter.
+
+== comments
+
+=== 210218 1723
+
+comment author : Nicholas Prado
+
+This is, of course, a workaround for the lava layer between the text output and the db values, which I am pretty sure I sync between instances, when requested.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
