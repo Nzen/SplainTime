@@ -17,6 +17,22 @@ While Splaintime does create records in st_tag for user input, these are divorce
 Provide some mechanism to reparse the output file, so the database and time since queries can reflect the human changes.
 -- desc
 
+## 200814 1438 CST
+
+comment author : Nicholas
+
+-- comment
+make an external tool to wrap up incomplete days by deleting the file, adding the in progress task and a fake end, then sums with accountant. maybe it asks for when the last time should finish.
+-- comment
+
+## 201005 0941 CST
+
+comment author : Nicholas
+
+-- comment
+I could make reparsing easier if the splaintime file includes the st_tag id with each line.
+-- comment
+
 >## yyMMdd hhMM zzz
 
 >comment author : 

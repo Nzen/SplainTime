@@ -1,0 +1,46 @@
+
+= issue 201007_1342
+
+== Color recognized category
+
+* assignee : Nicholas
+* status : to do
+* priority : low
+
+Splaintime should color something (min?) when it recognizes a category. That way, I don't need to ask ??cat before entering it.
+
+== comments
+
+=== 190815 1747 CST
+
+comment author : Nicholas Prado
+
+perhaps color something, based on whether it's currently a category. That way, I don't need to ask or hope. Hold the categories in memory, but consider refreshing hourly or whenever asked.
+
+////
+=== yyMMdd hhMM zzz
+
+comment author : 
+
+comment_here
+////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,41 @@
+
+= issue 210217 1832
+
+== Select responses for easier removal
+
+* assignee : Nicholas Prado
+* status : to do
+* priority : medium
+
+Splaintime replies with text in response to queries or invalid input (ex ??ts banana >> 30m). Select this text so removing it is a single keypress.
+
+== comments
+
+=== 200615 1533 CST
+
+comment author : Nicholas Prado
+
+if person says -0 or -6:51 when the time is 6:51, then remove the operand from the text. That way, there's some feedback, without getting in so and so's way. It's not as 'hey there's a problem here in your intention' as a dialog that says 'commit anyway?', but I'm the only user, so I can withstand that.
+
+=== 191009 845 CST
+
+comment author : Nicholas
+
+ditch the y/n responses when asking ??cat. Just the presence of the wrapper is enough.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
