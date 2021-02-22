@@ -1,0 +1,45 @@
+
+# issue 200512_2245
+
+## body
+
+assignee : 
+
+title : Parse and synchronize today's file
+
+status : to do
+
+priority : 
+
+-- desc
+Allow a running splaintime to change the time and or description of a tag by comparing against the current splaintime file. As the undo functionality is limited and can lose the time, the software should provide a means of letting the user edit the output file.
+-- desc
+
+>## yyMMdd hhMM zzz
+
+>comment author : 
+
+>-- comment
+
+>-- comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
